@@ -20,14 +20,22 @@ ismb_est = function(Z, nc, covariate, D, t_0, Q, W, ne){
   data = matrix(NA, n, nc+5)
   data[,1] = Z
   data[,2] = log(Z-t_0)
+  data[is.nan(data[,2]),2]=-10
   data[,3] = as.numeric(Z>t_0)
   data[,4:(nc+3)] = covariate
   data[,(nc+4)] = D
-  data[is.nan(data[,2]),2]=-10
+  data[,(nc+5)] = W
   data = as.data.frame(data)
+  colnames(data)[1:3]=c("Z", "log(Z-t_0)","I[Z>t_0]")
   covar_names = paste("covariate",1:nc,sep="")
   colnames(data)[4:(nc+3)] = covar_names
   colnames(data)[(nc+4):(nc+5)] = c("delta","Weight")
+
+  # Covariate setting (1 covariate)
+  X = as.matrix(cbind(c(rep(1,n)),data[,4:(nc+3)]))
+  logT = data[,2]
+  I = data[,3]
+  H = diag(1/n, nc+1, nc+1)
 
   # Objective equation
   objectF = function(beta){
@@ -40,13 +48,6 @@ ismb_est = function(Z, nc, covariate, D, t_0, Q, W, ne){
     beta = as.matrix(beta)
     result = t(eta*X*I*W) %*% {Q - (pnorm((X%*%beta-logT)/sqrt(diag(X %*% H %*% t(X)))))}
   }
-
-  # Covariate setting (1 covariate)
-  X = as.matrix(cbind(c(rep(1,n)),data[,4:(nc+3)]))
-  W = data[,(nc+6)]
-  logT = data[,2]
-  I = data[,3]
-  H = diag(1/n, nc+1, nc+1)
 
   # Change betastart when real data analysis c(1,rep(1,nc))
   betastart = c(-2,rep(0,nc))
