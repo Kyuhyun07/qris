@@ -1,4 +1,4 @@
-#' Quantile regression estimator (Kim et al)
+#' Quantile regression estimator (Kim et al & optimization & weight out)
 #'
 #' ismb_est function will calculate qunatile regression parameters "beta" and standard error of "beta" using induced smoothing approach.
 #'
@@ -14,7 +14,7 @@
 #'     covar = as.matrix(data[,1:12])
 #'     ismb_est(data$survTime, 12, covar, data$event, 2, 0.5 ,100)
 #' @export
-rq_est = function(Z, nc, covariate, D, t_0, Q, W){
+rq_optim_est = function(Z, nc, covariate, D, t_0, Q, W){
   n = length(Z)
   data = matrix(NA, n, nc+6)
   data[,1] = Z
@@ -74,16 +74,16 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
   logT = data[,2]
   I = data[,3]
 
-  # Objective equation
-  rq_objectF = function(beta){
-    result = t(X*I*W) %*% {Q - ifelse(logT-(X%*%beta)<=0,1,0)}
+  # Objective equation(optim_weight out)
+  rq_optim_objectF = function(beta){
+    beta = as.matrix(beta)
+    result = t(W*I*(logT-(X%*%beta)))%*%(Q-ifelse(logT-(X%*%beta)<=0,1,0))
   }
 
   # Change betastart when real data analysis c(1,rep(1,nc))
-  betastart = c(1,rep(1,nc))
-  rq.fit = nleqslv(betastart,rq_objectF, control=list(ftol=1e-5))
-  if (rq.fit$termcd == 1){
-    solbeta = rq.fit$x
+  rq.optim.fit = optim(par = c(1,rep(1,nc)) , fn = rq_optim_objectF)
+  if (rq.optim.fit$convergence == 0){
+    solbeta = rq.optim.fit$par
     print(solbeta)
   } else {
     solbeta = c(NA, NA)

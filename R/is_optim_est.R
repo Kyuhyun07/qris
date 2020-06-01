@@ -1,4 +1,4 @@
-#' Quantile regression estimator (Kim et al)
+#' Quantile regression estimator (Induced smoothing & optimization & weight out)
 #'
 #' ismb_est function will calculate qunatile regression parameters "beta" and standard error of "beta" using induced smoothing approach.
 #'
@@ -14,7 +14,7 @@
 #'     covar = as.matrix(data[,1:12])
 #'     ismb_est(data$survTime, 12, covar, data$event, 2, 0.5 ,100)
 #' @export
-rq_est = function(Z, nc, covariate, D, t_0, Q, W){
+is_optim_est = function(Z, nc, covariate, D, t_0, Q, W){
   n = length(Z)
   data = matrix(NA, n, nc+6)
   data[,1] = Z
@@ -25,7 +25,7 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
   data[,(nc+4)] = D
   data[n,(nc+4)] = 1
   data = as.data.frame(data)
-
+  
   # Weight
   # Kaplan-Meier estimator for censoring
   # survfit weight
@@ -42,7 +42,7 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
   # if (data[m,(nc+4)]==0){
   #   data[m,(nc+6)]=0
   # }
-
+  
   # WKM surv weight
   fit = WKM(data[,1],  1-data[,(nc+4)], zc = rep(1,n), w = rep(1,n))
   for (i in 1:length(fit$surv))
@@ -57,7 +57,7 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
   if (data[m,(nc+4)]==0){
     data[m,(nc+6)]=0
   }
-
+  
   # weight using WKM jump
   # fit = WKM(data[,1], (data[,(nc+4)]), zc = rep(1,n), w = rep(1,n))
   # data[,(nc+6)] = fit$jump
@@ -67,23 +67,25 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
     colnames(data)[j]="covariate"
   }
   colnames(data)[(nc+4):(nc+6)] = c("delta","G_KM","Weight")
-
+  
   # Covariate setting (1 covariate)
   X = as.matrix(cbind(c(rep(1,n)),data[,4:(nc+3)]))
   W = data[,(nc+6)]
   logT = data[,2]
   I = data[,3]
-
-  # Objective equation
-  rq_objectF = function(beta){
-    result = t(X*I*W) %*% {Q - ifelse(logT-(X%*%beta)<=0,1,0)}
+  H = diag(1/n, nc+1, nc+1)
+  
+  # Objective equation(optim_weight out)
+  is_optim_objectF = function(beta){
+    beta = as.matrix(beta)
+    result = t(W*I)%*%((logT-(X%*%beta))*(Q-(pnorm((X%*%beta-logT)/sqrt(diag(X %*% H %*% t(X))))))
+                       +dnorm((X%*%beta-logT)/sqrt(diag(X %*% H %*% t(X))))*sqrt(diag(X %*% H %*% t(X))))
   }
-
+  
   # Change betastart when real data analysis c(1,rep(1,nc))
-  betastart = c(1,rep(1,nc))
-  rq.fit = nleqslv(betastart,rq_objectF, control=list(ftol=1e-5))
-  if (rq.fit$termcd == 1){
-    solbeta = rq.fit$x
+  is.optim.fit = optim(par = c(1,rep(1,nc)) , fn = is_optim_objectF)
+  if (is.optim.fit$convergence == 0){
+    solbeta = is.optim.fit$par
     print(solbeta)
   } else {
     solbeta = c(NA, NA)
