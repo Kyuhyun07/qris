@@ -17,7 +17,7 @@
 #'     covar = as.matrix(data[,1:12])
 #'     ismb_est(data$survTime, 12, covar, data$event, 2, 0.5 ,100)
 #' @export
-is_est = function(Z, nc, covariate, D, W, t_0, Q, ne){
+is_est = function(Z, nc, covariate, D, t_0, Q, W){
   # n = number of subject
   n = length(Z)
   data = matrix(NA, n, nc+5)

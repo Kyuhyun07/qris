@@ -106,18 +106,25 @@ b1.rq.optim.00 = c()
 set.seed(1)
 for (i in 1:2000){
   a = data.gen(200,c.0)
+  W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
   tic()
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   toc()
   b0.is.00[i] = is.fit[1]
   b1.is.00[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  tic()
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
+  toc()
   b0.is.optim.00[i] = is.optim.fit[1]
   b1.is.optim.00[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  tic()
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
+  toc()
   b0.rq.00[i] = rq.fit[1]
   b1.rq.00[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  tic()
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
+  toc()
   b0.rq.optim.00[i] = rq.optim.fit[1]
   b1.rq.optim.00[i] = rq.optim.fit[2]
 }
@@ -147,16 +154,17 @@ b1.rq.optim.01 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.1)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.01[i] = is.fit[1]
   b1.is.01[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.optim.01[i] = is.optim.fit[1]
   b1.is.optim.01[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.01[i] = rq.fit[1]
   b1.rq.01[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.optim.01[i] = rq.optim.fit[1]
   b1.rq.optim.01[i] = rq.optim.fit[2]
 }
@@ -186,16 +194,17 @@ b1.rq.optim.03 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.3)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.03[i] = is.fit[1]
   b1.is.03[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.optim.03[i] = is.optim.fit[1]
   b1.is.optim.03[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.03[i] = rq.fit[1]
   b1.rq.03[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.optim.03[i] = rq.optim.fit[1]
   b1.rq.optim.03[i] = rq.optim.fit[2]
 }
@@ -225,16 +234,17 @@ b1.rq.optim.05 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.5)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.05[i] = is.fit[1]
   b1.is.05[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.optim.05[i] = is.optim.fit[1]
   b1.is.optim.05[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.05[i] = rq.fit[1]
   b1.rq.05[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.optim.05[i] = rq.optim.fit[1]
   b1.rq.optim.05[i] = rq.optim.fit[2]
 }
@@ -264,16 +274,17 @@ b1.rq.optim.07 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.7)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.07[i] = is.fit[1]
   b1.is.07[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.is.optim.07[i] = is.optim.fit[1]
   b1.is.optim.07[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.07[i] = rq.fit[1]
   b1.rq.07[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 0, 0.5, W)
   b0.rq.optim.07[i] = rq.optim.fit[1]
   b1.rq.optim.07[i] = rq.optim.fit[2]
 }
@@ -310,16 +321,17 @@ b1.rq.optim.10 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.0)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5],1, 0.5)
+  W = weight_generator(a[,3], 1, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5],1, 0.5, W)
   b0.is.10[i] = is.fit[1]
   b1.is.10[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.optim.10[i] = is.optim.fit[1]
   b1.is.optim.10[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.10[i] = rq.fit[1]
   b1.rq.10[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.optim.10[i] = rq.optim.fit[1]
   b1.rq.optim.10[i] = rq.optim.fit[2]
 }
@@ -349,16 +361,17 @@ b1.rq.optim.11 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.1)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  W = weight_generator(a[,3], 1, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.11[i] = is.fit[1]
   b1.is.11[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.optim.11[i] = is.optim.fit[1]
   b1.is.optim.11[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.11[i] = rq.fit[1]
   b1.rq.11[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.optim.11[i] = rq.optim.fit[1]
   b1.rq.optim.11[i] = rq.optim.fit[2]
 }
@@ -389,16 +402,17 @@ b1.rq.optim.13 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.3)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  W = weight_generator(a[,3], 1, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.13[i] = is.fit[1]
   b1.is.13[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.optim.13[i] = is.optim.fit[1]
   b1.is.optim.13[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.13[i] = rq.fit[1]
   b1.rq.13[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.optim.13[i] = rq.optim.fit[1]
   b1.rq.optim.13[i] = rq.optim.fit[2]
 }
@@ -428,16 +442,17 @@ b1.rq.optim.15 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.5)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  W = weight_generator(a[,3], 1, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.15[i] = is.fit[1]
   b1.is.15[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.optim.15[i] = is.optim.fit[1]
   b1.is.optim.15[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.15[i] = rq.fit[1]
   b1.rq.15[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.optim.15[i] = rq.optim.fit[1]
   b1.rq.optim.15[i] = rq.optim.fit[2]
 }
@@ -467,16 +482,17 @@ b1.rq.optim.17 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.7)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  W = weight_generator(a[,3], 1, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.17[i] = is.fit[1]
   b1.is.17[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.is.optim.17[i] = is.optim.fit[1]
   b1.is.optim.17[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.17[i] = rq.fit[1]
   b1.rq.17[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 1, 0.5, W)
   b0.rq.optim.17[i] = rq.optim.fit[1]
   b1.rq.optim.17[i] = rq.optim.fit[2]
 }
@@ -512,16 +528,17 @@ b1.rq.optim.20 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.0)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  W = weight_generator(a[,3], 2, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.20[i] = is.fit[1]
   b1.is.20[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.optim.20[i] = is.optim.fit[1]
   b1.is.optim.20[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.20[i] = rq.fit[1]
   b1.rq.20[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.optim.20[i] = rq.optim.fit[1]
   b1.rq.optim.20[i] = rq.optim.fit[2]
 }
@@ -551,16 +568,17 @@ b1.rq.optim.21 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.1)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  W = weight_generator(a[,3], 2, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.21[i] = is.fit[1]
   b1.is.21[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.optim.21[i] = is.optim.fit[1]
   b1.is.optim.21[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.21[i] = rq.fit[1]
   b1.rq.21[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.optim.21[i] = rq.optim.fit[1]
   b1.rq.optim.21[i] = rq.optim.fit[2]
 }
@@ -591,16 +609,17 @@ b1.rq.optim.23 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.3)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  W = weight_generator(a[,3], 2, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.23[i] = is.fit[1]
   b1.is.23[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.optim.23[i] = is.optim.fit[1]
   b1.is.optim.23[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.23[i] = rq.fit[1]
   b1.rq.23[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.optim.23[i] = rq.optim.fit[1]
   b1.rq.optim.23[i] = rq.optim.fit[2]
 }
@@ -630,16 +649,17 @@ b1.rq.optim.25 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.5)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  W = weight_generator(a[,3], 2, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.25[i] = is.fit[1]
   b1.is.25[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.optim.25[i] = is.optim.fit[1]
   b1.is.optim.25[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.25[i] = rq.fit[1]
   b1.rq.25[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.optim.25[i] = rq.optim.fit[1]
   b1.rq.optim.25[i] = rq.optim.fit[2]
 }
@@ -669,16 +689,17 @@ b1.rq.optim.27 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.7)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  W = weight_generator(a[,3], 2, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.27[i] = is.fit[1]
   b1.is.27[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.is.optim.27[i] = is.optim.fit[1]
   b1.is.optim.27[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.27[i] = rq.fit[1]
   b1.rq.27[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 2, 0.5, W)
   b0.rq.optim.27[i] = rq.optim.fit[1]
   b1.rq.optim.27[i] = rq.optim.fit[2]
 }
@@ -714,16 +735,17 @@ b1.rq.optim.30 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.0)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  W = weight_generator(a[,3], 3, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.30[i] = is.fit[1]
   b1.is.30[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.optim.30[i] = is.optim.fit[1]
   b1.is.optim.30[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.30[i] = rq.fit[1]
   b1.rq.30[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.optim.30[i] = rq.optim.fit[1]
   b1.rq.optim.30[i] = rq.optim.fit[2]
 }
@@ -753,16 +775,17 @@ b1.rq.optim.31 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.1)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  W = weight_generator(a[,3], 3, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.31[i] = is.fit[1]
   b1.is.31[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.optim.31[i] = is.optim.fit[1]
   b1.is.optim.31[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.31[i] = rq.fit[1]
   b1.rq.31[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.optim.31[i] = rq.optim.fit[1]
   b1.rq.optim.31[i] = rq.optim.fit[2]
 }
@@ -793,16 +816,17 @@ b1.rq.optim.33 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.3)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  W = weight_generator(a[,3], 3, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.33[i] = is.fit[1]
   b1.is.33[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.optim.33[i] = is.optim.fit[1]
   b1.is.optim.33[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.33[i] = rq.fit[1]
   b1.rq.33[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.optim.33[i] = rq.optim.fit[1]
   b1.rq.optim.33[i] = rq.optim.fit[2]
 }
@@ -832,16 +856,25 @@ b1.rq.optim.35 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.5)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  W = weight_generator(a[,3], 3, 1, a[,4], a[,5])
+  tic()
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
+  toc()
   b0.is.35[i] = is.fit[1]
   b1.is.35[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  tic()
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
+  toc()
   b0.is.optim.35[i] = is.optim.fit[1]
   b1.is.optim.35[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  tic()
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
+  toc()
   b0.rq.35[i] = rq.fit[1]
   b1.rq.35[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  tic()
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
+  toc()
   b0.rq.optim.35[i] = rq.optim.fit[1]
   b1.rq.optim.35[i] = rq.optim.fit[2]
 }
@@ -871,16 +904,17 @@ b1.rq.optim.37 = c()
 set.seed(1)
 for (i in 1:2000){
   a<-data.gen(200,c.7)
-  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  W = weight_generator(a[,3], 3, 1, a[,4], a[,5])
+  is.fit = is_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.37[i] = is.fit[1]
   b1.is.37[i] = is.fit[2]
-  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  is.optim.fit = is_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.is.optim.37[i] = is.optim.fit[1]
   b1.is.optim.37[i] = is.optim.fit[2]
-  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.fit = rq_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.37[i] = rq.fit[1]
   b1.rq.37[i] = rq.fit[2]
-  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5)
+  rq.optim.fit = rq_optim_est(a[,3], 1, a[,4], a[,5], 3, 0.5, W)
   b0.rq.optim.37[i] = rq.optim.fit[1]
   b1.rq.optim.37[i] = rq.optim.fit[2]
 }
