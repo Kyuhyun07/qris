@@ -1,6 +1,7 @@
 #' Quantile regression estimator (Kim et al & optimization & weight out)
 #'
-#' ismb_est function will calculate qunatile regression parameters "beta" and standard error of "beta" using induced smoothing approach.
+#' rq_optim_est function will calculate qunatile regression parameters "beta" using quantile regression idea. (Kim et al. 2012, function (8))
+#' It find solution from optimizer (optim)
 #'
 #' @param Z A vector of subjects' event time
 #' @param nc Number of covariate to estimate
@@ -15,76 +16,54 @@
 #'     ismb_est(data$survTime, 12, covar, data$event, 2, 0.5 ,100)
 #' @export
 rq_optim_est = function(Z, nc, covariate, D, t_0, Q, W){
+  # n = number of subject
   n = length(Z)
-  data = matrix(NA, n, nc+6)
+  data = matrix(NA, n, nc+5)
+  # event time = minimum of event time and censored time of subject
   data[,1] = Z
+  # Take log for event time - adjusted followup time
   data[,2] = log(Z-t_0)
+  # Indicator of event time > followup time
   data[,3] = as.numeric(Z>t_0)
+  # covariates
   data[,4:(nc+3)] = covariate
+  # Change log(negative number)=NA to -10 (any number is possible)
   data[is.na(data[,2]),2]=-10
+  # censoring indicator (1=uncensored data, 0=censored data)
   data[,(nc+4)] = D
+  # change last data to uncensored data (to improve performance of estimation)
   data[n,(nc+4)] = 1
+  data[,(nc+5)] = W
   data = as.data.frame(data)
 
-  # Weight
-  # Kaplan-Meier estimator for censoring
-  # survfit weight
-  # fit = survfit(Surv(data[,1],1-(data[,(nc+4)])) ~ 1)
-  # for (i in 1:length(fit$surv))
-  # {
-  #   data[data[,1]==fit$time[i],(nc+5)] = fit$surv[i]
-  # }
-  # data[,(nc+6)] = data[,(nc+4)]/data[,(nc+5)]
-  # m = nrow(data)
-  # if (data[m,(nc+6)]==Inf){
-  #   data[m,(nc+6)]=max(data[1:(m-1),(nc+6)])
-  # }
-  # if (data[m,(nc+4)]==0){
-  #   data[m,(nc+6)]=0
-  # }
-
-  # WKM surv weight
-  fit = WKM(data[,1],  1-data[,(nc+4)], zc = rep(1,n), w = rep(1,n))
-  for (i in 1:length(fit$surv))
-  {
-    data[data[,1]==fit$times[i],(nc+5)] = fit$surv[i]
-  }
-  data[,(nc+6)] = data[,(nc+4)]/data[,(nc+5)]
-  m = nrow(data)
-  if (data[m,(nc+6)]==Inf){
-    data[m,(nc+6)]=max(data[1:(m-1),(nc+6)])
-  }
-  if (data[m,(nc+4)]==0){
-    data[m,(nc+6)]=0
-  }
-
-  # weight using WKM jump
-  # fit = WKM(data[,1], (data[,(nc+4)]), zc = rep(1,n), w = rep(1,n))
-  # data[,(nc+6)] = fit$jump
-  # m = nrow(data)
+  # Naming data
   colnames(data)[1:3]=c("Z", "log(Z-t_0)","I[Z>t_0]")
   for (j in 4:(nc+3)){
     colnames(data)[j]="covariate"
   }
-  colnames(data)[(nc+4):(nc+6)] = c("delta","G_KM","Weight")
+  colnames(data)[(nc+4):(nc+5)] = c("delta","Weight")
 
   # Covariate setting (1 covariate)
+  # Making covariate matrix (intercept coefficient + covariate)
   X = as.matrix(cbind(c(rep(1,n)),data[,4:(nc+3)]))
-  W = data[,(nc+6)]
+  # response variable
   logT = data[,2]
+  # Indicator of event time > followup time
   I = data[,3]
 
-  # Objective equation(optim_weight out)
+  # Estimating function to minimize result
   rq_optim_objectF = function(beta){
     beta = as.matrix(beta)
     result = t(W*I*(logT-(X%*%beta)))%*%(Q-ifelse(logT-(X%*%beta)<=0,1,0))
   }
 
-  # Change betastart when real data analysis c(1,rep(1,nc))
-  rq.optim.fit = optim(par = c(1,rep(1,nc)) , fn = rq_optim_objectF)
+  # initial beta for using optimizer
+  rq.optim.fit = optim(par = c(1,rep(0,nc)) , fn = rq_optim_objectF)
+  # When optimizer find converged solution, we take that value
   if (rq.optim.fit$convergence == 0){
     solbeta = rq.optim.fit$par
     print(solbeta)
+    # When optimizer makes any error, we print out NA
   } else {
     solbeta = c(NA, NA)
     print(solbeta)

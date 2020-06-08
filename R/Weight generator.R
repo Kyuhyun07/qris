@@ -1,18 +1,26 @@
 #### Weight generator ####
 weight_generator = function(Z, t_0, nc, covariate, D){
+  # n = number of subject
   n = length(Z)
-  data = matrix(NA, n, nc+6)
+  data = matrix(NA, n, nc+5)
+  # event time = minimum of event time and censored time of subject
   data[,1] = Z
+  # Take log for event time - adjusted followup time
   data[,2] = log(Z-t_0)
+  # Indicator of event time > followup time
   data[,3] = as.numeric(Z>t_0)
+  # covariates
   data[,4:(nc+3)] = covariate
+  # Change log(negative number)=NA to -10 (any number is possible)
   data[is.na(data[,2]),2]=-10
+  # censoring indicator (1=uncensored data, 0=censored data)
   data[,(nc+4)] = D
+  # change last data to uncensored data (to improve performance of estimation)
   data[n,(nc+4)] = 1
   data = as.data.frame(data)
 
-  # Weight
-  # Kaplan-Meier estimator for censoring survfit weight
+  # Weight calculating methods
+  # 1. Kaplan-Meier estimator for censoring survfit weight
   # fit = survfit(Surv(data[,1],1-(data[,(nc+4)])) ~ 1)
   # for (i in 1:length(fit$surv)){
   #   data[data[,1]==fit$time[i],(nc+5)] = fit$surv[i]
@@ -26,7 +34,7 @@ weight_generator = function(Z, t_0, nc, covariate, D){
   #   data[m,(nc+6)]=0
   # }
 
-  # WKM surv weight
+  # 2. WKM surv weight
   fit = WKM(data[,1],  1-data[,(nc+4)], zc = rep(1,n), w = rep(1,n))
   for (i in 1:length(fit$surv)){
     data[data[,1]==fit$times[i],(nc+5)] = fit$surv[i]
@@ -40,7 +48,7 @@ weight_generator = function(Z, t_0, nc, covariate, D){
     data[m,(nc+6)]=0
   }
 
-  # weight using WKM jump
+  # 3. weight using WKM jump
   # fit = WKM(data[,1], (data[,(nc+4)]), zc = rep(1,n), w = rep(1,n))
   # data[,(nc+6)] = fit$jump
   # m = nrow(data)
