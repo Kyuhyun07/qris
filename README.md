@@ -28,8 +28,11 @@ rq_optim_est.
 ndata2.R
  - simulation example
  - setting : median quantile estimation from dataset with various censoring proportion (0% ~ 70%)
- 
-Reference papers.
+
+
+
+Reference papers
+
 Regression on Quantile Residual life (Jung et al. 2009).pdf
   - paper about simulation settings
 
