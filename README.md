@@ -1,4 +1,4 @@
-In R folder,
+In R folder (R codes)
 
 Simulation data generator.R
  - Generating simulation data based on our simulation setting
