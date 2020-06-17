@@ -33,20 +33,44 @@ datGen <- function(n, cp, sce, q) {
                        0.6931472, 0.7974189, 0.9070615, 1.0174711), 4)
     u <- runif(n)
     if (cp == 0) cen <- Inf
-    if (sce == 1) {
-        if (cp == .1) cen <- t(matrix(runif(4 * n, 0, c(123.69, 70.39, 64.86, 61.17)), 4))
-        if (cp == .3) cen <- t(matrix(runif(4 * n, 0, c(41.27, 24.35, 23.34, 22.53)), 4))
-        if (cp == .5) cen <- t(matrix(runif(4 * n, 0, c(23.55, 14.07, 13.62, 13.43)), 4))
-        if (cp == .7) cen <- t(matrix(runif(4 * n, 0, c(14.2, 8.49, 8.36, 8.5)), 4))
+    if (sce == 2 & q == .25) {
+        if (cp == .1) cen <- t(matrix(runif(4 * n, 0, c(123.69, 115.24, 106.73, 101.62)), 4))
+        if (cp == .3) cen <- t(matrix(runif(4 * n, 0, c(41.27, 41.27, 39.17, 37.34, 35.91)), 4))
+        if (cp == .5) cen <- t(matrix(runif(4 * n, 0, c(23.55, 22.5, 21.61, 21.19)), 4))
+        if (cp == .7) cen <- t(matrix(runif(4 * n, 0, c(14.2, 13.55, 13.07, 13.04)), 4))
     }
-    if (sce == 2) {
+    if (sce == 2 & q == .5) {
         if (cp == .1) cen <- t(matrix(runif(4 * n, 0, c(78.11, 70.39, 64.86, 61.17)), 4))
         if (cp == .3) cen <- t(matrix(runif(4 * n, 0, c(26.36, 24.35, 23.34, 22.53)), 4))
         if (cp == .5) cen <- t(matrix(runif(4 * n, 0, c(15.08, 14.07, 13.62, 13.43)), 4))
         if (cp == .7) cen <- t(matrix(runif(4 * n, 0, c(9.09, 8.49, 8.36, 8.5)), 4))
     }
-    ## Y <- (-log(u))^(1 / k) / ((-log(q))^(1 / k) / exp(b[1,] %*% apply(X, 1, cumsum)))
-    Y <- (-log(u))^(1 / k) / ((-log(q))^(1 / k) / exp(colSums(b[1,] * apply(X, 1, cumsum))))
+    if (sce == 2 & q == .75) {
+        if (cp == .1) cen <- t(matrix(runif(4 * n, 0, c(55.68, 48.34, 43.86, 41.23)), 4))
+        if (cp == .3) cen <- t(matrix(runif(4 * n, 0, c(18.79, 16.92, 16.08, 15.80)), 4))
+        if (cp == .5) cen <- t(matrix(runif(4 * n, 0, c(10.69, 9.86, 9.57, 9.80)), 4))
+        if (cp == .7) cen <- t(matrix(runif(4 * n, 0, c(6.49, 5.96, 6.03, 6.44)), 4))
+    }
+    if (sce == 1 & q == .25) {
+        if (cp == .1) cen <- t(matrix(runif(4 * n, 0, c(81.63, 73.44, 66.69, 61.86)), 4))
+        if (cp == .3) cen <- t(matrix(runif(4 * n, 0, c(27.42, 25.32, 23.86, 22.66)), 4))
+        if (cp == .5) cen <- t(matrix(runif(4 * n, 0, c(16.30, 15.34, 14.72, 14.33)), 4))
+        if (cp == .7) cen <- t(matrix(runif(4 * n, 0, c(10.48, 9.92, 9.64, 9.58)), 4))
+    }
+    if (sce == 1 & q == .50) {
+        if (cp == .1) cen <- t(matrix(runif(4 * n, 0, c(52.15, 44.78, 39.03, 35)), 4))
+        if (cp == .3) cen <- t(matrix(runif(4 * n, 0, c(17.76, 15.85, 14.55, 13.78)), 4))
+        if (cp == .5) cen <- t(matrix(runif(4 * n, 0, c(10.50, 9.63, 9.22, 9.06)), 4))
+        if (cp == .7) cen <- t(matrix(runif(4 * n, 0, c(6.8, 6.26, 6.2, 6.36)), 4))
+    }
+    if (sce == 1 & q == .75) {
+        if (cp == .1) cen <- t(matrix(runif(4 * n, 0, c(36.98, 30.1, 25.65, 21.92)), 4))
+        if (cp == .3) cen <- t(matrix(runif(4 * n, 0, c(12.53, 10.82, 9.89, 9.46)), 4))
+        if (cp == .5) cen <- t(matrix(runif(4 * n, 0, c(7.47, 6.68, 6.44, 6.59)), 4))
+        if (cp == .7) cen <- t(matrix(runif(4 * n, 0, c(4.81, 4.61, 4.50, 4.41)), 4))
+    }    
+    ## Y <- (-log(u))^(1 / k) / ((-log(q))^(1 / k) / exp(colSums(b[1,] * apply(X, 1, cumsum))))
+    Y <- (-log(u))^(1 / k) / ((-log(q))^(1 / k) / exp(colSums(b[1,] * t(X))))
     Z <- matrix(pmin(Y, cen), n)
     delta <- 1 * (Y <= cen)
     delta[t(t(Z) <= 0:3)] <- NA
