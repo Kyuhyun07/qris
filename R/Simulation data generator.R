@@ -217,5 +217,6 @@ c.7=4.41
 
 
 ## Example
+source("allcodes.R")
 a = data.gen(200,c.3)
 W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
