@@ -1,3 +1,5 @@
+library(emplik)
+
 #' Quantile regression estimator using induced smoothing approach
 #'
 #' is_est function will calculate qunatile regression parameters "beta" using quantile regression idea and induced smoothing approach.
@@ -336,3 +338,9 @@ weight_generator = function(Z, t_0, nc, covariate, D){
     colnames(data)[(nc+4):(nc+6)] = c("delta","G_KM","Weight")
     return(data[,(nc+6)])
 }
+
+
+tmp <- survfit(Surv(Z, 1 - censored) ~ 1, data = a)
+
+W2 <- a$censored / tmp$surv
+W2[is.na(W2)] <- max(W2, na.rm = TRUE)
