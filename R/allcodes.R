@@ -1,5 +1,4 @@
 library(microbenchmark)
-library(Rcpp)
 library(emplik)
 
 #' Quantile regression estimator using induced smoothing approach
@@ -75,39 +74,7 @@ is_est = function(Z, nc, covariate, D, t_0, Q, W){
     }
 }
 
-#######################################################################################################
-## ## RCPP code to replace is_objectF
-sourceCpp(code = '
-  #include <RcppArmadillo.h>
-  // [[Rcpp::depends(RcppArmadillo)]]
-  using namespace arma;
-  // [[Rcpp::export]]
-  arma::mat objFC(arma::vec b, arma::mat X, arma::vec W, arma::mat H, 
-                  arma::vec ind, arma::vec Z, double t0, double Q) {
-  arma::mat m1 = X % repmat(W % ind, 1, X.n_cols);
-  arma::mat m2 = normcdf((X * b - log(Z - t0)) / sqrt(diagvec(X * H * X.t()))) - Q;
-  return m1.t() * m2;
-}')
-
-
-## b0 <- runif(2)
-## b0 <- rep(0, 2)
-## objFC(b0, X, W, H, I, Z, 0, Q)
-## is_objectF(b0)
-
 ## microbenchmark(objFC(b0, X, W, H, I, Z, 0, Q), is_objectF(b0))
-
-## nleqslv(betastart, fn = function(b) objFC(b, X, W, H, I, Z, 0, Q), control = list(ftol = 1e-5))
-## nleqslv(betastart, is_objectF, control = list(ftol = 1e-5))
-        
-## microbenchmark(
-##     nleqslv(betastart, fn = function(b) objFC(b, X, W, H, I, Z, 0, Q), control = list(ftol = 1e-5)),
-##     nleqslv(betastart, is_objectF, control = list(ftol = 1e-5)))
-        
-## microbenchmark(
-##     nleqslv(betastart, fn = function(b) objFC(b, X, W, H, I, Z, 0, Q)), 
-##     nleqslv(betastart, is_objectF))
-#######################################################################################################
                     
 #' Quantile regression estimator (Induced smoothing & optimization & weight out)
 #'
@@ -181,26 +148,6 @@ is_optim_est = function(Z, nc, covariate, D, t_0, Q, W){
     }
 }
 
-sourceCpp(code = '
-  #include <RcppArmadillo.h>
-  // [[Rcpp::depends(RcppArmadillo)]]
-  using namespace arma;
-  // [[Rcpp::export]]
-  arma::mat opmFC(arma::vec b, arma::mat X, arma::vec W, arma::mat H, 
-                  arma::vec ind, arma::vec Z, double t0, double Q) {
-  arma::mat se = sqrt(diagvec(X * H * X.t()));
-  arma::mat xdif = X * b - log(Z - t0);
-  arma::mat m1 = W % ind;
-  arma::mat m2 = xdif % (normcdf(xdif / se) - Q);
-  arma::mat m3 = normpdf(xdif / se) % se;
-  return m1.t() * (m2 + m3);
-}')
-
-## b0 <- runif(2)
-## opmFC(b0, X, W, H, I, Z, 0, Q)
-## is_optim_objectF(b0)
-## microbenchmark(opmFC(b0, X, W, H, I, Z, 0, Q), is_optim_objectF(b0))
-
 
 #' Quantile regression estimator (Kim et al)
 #'
@@ -270,19 +217,6 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
     }
 }
 
-sourceCpp(code = '
-  #include <RcppArmadillo.h>
-  // [[Rcpp::depends(RcppArmadillo)]]
-  using namespace arma;
-  // [[Rcpp::export]]
-  arma::mat rqobj(arma::vec b, arma::mat X, arma::vec W, 
-                  arma::vec ind, arma::vec Z, double t0, double Q) {
-  arma::mat m1 = X % repmat(W % ind, 1, X.n_cols);
-  arma::mat m2 = Q - arma::conv_to<arma::mat>::from((log(Z - t0) <= X * b));
-  return m1.t() * m2;
-}')
-
-
 #' Quantile regression estimator (Kim et al & optimization & weight out)
 #'
 #' rq_optim_est function will calculate qunatile regression parameters "beta" using quantile regression idea. (Kim et al. 2012, function (8))
@@ -351,26 +285,6 @@ rq_optim_est = function(Z, nc, covariate, D, t_0, Q, W){
     }
 }
 
-
-sourceCpp(code = '
-  #include <RcppArmadillo.h>
-  // [[Rcpp::depends(RcppArmadillo)]]
-  using namespace arma;
-  // [[Rcpp::export]]
-  arma::mat rqopm(arma::vec b, arma::mat X, arma::vec W, 
-                  arma::vec ind, arma::vec Z, double t0, double Q) {
-  arma::mat xdif = X * b - log(Z - t0);
-  arma::mat m1 = W % ind % xdif;
-  arma::mat m2 = arma::conv_to<arma::mat>::from((log(Z - t0) <= X * b)) - Q;
-  return m1.t() * m2;
-}')
-
-b0 <- runif(2)
-rqopm(b0, X, W, I, Z, 0, Q)
-rq_optim_objectF(b0)
-
-microbenchmark(opmFC(b0, X, W, H, I, Z, 0, Q), is_optim_objectF(b0))
-
 weight_generator = function(Z, t_0, nc, covariate, D){
     ## n = number of subject
     n = length(Z)
@@ -428,4 +342,3 @@ weight_generator = function(Z, t_0, nc, covariate, D){
     colnames(data)[(nc+4):(nc+6)] = c("delta","G_KM","Weight")
     return(data[,(nc+6)])
 }
-

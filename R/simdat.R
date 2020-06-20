@@ -4,6 +4,8 @@
 ## #################################################################
 
 library(survival)
+library(nleqslv)
+library(Rcpp)
 
 #' External variables; t0 = 1, 3, 5, 7
 #' @param n is sample size
@@ -90,6 +92,63 @@ datGen <- function(n, cp, sce, qt) {
     data.frame(Z = Z, X = X, d = delta, W = W)
 }
 
+#' Induce smoothing estimating equation, adopted from is_objectF()
+sourceCpp(code = '
+  #include <RcppArmadillo.h>
+  // [[Rcpp::depends(RcppArmadillo)]]
+  using namespace arma;
+  // [[Rcpp::export]]
+  arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, 
+                  arma::vec Z, double t0, double Q) {
+  arma::mat m1 = X % repmat(W, 1, X.n_cols);
+  arma::mat m2 = normcdf((X * b - log(Z - t0)) / sqrt(diagvec(X * H * X.t()))) - Q;
+  return m1.t() * m2;
+}')
+
+#' Induce smoothing objective equation, adopted from is_optim_objectF()
+sourceCpp(code = '
+  #include <RcppArmadillo.h>
+  // [[Rcpp::depends(RcppArmadillo)]]
+  using namespace arma;
+  // [[Rcpp::export]]
+  arma::mat isOpm(arma::vec b, arma::mat X, arma::vec W, arma::mat H, 
+                  arma::vec Z, double t0, double Q) {
+  arma::mat se = sqrt(diagvec(X * H * X.t()));
+  arma::mat xdif = X * b - log(Z - t0);
+  arma::mat m1 = W;
+  arma::mat m2 = xdif % (normcdf(xdif / se) - Q);
+  arma::mat m3 = normpdf(xdif / se) % se;
+  return m1.t() * (m2 + m3);
+}')
+
+#' Non smoothed estimating equation, adopted from rq_objectF
+sourceCpp(code = '
+  #include <RcppArmadillo.h>
+  // [[Rcpp::depends(RcppArmadillo)]]
+  using namespace arma;
+  // [[Rcpp::export]]
+  arma::mat rqObj(arma::vec b, arma::mat X, arma::vec W, 
+                  arma::vec Z, double t0, double Q) {
+  arma::mat m1 = X % repmat(W, 1, X.n_cols);
+  arma::mat m2 = Q - arma::conv_to<arma::mat>::from((log(Z - t0) <= X * b));
+  return m1.t() * m2;
+}')
+
+#' Non smoothed estimating equation, adopted from rq_optim_objectF
+sourceCpp(code = '
+  #include <RcppArmadillo.h>
+  // [[Rcpp::depends(RcppArmadillo)]]
+  using namespace arma;
+  // [[Rcpp::export]]
+  arma::mat rqOpm(arma::vec b, arma::mat X, arma::vec W, 
+                  arma::vec Z, double t0, double Q) {
+  arma::mat xdif = X * b - log(Z - t0);
+  arma::mat m1 = W % xdif;
+  arma::mat m2 = arma::conv_to<arma::mat>::from((log(Z - t0) <= X * b)) - Q;
+  return m1.t() * m2;
+}')
+
+
 summary(datGen(1e5, .1, 1, .5)[,7:10])
 summary(datGen(1e5, .3, 1, .5)[,7:10])
 summary(datGen(1e5, .5, 1, .5)[,7:10])
@@ -100,3 +159,29 @@ summary(datGen(1e5, .3, 2, .5)[,7:10])
 summary(datGen(1e5, .5, 2, .5)[,7:10])
 summary(datGen(1e5, .7, 2, .5)[,7:10])
 
+#' A do function to run all estiamtes
+#' Assumes data is created by `datGen`
+#' @param n is the sample size
+#' @param cp is the censoring rate
+#' @param sce  = 1 if X_1 = 0
+#' @param qt is the quantile, e.g., 0.25, 0.5, 0.75
+do <- function(n, cp, sce, qt) {
+    dat <- datGen(n, cp, sce, qt)
+    p <- 2
+    H <- diag(p) / n
+    b0 <- rep(0, p)
+    sapply(1:4, function(i) {
+        dat0 <- dat[!is.na(dat[,i]),]
+        Z <- as.matrix(dat0[,grep(paste("Z", i, sep = "."), names(dat0))])
+        W <- as.matrix(dat0[,grep(paste("W", i, sep = "."), names(dat0))])
+        X <- as.matrix(dat0[,grep("X.", names(dat0))])    
+        f1 <- nleqslv(b0, function(b) isObj(b, X, W, H, Z, 0, qt))
+        f2 <- optim(b0, function(b) isOpm(b, X, W, H, Z, 0, qt))
+        f3 <- nleqslv(b0, function(b) rqObj(b, X, W, Z, 0, qt))
+        f4 <- optim(b0, function(b) rqOpm(b, X, W, Z, 0, qt))
+        c(f1$x, f2$par, f3$x, f4$par, f1$termcd, f2$convergence, f3$termcd, f4$convergence)
+    })
+}
+
+do(200, .1, 1, .5)
+do(1000, .1, 1, .5)
