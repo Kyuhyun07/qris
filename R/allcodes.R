@@ -75,19 +75,19 @@ is_est = function(Z, nc, covariate, D, t_0, Q, W){
     }
 }
 
-###########################################################################################################
+#######################################################################################################
 ## ## RCPP code to replace is_objectF
-## sourceCpp(code = '
-##   #include <RcppArmadillo.h>
-##   // [[Rcpp::depends(RcppArmadillo)]]
-##   using namespace arma;
-##   // [[Rcpp::export]]
-##   arma::mat objFC(arma::vec b, arma::mat X, arma::vec W, arma::mat H, 
-##                   arma::vec ind, arma::vec Z, double t0, double Q) {
-##   arma::mat m1 = X % repmat(W % ind, 1, X.n_cols);
-##   arma::mat m2 = normcdf((X * b - log(Z - t0)) / sqrt(diagvec(X * H * X.t()))) - Q;
-##   return m1.t() * m2;
-## }')
+sourceCpp(code = '
+  #include <RcppArmadillo.h>
+  // [[Rcpp::depends(RcppArmadillo)]]
+  using namespace arma;
+  // [[Rcpp::export]]
+  arma::mat objFC(arma::vec b, arma::mat X, arma::vec W, arma::mat H, 
+                  arma::vec ind, arma::vec Z, double t0, double Q) {
+  arma::mat m1 = X % repmat(W % ind, 1, X.n_cols);
+  arma::mat m2 = normcdf((X * b - log(Z - t0)) / sqrt(diagvec(X * H * X.t()))) - Q;
+  return m1.t() * m2;
+}')
 
 
 ## b0 <- runif(2)
@@ -107,7 +107,7 @@ is_est = function(Z, nc, covariate, D, t_0, Q, W){
 ## microbenchmark(
 ##     nleqslv(betastart, fn = function(b) objFC(b, X, W, H, I, Z, 0, Q)), 
 ##     nleqslv(betastart, is_objectF))
-###########################################################################################################
+#######################################################################################################
                     
 #' Quantile regression estimator (Induced smoothing & optimization & weight out)
 #'
@@ -196,12 +196,10 @@ sourceCpp(code = '
   return m1.t() * (m2 + m3);
 }')
 
-
 ## b0 <- runif(2)
 ## opmFC(b0, X, W, H, I, Z, 0, Q)
 ## is_optim_objectF(b0)
 ## microbenchmark(opmFC(b0, X, W, H, I, Z, 0, Q), is_optim_objectF(b0))
-
 
 
 #' Quantile regression estimator (Kim et al)
@@ -256,7 +254,7 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
     I = data[,3]
     ## Estimating equation for estimaing beta
     rq_objectF = function(beta){
-        result = t(X*I*W) %*% {Q - ifelse(logT-(X%*%beta)<=0,1,0)}
+        t(X*I*W) %*% {Q - ifelse(logT-(X%*%beta)<=0,1,0)}
     }
     ## initial beta for using non-linear equation solver
     betastart = c(1,rep(0,nc))
@@ -271,6 +269,19 @@ rq_est = function(Z, nc, covariate, D, t_0, Q, W){
         print(solbeta)
     }
 }
+
+sourceCpp(code = '
+  #include <RcppArmadillo.h>
+  // [[Rcpp::depends(RcppArmadillo)]]
+  using namespace arma;
+  // [[Rcpp::export]]
+  arma::mat rqobj(arma::vec b, arma::mat X, arma::vec W, 
+                  arma::vec ind, arma::vec Z, double t0, double Q) {
+  arma::mat m1 = X % repmat(W % ind, 1, X.n_cols);
+  arma::mat m2 = Q - arma::conv_to<arma::mat>::from((log(Z - t0) <= X * b));
+  return m1.t() * m2;
+}')
+
 
 #' Quantile regression estimator (Kim et al & optimization & weight out)
 #'
@@ -325,7 +336,7 @@ rq_optim_est = function(Z, nc, covariate, D, t_0, Q, W){
     ## Estimating function to minimize result
     rq_optim_objectF = function(beta){
         beta = as.matrix(beta)
-        result = t(W*I*(logT-(X%*%beta)))%*%(Q-ifelse(logT-(X%*%beta)<=0,1,0))
+        t(W*I*(logT-(X%*%beta)))%*%(Q-ifelse(logT-(X%*%beta)<=0,1,0))
     }
     ## initial beta for using optimizer
     rq.optim.fit = optim(par = c(1,rep(0,nc)) , fn = rq_optim_objectF)
@@ -339,6 +350,26 @@ rq_optim_est = function(Z, nc, covariate, D, t_0, Q, W){
         print(solbeta)
     }
 }
+
+
+sourceCpp(code = '
+  #include <RcppArmadillo.h>
+  // [[Rcpp::depends(RcppArmadillo)]]
+  using namespace arma;
+  // [[Rcpp::export]]
+  arma::mat rqopm(arma::vec b, arma::mat X, arma::vec W, 
+                  arma::vec ind, arma::vec Z, double t0, double Q) {
+  arma::mat xdif = X * b - log(Z - t0);
+  arma::mat m1 = W % ind % xdif;
+  arma::mat m2 = arma::conv_to<arma::mat>::from((log(Z - t0) <= X * b)) - Q;
+  return m1.t() * m2;
+}')
+
+b0 <- runif(2)
+rqopm(b0, X, W, I, Z, 0, Q)
+rq_optim_objectF(b0)
+
+microbenchmark(opmFC(b0, X, W, H, I, Z, 0, Q), is_optim_objectF(b0))
 
 weight_generator = function(Z, t_0, nc, covariate, D){
     ## n = number of subject
