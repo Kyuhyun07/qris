@@ -220,13 +220,3 @@ c.7=4.41
 source("allcodes.R")
 a = data.gen(200,c.3)
 W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
-
-library(emplik)
-library(survival)
-head(a)
-
-foo <- WKM(a[,1], 1 - a[,5])
-foo2 <- survfit(Surv(T, 1 - censored) ~ 1, data = a)
-
-str(foo)
-str(foo2)

@@ -99,3 +99,4 @@ summary(datGen(1e5, .1, 2, .5)[,7:10])
 summary(datGen(1e5, .3, 2, .5)[,7:10])
 summary(datGen(1e5, .5, 2, .5)[,7:10])
 summary(datGen(1e5, .7, 2, .5)[,7:10])
+

@@ -103,6 +103,8 @@ b1.rq.00 = c()
 b0.rq.optim.00 = c()
 b1.rq.optim.00 = c()
 
+source("allcodes.R")
+
 set.seed(1)
 for (i in 1:2000){
   a = data.gen(200,c.0)
