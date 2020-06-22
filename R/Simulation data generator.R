@@ -1,46 +1,3 @@
-## Simulation data generator
-######## Data Generation function ########
-## We refer simulation setting from Jung et al. 2009
-## samplesize = size of dataset
-## We generate censoring time by uniform(0, censor)
-## And we empirically find censor values to keep censoring proportion 0%~70%
-data.gen<-function(samplesize, censor){
-    sim=matrix(NA,samplesize,5)
-    colnames(sim) = c("T","C","Z","X","censored")
-    ## Generate C_i
-    sim[,2] = runif(samplesize,0,censor)
-    ## Covariates (Control=0, Treatment=1)
-    sim[,4] = rbinom(samplesize,size=1,p=0.5)
-    ## Generate T_i (Given Condition r=rho_0, k=2, exp(beta_0)=5, exp(beta_1)=2))
-    unif = runif(n=samplesize ,min = 0,max = 1)
-    for (q in 1:samplesize){
-        sim[q,1]={{-log(1-unif[q])}^(1/k)}/r.initial.0
-    }
-    ## Generate Y_i (min(T,C))
-    sim[,3] = apply(sim[,1:2], 1, FUN=min)
-    ## Censoring indicator (Censored=0, Not censored=1)
-    sim[,5]=I(sim[,1]<sim[,2])
-    ## Ordering
-    sim = sim[order(sim[,3]),]
-    n = nrow(sim)
-    sim = as.data.frame(sim)
-    return(sim)
-}
-
-
-## Assumed necessary parameters
-######## ndata1-3, both beta0, 1  effective ########
-exp.beta.initial.0=5
-exp.beta.initial.1=10
-k=2
-r.initial.0=(log(10/7.5))^(1/k)/exp.beta.initial.0
-r.initial.1=(log(10/7.5))^(1/k)/exp.beta.initial.1
-
-######## ndata4-6, Only beta0 effective ########
-exp.beta.initial.0=5
-k=2
-r.initial.0=(log(10/7.5))^(1/k)/exp.beta.initial.0
-
 ######## Censor information ########
 ######## ndata1 : 25% quantile ########
 ## t_0 = 0
@@ -215,8 +172,4 @@ c.3=9.46
 c.5=6.59
 c.7=4.41
 
-
-## Example
-source("allcodes.R")
-a = data.gen(200,c.3)
 W = weight_generator(a[,3], 0, 1, a[,4], a[,5])
