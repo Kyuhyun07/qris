@@ -10,6 +10,7 @@ library(RcppArmadillo)
 library(scales)
 
 #### method 1 : Original code (ISMB + rcpp's weight + weight-in, only R use) ####
+<<<<<<< HEAD
 # We used this code to execute simulation in our manuscript.
 # which means this code is theoretically correct code, but no Rcpp is used and not fitted for R package. 
 # ismbw1.est= function(Z, nc, covariate, D, t_0, Q, ne, init){
@@ -89,6 +90,83 @@ library(scales)
 #### method 2 : Rcpp ISMB (R package) ####
 # This code is the application of Rcpp to method 1.
 # Our request is change this mehtod 2 code as aftgee style code.
+=======
+ismbw1.est= function(Z, nc, covariate, D, t_0, Q, ne, init){
+  n = length(Z)
+  data = matrix(NA, n, nc+5)
+  data[,1] = Z
+  data[,2] = log(Z-t_0)
+  data[,3] = as.numeric(Z>=t_0)
+  data[,4:(nc+3)] = covariate
+  data[is.na(data[,2]),2]=-10
+  data[,(nc+4)] = D
+  data[n,(nc+4)] = 1
+  data = as.data.frame(data) #head(data,20)
+  colnames(data)[1:3]=c("Z", "log(Z-t_0)", "I[Z>t_0]")
+  covar = paste("covariate",1:nc,sep = "")
+  colnames(data)[4:(nc+3)] = covar
+  colnames(data)[(nc+4):(nc+5)] = c("delta","Weight")
+  
+  # Rcpp Li's weight with jump weight
+  sv <- survfit(Surv(data[,1], 1 - data[,(nc+4)]) ~ 1)
+  W <- data[,(nc+4)] / sv$surv[findInterval(data[,1], sv$time)]*sv$surv[min(which(floor(sv$time)==(t_0)))]
+  W[is.na(W)] <- max(W, na.rm = TRUE)
+  data[,(nc+5)] = W
+  
+  # Objective equation
+  objectF = function(beta){
+    result = t(X*I) %*% {W*(pnorm((X%*%beta-logT)/sqrt(diag(X %*% H %*% t(X)))))-Q}
+    result = as.vector(result)
+  }
+  
+  #### revised object equation ####
+  rev.objectF = function(beta){
+    result = t(eta*X*I) %*% {W*(pnorm((X%*%beta-logT)/sqrt(diag(X %*% H %*% t(X)))))-Q}
+    result = as.vector(result)
+  }
+  
+  # Covariate setting (1 covariate)
+  X = as.matrix(cbind(c(rep(1,n)),data[,4:(nc+3)]))
+  W = data[,(nc+5)]
+  logT = data[,2]
+  I = data[,3]
+  H = diag(1/n, nc+1, nc+1)
+  
+  # Guess beta option (rq : solution from rq, 0 : no effect of covariate, others : covariate)
+  if (init == "rq"){
+    betastart = as.vector(rq(data[,2] ~ as.matrix(data[,4:(nc+3)]), tau=Q, weight=W)$coefficient)
+  } else if (init == 0){
+    betastart = c(1,rep(0,nc))
+  } else {
+    betastart = rnorm(nc+1)}
+  is.fit = nleqslv(betastart, objectF)
+  
+  if (is.fit$termcd == 1 | is.fit$termcd == 2){
+    coefficient = is.fit$x
+    # Variance estimation : ISMB
+    result.ismb=c()
+    for (j in 1:ne){
+      eta = rexp(n,1)
+      result = t(eta*X*I) %*% {W*(pnorm((X%*%coefficient-logT)/sqrt(diag(X %*% H %*% t(X)))))-Q}
+      result.ismb = cbind(result.ismb,result)
+    }
+    v = cov(t(result.ismb))
+    a.beta = t(X*I*W*as.vector(dnorm((logT-X%*%coefficient)/sqrt(diag(X %*% H %*% t(X))))))%*%(-X/sqrt(diag(X %*% H %*% t(X))))
+    inva.beta = qr.solve(a.beta)
+    sigma = t(inva.beta) %*% v %*% inva.beta
+    SE = sqrt(diag(sigma))
+    beta.se = cbind(coefficient, SE)
+    print(beta.se)
+  } else {
+    coefficient = c(NA,rep(NA,nc))
+    SE = c(NA,rep(NA,nc))
+    beta.se = cbind(coefficient, SE)
+    print(beta.se)
+  }
+}
+
+#### method 2 : Rcpp ISMB (R package) ####
+>>>>>>> b4c8f41dda9cb9c9fc8fd9bbdfc03b0ee31e6252
 #' @param Z is a vector of observed time, which is minimum of failure time and censored time
 #' @param nc is a number of covariates used in analysis
 #' @param covariate is a matrix of covariate (# row = # of subject, # of column = # of covariate(nc))
@@ -204,7 +282,11 @@ rcpp.est= function(Z, nc, covariate, D, t_0, Q, ne, init){
 #### Data Generation function ####
 data.gen<-function(samplesize, censor){
   sim=matrix(NA,samplesize,5)
+<<<<<<< HEAD
   colnames(sim) = c("T","C","Z","X","delta")
+=======
+  colnames(sim) = c("T","C","Z","X","censored")
+>>>>>>> b4c8f41dda9cb9c9fc8fd9bbdfc03b0ee31e6252
   # Generate C_i
   sim[,2] = runif(samplesize,0,censor)
   # Covariates (Control=0, Treatment=1)
