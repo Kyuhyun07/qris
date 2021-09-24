@@ -1,0 +1,133 @@
+---
+output: github_document
+---
+
+---
+
+## **qrismb**
+
+---
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+## qrismb : Quantile regression with induced smoothing approach and L1-minimization
+
+The __qrismb__ package implements a regression modeling of the quantiles of residual life, remaining lifetime at a specific time. For estimation of regression parameters, we applies an induced smoothed version of the existing non-smooth estimating equations approaches, and also uses L1-minimization approach as well. For estimation of regression parameter, "smooth" method uses a robust sandwich-type covariance estimator of regression estimators with resampling method, and "nonsmooth" method uses full multiplier bootstrap approach. To handle data subject to right censoring, inverse probabilities of censoring are incorporated as weights. 
+
+## Installation
+
+You can install the development version from [GitHub](https://github.com/Kyuhyun07/qrismb) with:
+
+``` {r github, eval = FALSE}
+devtools::install_github("Kyuhyun07/qrismb")
+library(qrismb)
+```
+
+## Example
+Here are two examples.
+
+```{r example}
+## 1. Simulation data example
+## Simulate survival data from quantile regression model with possible ascociated response
+data.gen<-function(samplesize, censor){
+  sim=matrix(NA,samplesize,5)
+  colnames(sim) = c("T","C","Z","X","delta")
+  colnames(sim) = c("T","C","Z","X","censored")
+  # Generate C_i
+  sim[,2] = runif(samplesize,0,censor)
+  # Covariates (Control=0, Treatment=1)
+  sim[,4] = rbinom(samplesize,size=1,p=0.5)
+  # Generate T_i (Given Condition r=rho_0, k=2, exp(beta_0)=5, exp(beta_1)=2))
+  unif = runif(n=samplesize ,min = 0,max = 1)
+  for (q in 1:samplesize){
+    if (sim[q,4]==0){
+      sim[q,1]={{-log(1-unif[q])}^(1/k)}/r.initial.0
+    } else {
+      sim[q,1]={{-log(1-unif[q])}^(1/k)}/r.initial.1
+    }
+  }
+  # Generate Y_i (min(T,C))
+  sim[,3] = apply(sim[,1:2], 1, FUN=min)
+  # Censoring indicator (Censored=0, Not censored=1)
+  sim[,5]=I(sim[,1]<sim[,2])
+  # Ordering
+  sim = sim[order(sim[,3]),]
+  n = nrow(sim)
+  sim = as.data.frame(sim)
+  return(sim)
+}
+## Necessary data for simulation data generation 
+exp.beta.initial.0=5
+exp.beta.initial.1=10
+k=2
+r.initial.0=(log(10/5))^(1/k)/exp.beta.initial.0
+r.initial.1=(log(10/5))^(1/k)/exp.beta.initial.1
+c.0=5000000
+c.1=70.39
+c.3=24.35
+c.5=14.07
+c.7=8.49
+set.seed(2021)
+a<-data.gen(200,c.3)
+
+## Define parameters for qrismb
+Z=a[,3]
+nc=1
+covariate=a[,4]
+D=a[,5]
+t_0=2
+Q=0.5
+ne=200
+
+## Run qrismb
+library(qrismb)
+qrismb(a[,3], 1, a[,4], a[,5], 3, 0.5, 200, "rq", "smooth")
+qrismb(a[,3], 1, a[,4], a[,5], 3, 0.5, 200, "one", "nonsmooth")
+```
+
+```{r example2, cache = TRUE}
+## 2. real data example
+## Load "retinopathy" data from R survival package
+library(survival)
+data("retinopathy")
+## Pre-process the data
+reti = retinopathy
+reti_rev = reti
+# covariate 1 : Risk group (rescale 6 to 12 -> 0.5 to 1)
+reti_rev$risk = rescale(reti$risk, to=c(0,1), from=c(0,12))
+# covariate 2 : Age (no change, continuous variable)
+# covariate 3 : Type of Diabetes (adult = 1, juvenile = 0)
+reti_rev$type = as.numeric(reti$type)-1
+# covariate 4 : treatment (no change)
+# covariate 5 : interaction (type x trt)
+reti_rev$typextrt = reti_rev$type*reti$trt
+
+## Define parameters for qrismb
+Z=reti_rev$futime
+nc=5
+covariate=as.matrix(reti_rev[,c(9,4,5,6,10)])
+D=reti_rev$status
+t_0=1
+Q=0.25
+ne=200
+
+## Run qrismb
+qrismb(Z, nc, covariate, D, t_0, Q, ne, "rq", "smooth")
+qrismb(Z, nc, covariate, D, t_0, Q, ne, "random", "nonsmooth")
+```
+
+## Reference 
+Chiou, S., Kang, S., and Yan, J. (2014).  Fitting accelerated failure time model in routine survival analysis with R package aftgee. 
+*Journal of Statistical Software*, **61**(11): 1--23. 
+
+Li, R., Huang, X., & Cortes, J. (2016). Quantile residual life regression with longitudinal biomarker measurements for dynamic prediction. *Journal of the Royal Statistical Society*. **Series C** (Applied Statistics), 755-773.
+
+Jung, S. H., Jeong, J. H., & Bandos, H. (2009). Regression on quantile residual life. *Biometrics*, **65**(4), 1203-1212.
