@@ -3,6 +3,9 @@
 #' Using two estimation methods
 #' 1. L1-minimization(non-smooth estimating equation)
 #' 2. Induced smoothing approach (smooth estimating equation)
+#' @useDynLib qrismb
+#' @importFrom Rcpp sourceCpp
+NULL
 #'
 #' @param Z is a vector of observed time, which is minimum of failure time and censored time
 #' @param nc is a number of covariates used in analysis
@@ -156,43 +159,44 @@ qrismb= function(Z, nc, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init, method){
       list(coefficient=coefficient, stderr = se)
     }
   } else {
-    sourceCpp(code = '
-          #include <RcppArmadillo.h>
-          // [[Rcpp::depends(RcppArmadillo)]]
-          using namespace arma;
-          // [[Rcpp::export]]
-          arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec I,
-          arma::vec logT, double Q) {
-          arma::mat m1 = X % repmat(I, 1, X.n_cols);
-          arma::mat m2 = normcdf((X * b - logT) / sqrt(diagvec(X * H * X.t()))) % W - Q;
-          return m1.t() * m2;
-          }')
-
-    #' Induce smoothing estimating equation, adopted from rev_is_objectF()
-    sourceCpp(code = '
-          #include <RcppArmadillo.h>
-          // [[Rcpp::depends(RcppArmadillo)]]
-          using namespace arma;
-          // [[Rcpp::export]]
-          arma::mat rev_isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec E,arma::vec I,
-          arma::vec logT, double Q) {
-          arma::mat m1 = X % repmat(I, 1, X.n_cols) % repmat(E, 1, X.n_cols);
-          arma::mat m2 = normcdf((X * b - logT) / sqrt(diagvec(X * H * X.t()))) % W - Q;
-          return m1.t() * m2;
-          }')
-
-    #' Induce smoothing estimating equation, adopted from Amat
-    sourceCpp(code = '
-          #include <RcppArmadillo.h>
-          // [[Rcpp::depends(RcppArmadillo)]]
-          using namespace arma;
-          // [[Rcpp::export]]
-          arma::mat Amat(arma::vec b, arma::mat X, arma::vec W_star, arma::mat H, arma::vec E, arma::vec I,
-          arma::vec logT, double Q) {
-          arma::mat m1 = X % repmat(I, 1, X.n_cols) % repmat(W_star, 1, X.n_cols);
-          arma::mat m2 =  (-X / repmat(sqrt(diagvec(X * H * X.t())), 1, X.n_cols)) % repmat(normpdf((X * b - logT) / sqrt(diagvec(X * H * X.t()))), 1, X.n_cols);
-          return m1.t() * m2;
-          }')
+    #' sourceCpp(code = '
+    #'       #include <RcppArmadillo.h>
+    #'       // [[Rcpp::depends(RcppArmadillo)]]
+    #'       using namespace arma;
+    #'       // [[Rcpp::export]]
+    #'       arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec I,
+    #'       arma::vec logT, double Q) {
+    #'       arma::mat m1 = X % repmat(I, 1, X.n_cols);
+    #'       arma::mat m2 = normcdf((X * b - logT) / sqrt(diagvec(X * H * X.t()))) % W - Q;
+    #'       return m1.t() * m2;
+    #'       }')
+    #'
+    #'
+    #' #' Induce smoothing estimating equation, adopted from rev_is_objectF()
+    #' sourceCpp(code = '
+    #'       #include <RcppArmadillo.h>
+    #'       // [[Rcpp::depends(RcppArmadillo)]]
+    #'       using namespace arma;
+    #'       // [[Rcpp::export]]
+    #'       arma::mat rev_isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec E,arma::vec I,
+    #'       arma::vec logT, double Q) {
+    #'       arma::mat m1 = X % repmat(I, 1, X.n_cols) % repmat(E, 1, X.n_cols);
+    #'       arma::mat m2 = normcdf((X * b - logT) / sqrt(diagvec(X * H * X.t()))) % W - Q;
+    #'       return m1.t() * m2;
+    #'       }')
+    #'
+    #' #' Induce smoothing estimating equation, adopted from Amat
+    #' sourceCpp(code = '
+    #'       #include <RcppArmadillo.h>
+    #'       // [[Rcpp::depends(RcppArmadillo)]]
+    #'       using namespace arma;
+    #'       // [[Rcpp::export]]
+    #'       arma::mat Amat(arma::vec b, arma::mat X, arma::vec W_star, arma::mat H, arma::vec E, arma::vec I,
+    #'       arma::vec logT, double Q) {
+    #'       arma::mat m1 = X % repmat(I, 1, X.n_cols) % repmat(W_star, 1, X.n_cols);
+    #'       arma::mat m2 =  (-X / repmat(sqrt(diagvec(X * H * X.t())), 1, X.n_cols)) % repmat(normpdf((X * b - logT) / sqrt(diagvec(X * H * X.t()))), 1, X.n_cols);
+    #'       return m1.t() * m2;
+    #'       }')
     rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logT, Q))
 
     if (rcpp.fit$termcd == 1 | rcpp.fit$termcd == 2){

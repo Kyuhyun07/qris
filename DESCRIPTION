@@ -16,3 +16,5 @@ Imports:
     RcppArmadillo,
     scales,
     survival
+LinkingTo: 
+    Rcpp
