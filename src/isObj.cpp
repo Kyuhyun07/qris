@@ -1,6 +1,5 @@
-#include <Rcpp.h>
-using namespace Rcpp;
 #include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 // [[Rcpp::export]]
 arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec I,arma::vec logT, double Q) {

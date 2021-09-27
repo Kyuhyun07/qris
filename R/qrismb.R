@@ -3,9 +3,6 @@
 #' Using two estimation methods
 #' 1. L1-minimization(non-smooth estimating equation)
 #' 2. Induced smoothing approach (smooth estimating equation)
-#' @useDynLib qrismb
-#' @importFrom Rcpp sourceCpp
-NULL
 #'
 #' @param Z is a vector of observed time, which is minimum of failure time and censored time
 #' @param nc is a number of covariates used in analysis

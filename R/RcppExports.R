@@ -13,3 +13,7 @@ rev_isObj <- function(b, X, W, H, E, I, logT, Q) {
     .Call('_qrismb_rev_isObj', PACKAGE = 'qrismb', b, X, W, H, E, I, logT, Q)
 }
 
+# Register entry points for exported C++ functions
+methods::setLoadAction(function(ns) {
+    .Call('_qrismb_RcppExport_registerCCallable', PACKAGE = 'qrismb')
+})

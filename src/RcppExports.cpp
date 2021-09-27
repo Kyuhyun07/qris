@@ -2,15 +2,16 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include <Rcpp.h>
+#include <string>
+#include <set>
 
 using namespace Rcpp;
 
 // Amat
 arma::mat Amat(arma::vec b, arma::mat X, arma::vec W_star, arma::mat H, arma::vec E, arma::vec I, arma::vec logT, double Q);
-RcppExport SEXP _qrismb_Amat(SEXP bSEXP, SEXP XSEXP, SEXP W_starSEXP, SEXP HSEXP, SEXP ESEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
+static SEXP _qrismb_Amat_try(SEXP bSEXP, SEXP XSEXP, SEXP W_starSEXP, SEXP HSEXP, SEXP ESEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type W_star(W_starSEXP);
@@ -21,7 +22,31 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type Q(QSEXP);
     rcpp_result_gen = Rcpp::wrap(Amat(b, X, W_star, H, E, I, logT, Q));
     return rcpp_result_gen;
-END_RCPP
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _qrismb_Amat(SEXP bSEXP, SEXP XSEXP, SEXP W_starSEXP, SEXP HSEXP, SEXP ESEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_qrismb_Amat_try(bSEXP, XSEXP, W_starSEXP, HSEXP, ESEXP, ISEXP, logTSEXP, QSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error(CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
 }
 // isObj
 arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec I, arma::vec logT, double Q);
@@ -59,10 +84,27 @@ BEGIN_RCPP
 END_RCPP
 }
 
+// validate (ensure exported C++ functions exist before calling them)
+static int _qrismb_RcppExport_validate(const char* sig) { 
+    static std::set<std::string> signatures;
+    if (signatures.empty()) {
+        signatures.insert("arma::mat(*Amat)(arma::vec,arma::mat,arma::vec,arma::mat,arma::vec,arma::vec,arma::vec,double)");
+    }
+    return signatures.find(sig) != signatures.end();
+}
+
+// registerCCallable (register entry points for exported C++ functions)
+RcppExport SEXP _qrismb_RcppExport_registerCCallable() { 
+    R_RegisterCCallable("qrismb", "_qrismb_Amat", (DL_FUNC)_qrismb_Amat_try);
+    R_RegisterCCallable("qrismb", "_qrismb_RcppExport_validate", (DL_FUNC)_qrismb_RcppExport_validate);
+    return R_NilValue;
+}
+
 static const R_CallMethodDef CallEntries[] = {
     {"_qrismb_Amat", (DL_FUNC) &_qrismb_Amat, 8},
     {"_qrismb_isObj", (DL_FUNC) &_qrismb_isObj, 7},
     {"_qrismb_rev_isObj", (DL_FUNC) &_qrismb_rev_isObj, 8},
+    {"_qrismb_RcppExport_registerCCallable", (DL_FUNC) &_qrismb_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}
 };
 
