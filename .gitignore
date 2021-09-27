@@ -3,3 +3,4 @@
 *.so
 *~
 .Rproj.user
+README.Rmd

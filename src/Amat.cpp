@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 #include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 // [[Rcpp::export]]
 arma::mat Amat(arma::vec b, arma::mat X, arma::vec W_star, arma::mat H, arma::vec E, arma::vec I,arma::vec logT, double Q) {
