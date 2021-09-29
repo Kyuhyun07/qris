@@ -1,13 +1,12 @@
 Package: qrismb
 Type: Package
-Title: Quantile regression using induced smoothing approach (Quantile Regression using Induced Smoothing Approach)
+Title: Quantile regression using induced smoothing approach
 Version: 0.1.0
-Date: 2020-05-11
+Date: 2021-09-28
 Authors@R: person("Kyu Hyun", "Kim", role = c("aut", "cre"), email = "kyuhyunkim07@yonsei.ac.kr")
 Description: This package includes functions to estimate quantile regression estimator using induced smoothing approach. Furthermore, it provides standard error of estimator based on multiplier bootstrap method.
 License: What license is it under?
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.1.2
 Imports: 
     nleqslv,
@@ -17,4 +16,4 @@ Imports:
     scales,
     survival
 LinkingTo: 
-    Rcpp
+    Rcpp, RcppArmadillo

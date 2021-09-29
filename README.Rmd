@@ -35,6 +35,7 @@ library(qrismb)
 Here are two examples.
 
 ```{r example}
+library(survival)
 ## 1. Simulation data example
 ## Simulate survival data from quantile regression model with possible ascociated response
 data.gen<-function(samplesize, censor){
