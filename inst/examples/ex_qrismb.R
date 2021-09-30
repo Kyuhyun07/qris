@@ -1,7 +1,7 @@
-data("retinopathy")
+data("retinopathy", package = 'survival')
 reti <- retinopathy
 reti_rev <- reti
-reti_rev$risk <- rescale(reti$risk, to = c(0,1), from = c(0,12))
+reti_rev$risk <- scales::rescale(reti$risk, to = c(0,1), from = c(0,12))
 reti_rev$type <- as.numeric(reti$type) - 1
 reti_rev$typextrt <- reti_rev$type * reti$trt
 Z <- reti_rev$futime

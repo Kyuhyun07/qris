@@ -25,6 +25,7 @@
 #' @export
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
+#' @importFrom survival survfit
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(Z, nc, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init, method){
     if(nc < 1)
