@@ -3,4 +3,5 @@
 export(qrismb)
 importFrom(nleqslv,nleqslv)
 importFrom(quantreg,rq.wfit)
+importFrom(survival,Surv)
 importFrom(survival,survfit)
