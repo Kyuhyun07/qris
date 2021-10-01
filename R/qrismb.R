@@ -21,13 +21,12 @@
 #'   \item{coefficient}{a vector of point estimates}
 #'   \item{stderr}{a vector of standard error of point estiamtes}
 #'   }
-#' 
+#'
 #' @export
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
-#' @importFrom survival survfit Surv
 #' @example inst/examples/ex_qrismb.R
-qrismb <- function(Z, nc, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init, method){
+qrismb <- function(Z, nc, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", method="smooth"){
     if(nc < 1)
         stop("Use at least one covariate")
     if(sum(D!=0&D!=1)>=1) {
@@ -47,151 +46,156 @@ qrismb <- function(Z, nc, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init, method
     }
 
     n = length(Z)
-    data = matrix(NA, n, nc+5)
-    data[,1] = Z
+    data <- matrix(NA, n, nc+5)
+    data[,1] <- Z
     ## Suppress warning message
-    options(warn=-1)
-    data[,2] = log(Z-t_0)
-    data[,3] = as.numeric(Z>=t_0)
-    data[,4:(nc+3)] = as.matrix(covariate)
-    data[is.na(data[,2]),2]=-10
-    data[,(nc+4)] = D
-    data[n,(nc+4)] = 1
-    data = as.data.frame(data) #head(data,20)
-    colnames(data)[1:3]=c("Z", "log(Z-t_0)", "I[Z>t_0]")
-    covar = paste("covariate",1:nc,sep = "")
-    colnames(data)[4:(nc+3)] = covar
-    colnames(data)[(nc+4):(nc+5)] = c("delta","Weight")
-    
+    data[,2] <-suppressWarnings(log(Z-t_0))
+    data[,3] <- as.numeric(Z>=t_0)
+    data[,4:(nc+3)] <- as.matrix(covariate)
+    data[is.na(data[,2]),2] <- -10
+    data[,(nc+4)] <- D
+    data[n,(nc+4)] <- 1
+    data <- as.data.frame(data) #head(data,20)
+    colnames(data)[1:3] <- c("Z", "log(Z-t_0)", "I[Z>t_0]")
+    covar <- paste("covariate",1:nc,sep = "")
+    colnames(data)[4:(nc+3)] <- covar
+    colnames(data)[(nc+4):(nc+5)] <- c("delta","Weight")
+
     ## Rcpp Li's weight with jump weight
     sv <- survfit(Surv(data[,1], 1 - data[,(nc+4)]) ~ 1)
     W <- data[,(nc+4)] / sv$surv[findInterval(data[,1], sv$time)]*sv$surv[min(which(floor(sv$time)==(t_0)))]
     W[is.na(W)] <- max(W, na.rm = TRUE)
-    data[,(nc+5)] = W
+    data[,(nc+5)] <- W
 
     ## Covariate setting (1 covariate)
 
-    X = as.matrix(cbind(c(rep(1,n)),data[,4:(nc+3)]))
-    W = data[,(nc+5)]
-    logT = data[,2]
-    I = data[,3]
-    H = diag(1/n, nc+1, nc+1)
+    X <- as.matrix(cbind(c(rep(1,n)),data[,4:(nc+3)]))
+    logT <- data[,2]
+    I <- data[,3]
+    H <- diag(1/n, nc+1, nc+1)
 
     ## Guess beta option (rq : solution from rq, 0 : no effect of covariate, others : covariate)
     if (init == "random"){
-        betastart = rnorm(nc+1)
+        betastart <- rnorm(nc+1)
     } else if (init == "one"){
-        betastart = c(1,rep(0,nc))
+        betastart <- c(1,rep(0,nc))
     } else {
-        betastart = as.vector(rq.wfit(X,data[,2], tau=Q, weight=W)$coef)
+        betastart <- as.vector(rq.wfit(X,data[,2], tau=Q, weight=W)$coef)
     }
 
     if (method == "nonsmooth"){
         ## Estimating equation for estimaing beta (using rq)
-        pseudo1 = -apply(X*I*W,2,sum)
-        pseudo2 = 2*apply(X*I*Q,2,sum)
-        M = 10^6
-        Y.reg = c(data[,2],M,M)
-        X.reg = rbind(X,rbind(pseudo1,pseudo2))
-        W.reg = c(I*W,1,1)
-        Li.fit = rq.wfit(X.reg,Y.reg,weights=W.reg)
-        coefficient = as.vector(Li.fit$coefficients)
+        pseudo1 <- -apply(X*I*W,2,sum)
+        pseudo2 <- 2*apply(X*I*Q,2,sum)
+        M <- 10^6
+        Y.reg <- c(data[,2],M,M)
+        X.reg <- rbind(X,rbind(pseudo1,pseudo2))
+        W.reg <- c(I*W,1,1)
+        Li.fit <- rq.wfit(X.reg,Y.reg,weights=W.reg)
+        coefficient <- as.vector(Li.fit$coefficients)
         ## Full multiplier bootstrap
-        fb_result = c()
+        fb_result <- c()
         ## if (Li.fit$code == 1 | Li.fit$code == 2){
         if (all(Li.fit$coefficients<=10)){
-            ## Variance estimation : Li's method (Full multiplier bootstrap)
-            SC.func=function(T,censor,wgt=1){
-                deathtime=unique(sort(T[censor[]==1]))
-                nrisk=ndeath=rep(0,length(deathtime))
-                for(i in 1:length(deathtime)){
-                    nrisk[i]=sum((deathtime[i]<=T)*wgt)
-                    ndeath[i]=sum((T==deathtime[i])*censor*wgt)
-                }
-                prodobj=1-ndeath/nrisk
-                survp=rep(0,length(deathtime))
-                for(i in 1:length(deathtime)){survp[i]=prod(prodobj[1:i])}
-                return(data.frame(cbind(deathtime,ndeath,nrisk,survp)))}
             for (j in 1:ne){
-                                        # generating perturbation variable
-                eta = rexp(n,1)
+                # generating perturbation variable
+                eta <- rexp(n,1)
                 if (all(D==rep(1,n))){
-                    W_star = rep(1,n)
+                    W_star <- rep(1,n)
                 } else {
-                    Gest=SC.func(Z,1-D,eta)
-                    SC=stepfun(Gest$deathtime,c(1,Gest$survp))
+                    Gest <- ghat(Z,1-D,eta)
                     W_star <- D / Gest$survp[findInterval(Z, Gest$deathtime)]*Gest$survp[min(which(floor(Gest$deathtime)==(t_0)))]
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
                 }
-                rev_pseudo1 = -apply(X*I*W_star*eta,2,sum)
-                rev_pseudo2 = 2*apply(X*I*eta*Q,2,sum)
-                M = 10^6
-                rev_Y.reg = c(data[,2],M,M)
-                rev_X.reg = rbind(X,rbind(rev_pseudo1,rev_pseudo2))
-                rev_W.reg = c(W_star*I*eta,1,1)
-                full_boot = rq.wfit(rev_X.reg,rev_Y.reg,weights=rev_W.reg)
+                rev_pseudo1 <- -apply(X*I*W_star*eta,2,sum)
+                rev_pseudo2 <- 2*apply(X*I*eta*Q,2,sum)
+                M <- 10^6
+                rev_Y.reg <- c(data[,2],M,M)
+                rev_X.reg <- rbind(X,rbind(rev_pseudo1,rev_pseudo2))
+                rev_W.reg <- c(W_star*I*eta,1,1)
+                full_boot <- rq.wfit(rev_X.reg,rev_Y.reg,weights=rev_W.reg)
                 if (all(full_boot$coef<=2)){
-                    fb_result = cbind(fb_result,as.vector(full_boot$coef))
+                    fb_result <- cbind(fb_result,as.vector(full_boot$coef))
                 } else {
-                    fb_result = cbind(fb_result,rep(NA,nc+1))
+                    fb_result <- cbind(fb_result,rep(NA,nc+1))
                 }
             }
-            sigma = cov(t(fb_result), use="complete.obs")
-            se = sqrt(diag(sigma))
-            list(coefficient=coefficient, stderr = se)
+            sigma <- try(cov(t(fb_result), use="complete.obs"), silent = T)
+            if(class(sigma)[1] == "try-error"|sum(!is.na(apply(fb_result,2,sum)))<=1){
+                stop("More resampling iterations are necessary")
+            } else {
+                se <- sqrt(diag(sigma))
+                list(coefficient=coefficient, stderr = se)
+            }
         } else {
-            coefficient = c(NA,rep(NA,nc))
-            se = c(NA,rep(NA,nc))
+            coefficient <- c(NA,rep(NA,nc))
+            se <- c(NA,rep(NA,nc))
             list(coefficient=coefficient, stderr = se)
         }
     } else {
         rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logT, Q))
         if (rcpp.fit$termcd == 1 | rcpp.fit$termcd == 2){
-            coefficient = rcpp.fit$x
+            coefficient <- rcpp.fit$x
             ## Variance estimation : ISMB
-            rcpp.result.ismb=c()
-
-            SC.func=function(T,censor,wgt=1){
-                deathtime=unique(sort(T[censor[]==1]))
-                nrisk=ndeath=rep(0,length(deathtime))
-                for(i in 1:length(deathtime)){
-                    nrisk[i]=sum((deathtime[i]<=T)*wgt)
-                    ndeath[i]=sum((T==deathtime[i])*censor*wgt)
-                }
-                prodobj=1-ndeath/nrisk
-                survp=rep(0,length(deathtime))
-                for(i in 1:length(deathtime)){survp[i]=prod(prodobj[1:i])}
-                return(data.frame(cbind(deathtime,ndeath,nrisk,survp)))}
-
+            rcpp.result.ismb <- c()
             for (j in 1:ne){
                 ## generating perturbation variable
-                E = rexp(n,1)
+                E <- rexp(n,1)
                 if (D==rep(1,n)){
-                    W_star = rep(1,n)
+                    W_star <- rep(1,n)
                 } else {
-                    Gest=SC.func(Z,1-D,E)
-                    SC=stepfun(Gest$deathtime,c(1,Gest$survp))
+                    Gest <- ghat(Z,1-D,E)
                     W_star <- D / Gest$survp[findInterval(Z, Gest$deathtime)]*Gest$survp[min(which(floor(Gest$deathtime)==(t_0)))]
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
                 }
-                result = rev_isObj(coefficient, X, W_star, H, E, I, logT, Q)
-                rcpp.result.ismb = cbind(rcpp.result.ismb,result)
+                result <- rev_isObj(coefficient, X, W_star, H, E, I, logT, Q)
+                rcpp.result.ismb <- cbind(rcpp.result.ismb,result)
             }
-            v = cov(t(rcpp.result.ismb))
-            rcpp.a = Amat(coefficient, X, W, H, E, I, logT, Q)
+            v <- cov(t(rcpp.result.ismb))
+            rcpp.a <- Amat(coefficient, X, W, H, E, I, logT, Q)
             inva <- try(solve(rcpp.a))
             if(class(inva)[1] == "try-error"){
-                se = rep(NA,nc+1)
+                se <- rep(NA,nc+1)
                 stop("Slope matrix is singular matrix")
             } else {
-                sigma = t(inva) %*% v %*% inva
-                se = sqrt(diag(sigma))
+                sigma <- t(inva) %*% v %*% inva
+                se <- sqrt(diag(sigma))
             }
             list(coefficient=coefficient, stderr = se)
         } else {
-            coefficient = c(NA,rep(NA,nc))
-            se = c(NA,rep(NA,nc))
+            coefficient <- c(NA,rep(NA,nc))
+            se <- c(NA,rep(NA,nc))
             list(coefficient=coefficient, stderr = se)
         }
     }
 }
+
+#' Estimate Kaplan Meier estimate of the survival function of the censoring time C
+#' ghat
+#'
+#' @param T is a vector of observed time, which is minimum of failure time and censored time
+#' @param event is a vector of censoring indicator (not censored = 1, censored = 0)
+#' @param wgt is a vector of weight
+#'
+#'@return An object of class "\code{ghat}" estimate KM estimator of survival function of
+#' The \code{ghat} object is a list containing at least the following components:
+#' \describe{
+#'   \item{deathtime}{the observed time}
+#'   \item{ndeath}{a vector of number of subject who experienced event at deathtime}
+#'   \item{nrisk}{a vector of number of subject who are possible to experience event at deathtime}
+#'   \item{survp}{a vector of survival probability at deathtime}
+#'   }
+#' @export
+#'
+ghat <- function(T,censor,wgt=1){
+    deathtime <- c(0,unique(sort(T[censor[]==1])))
+    nrisk <- ndeath <- survp <- rep(0,length(deathtime))
+    nrisk[1] <- sum((0<=T)*wgt)
+    ndeath[1] <- sum((T==0)*censor*wgt)
+    for(i in 2:length(deathtime)){
+        nrisk[i] <- sum((deathtime[i-1]<=T)*wgt)
+        ndeath[i] <- sum((T==deathtime[i-1])*censor*wgt)
+    }
+    prodobj <- 1-ndeath/nrisk
+    for(i in 1:length(deathtime)){survp[i] <- prod(prodobj[1:i])}
+    return(data.frame(cbind(deathtime,ndeath,nrisk,survp)))}
