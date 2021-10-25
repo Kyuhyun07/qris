@@ -4,12 +4,19 @@
 \alias{qrismb}
 \title{Estimate a quantile regression estimator of residual lifetime from survival data}
 \usage{
-qrismb(Z, nc, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init, method)
+qrismb(
+  Z,
+  covariate,
+  D,
+  t_0 = 0,
+  Q = 0.5,
+  ne = 100,
+  init = "rq",
+  method = "smooth"
+)
 }
 \arguments{
 \item{Z}{is a vector of observed time, which is minimum of failure time and censored time}
-
-\item{nc}{is a number of covariates used in analysis}
 
 \item{covariate}{is a matrix of covariate (# row = # of subject, # of column = # of covariate(nc))}
 
@@ -55,6 +62,6 @@ t_0 <- 1
 Q <- 0.25
 ne <- 200
 
-qrismb(Z, nc, covariate, D, t_0, Q, ne, "rq", "smooth")
-qrismb(Z, nc, covariate, D, t_0, Q, ne, "random", "nonsmooth")
+qrismb(Z, covariate, D, t_0, Q, ne, "rq", "smooth")
+qrismb(Z, covariate, D, t_0, Q, ne, "random", "nonsmooth")
 }

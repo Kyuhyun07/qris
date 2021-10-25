@@ -12,5 +12,5 @@ t_0 <- 1
 Q <- 0.25
 ne <- 200
 
-qrismb(Z, nc, covariate, D, t_0, Q, ne, "rq", "smooth")
-qrismb(Z, nc, covariate, D, t_0, Q, ne, "random", "nonsmooth")
+qrismb(Z, covariate, D, t_0, Q, ne, "rq", "smooth")
+qrismb(Z, covariate, D, t_0, Q, ne, "random", "nonsmooth")
