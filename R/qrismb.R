@@ -5,6 +5,7 @@
 #' 2. Induced smoothing approach (smooth estimating equation)
 #'
 #' @param Z is a vector of observed time, which is minimum of failure time and censored time
+#' @param nc is a number of covariates used in analysis
 #' @param covariate is a matrix of covariate (# row = # of subject, # of column = # of covariate(nc))
 #' @param D is a vector of censoring indicator (1 = not censored, 0 = censored)
 #' @param t_0 is the followup time(or basetime of analysis)
@@ -24,7 +25,6 @@
 #' @export
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
-#' @importFrom survival survfit
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(Z, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", method="smooth"){
     nc <- ncol(covariate)
@@ -45,7 +45,8 @@ qrismb <- function(Z, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", metho
     if(ne<=1) {
         stop("number of multiplier bootstrapping must greater than 1")
     }
-    n <- length(Z)
+
+    n = length(Z)
     data <- matrix(NA, n, nc+5)
     data[,1] <- Z
     ## Suppress warning message
@@ -125,12 +126,12 @@ qrismb <- function(Z, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", metho
                 stop("More resampling iterations are necessary")
             } else {
                 se <- sqrt(diag(sigma))
-                output <- list(coefficient=coefficient, stderr = se)
+                list(coefficient=coefficient, stderr = se)
             }
         } else {
             coefficient <- c(NA,rep(NA,nc))
             se <- c(NA,rep(NA,nc))
-            output <- list(coefficient = coefficient, stderr = se)
+            list(coefficient=coefficient, stderr = se)
         }
     } else {
         rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logT, Q))
@@ -141,7 +142,7 @@ qrismb <- function(Z, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", metho
             for (j in 1:ne){
                 ## generating perturbation variable
                 E <- rexp(n,1)
-                if (D == rep(1,n)){
+                if (D==rep(1,n)){
                     W_star <- rep(1,n)
                 } else {
                     Gest <- ghat(Z,1-D,E)
@@ -155,21 +156,19 @@ qrismb <- function(Z, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", metho
             rcpp.a <- Amat(coefficient, X, W, H, E, I, logT, Q)
             inva <- try(solve(rcpp.a))
             if(class(inva)[1] == "try-error"){
-                se <- rep(NA, nc+1)
+                se <- rep(NA,nc+1)
                 stop("Slope matrix is singular matrix")
             } else {
                 sigma <- t(inva) %*% v %*% inva
                 se <- sqrt(diag(sigma))
             }
-            output <- list(coefficient = coefficient, stderr = se)
+            list(coefficient=coefficient, stderr = se)
         } else {
             coefficient <- c(NA,rep(NA,nc))
             se <- c(NA,rep(NA,nc))
-            output <- list(coefficient = coefficient, stderr = se)
+            list(coefficient=coefficient, stderr = se)
         }
     }
-    class(output) <- "qrismb"
-    return(output)
 }
 
 #' Estimate Kaplan Meier estimate of the survival function of the censoring time C
@@ -200,5 +199,4 @@ ghat <- function(T,censor,wgt=1){
     }
     prodobj <- 1-ndeath/nrisk
     for(i in 1:length(deathtime)){survp[i] <- prod(prodobj[1:i])}
-    return(data.frame(cbind(deathtime,ndeath,nrisk,survp)))
-}
+    return(data.frame(cbind(deathtime,ndeath,nrisk,survp)))}
