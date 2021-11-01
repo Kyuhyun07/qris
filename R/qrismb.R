@@ -14,15 +14,18 @@
 #' @param init is option for initial guess of regression parameter ("random" assumes all coefficients as random numbers, "one" assumes all coefficients as 1s, otherwise a solution from rq function)
 #' @param method is option how to estimate coefficient and standard error of it
 #' ("nonsmooth" uses non-smooth estimating equation : L1-minimization method in coefficient estimation, and full multiplier bootstrap in standard error estimation.
-#' (otherwise uses induced smoothed estimating equation : nonlinear equation solver in coefficient estimation and partial multiplier bootstrap in standard error estimation).
+#' "smooth" uses induced smoothed estimating equation : nonlinear equation solver in coefficient estimation and partial multiplier bootstrap in standard error estimation
+#' "iterative" uses induced smoothed estmating eqution and iterative calculation updating coefficient and SE).
 #' @return An object of class "\code{qrismb}" representing the fit.
 #' The \code{qrismb} object is a list containing at least the following components:
 #' \describe{
 #'   \item{coefficient}{a vector of point estimates}
 #'   \item{stderr}{a vector of standard error of point estiamtes}
+#'   \item{iterno}{a number of itertation until convergence (only for iterative procedure)}
 #'   }
 #'
 #' @export
+#' @importFrom survival Surv
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
 #' @example inst/examples/ex_qrismb.R
@@ -137,14 +140,72 @@ qrismb <- function(Z, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", metho
                 stop("More resampling iterations are necessary")
             } else {
                 se <- sqrt(diag(sigma))
-                list(coefficient=coefficient, stderr = se)
+                list(coefficient = coefficient, stderr = se)
             }
         } else {
             coefficient <- c(NA,rep(NA,nc))
             se <- c(NA,rep(NA,nc))
             list(coefficient=coefficient, stderr = se)
         }
-    } else {
+    } else if (method == "iterative") {
+          iter_beta_result <- old_beta <- new_beta <- betastart
+          new_sigma <- old_sigma <- H
+          iter_SE_result <- sqrt(diag(old_sigma))
+
+          for (k in 1:10){
+              number_iter <- k
+              old_beta <- new_beta
+              old_sigma <- new_sigma
+              slope_a <- Amat(old_beta, X, W, old_sigma, I, logT, Q)
+              # Step 1 : Update beta()
+              new_beta <- old_beta - qr.solve(slope_a) %*% isObj(old_beta, X, W, H, I, logT, Q)
+              iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+              # Step 2 : Update Sigma()
+              result.ismb <- c()
+              for (j in 1:ne){
+                  # generating perturbation variable
+                  eta = rexp(n,1)
+                  if (D==rep(1,n)){
+                      W_star <- rep(1,n)
+                      } else {
+                          Gest <- ghat(data$Z,1-data$delta, eta)
+                          W_star <- data$delta / Gest$survp[findInterval(data$Z, Gest$deathtime)]*Gest$survp[max(which(floor(Gest$deathtime)<(t_0)))]
+                          W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+                      }
+                  result <- rev_isObj(old_beta, X, W_star, H, eta, I, logT, Q)
+                  result.ismb <- cbind(result.ismb,result)
+              }
+              new_V <- cov(t(result.ismb))
+              new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
+              iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
+              if(norm(new_beta-old_beta, "F")<1e-6) break
+          }
+
+          # Last iteration
+          old_beta <- new_beta
+          old_sigma <- new_sigma
+          slope_a <- Amat(old_beta, X, W, old_sigma, I, logT, Q)
+          new_beta <- old_beta - qr.solve(slope_a) %*% isObj(old_beta, X, W, H, I, logT, Q)
+          iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+          result.ismb <- c()
+          for (j in 1:ne){
+              # generating perturbation variable
+              eta <- rexp(n,1)
+              if (D==rep(1,n)){
+              W_star <- rep(1,n)
+              } else {
+                  Gest <- ghat(data$Z,1-data$delta,eta)
+                  W_star <- data$delta / Gest$survp[findInterval(data$Z, Gest$deathtime)]*Gest$survp[max(which(floor(Gest$deathtime)<(t_0)))]
+                  W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+              }
+              result <- rev_isObj(old_beta, X, W_star, H, eta, I, logT, Q)
+              result.ismb = cbind(result.ismb,result)
+          }
+          new_V = cov(t(result.ismb))
+          new_sigma = t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
+          iter_SE_result = rbind(iter_SE_result , sqrt(diag(new_sigma)))
+          list(coefficient=iter_beta_result, stderr = iter_SE_result, iterno = k+1)
+        } else {
         rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logT, Q))
         if (rcpp.fit$termcd == 1 | rcpp.fit$termcd == 2){
             coefficient <- rcpp.fit$x
@@ -164,7 +225,7 @@ qrismb <- function(Z, covariate, D, t_0 = 0, Q = 0.5, ne = 100, init="rq", metho
                 rcpp.result.ismb <- cbind(rcpp.result.ismb,result)
             }
             v <- cov(t(rcpp.result.ismb))
-            rcpp.a <- Amat(coefficient, X, W, H, E, I, logT, Q)
+            rcpp.a <- Amat(coefficient, X, W, H, I, logT, Q)
             inva <- try(solve(rcpp.a))
             if(class(inva)[1] == "try-error"){
                 se <- rep(NA,nc+1)

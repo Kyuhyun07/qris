@@ -2,8 +2,8 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @noRd
-Amat <- function(b, X, W_star, H, E, I, logT, Q) {
-    .Call('_qrismb_Amat', PACKAGE = 'qrismb', b, X, W_star, H, E, I, logT, Q)
+Amat <- function(b, X, W_star, H, I, logT, Q) {
+    .Call('_qrismb_Amat', PACKAGE = 'qrismb', b, X, W_star, H, I, logT, Q)
 }
 
 #' @noRd

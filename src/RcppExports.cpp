@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // Amat
-arma::mat Amat(arma::vec b, arma::mat X, arma::vec W_star, arma::mat H, arma::vec E, arma::vec I, arma::vec logT, double Q);
-RcppExport SEXP _qrismb_Amat(SEXP bSEXP, SEXP XSEXP, SEXP W_starSEXP, SEXP HSEXP, SEXP ESEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
+arma::mat Amat(arma::vec b, arma::mat X, arma::vec W_star, arma::mat H, arma::vec I, arma::vec logT, double Q);
+RcppExport SEXP _qrismb_Amat(SEXP bSEXP, SEXP XSEXP, SEXP W_starSEXP, SEXP HSEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,11 +21,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type W_star(W_starSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type H(HSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type E(ESEXP);
     Rcpp::traits::input_parameter< arma::vec >::type I(ISEXP);
     Rcpp::traits::input_parameter< arma::vec >::type logT(logTSEXP);
     Rcpp::traits::input_parameter< double >::type Q(QSEXP);
-    rcpp_result_gen = Rcpp::wrap(Amat(b, X, W_star, H, E, I, logT, Q));
+    rcpp_result_gen = Rcpp::wrap(Amat(b, X, W_star, H, I, logT, Q));
     return rcpp_result_gen;
 END_RCPP
 }

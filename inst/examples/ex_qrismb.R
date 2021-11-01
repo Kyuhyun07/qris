@@ -49,7 +49,8 @@ Q=0.5
 ne=200
 
 fit1 <- qrismb(Z, covariate, D, t_0, Q, ne, "rq", "smooth")
-fit2 <- qrismb(Z, covariate, D, t_0, Q, ne, "random", "nonsmooth")
+fit2 <- qrismb(Z, covariate, D, t_0, Q, ne, "rq", "nonsmooth")
+fit3 <- qrismb(Z, covariate, D, t_0, Q, ne, "rq", "iterative")
 
 data(cancer, package="survival")
 lung_rev <- lung[,c(2,3,4,5,7,8,9)]
