@@ -41,16 +41,10 @@ r.initial.1=(log(10/5))^(1/k)/exp.beta.initial.1
 # c value of unif(0,c)
 c=24.35
 a<-data.gen(200,c)
-Z=a[,3]
-covariate=as.matrix(a[,4])
-D=a[,5]
-t_0=1
-Q=0.5
-ne=200
 
-fit1 <- qrismb(Z, covariate, D, t_0, Q, ne, "rq", "smooth")
-fit2 <- qrismb(Z, covariate, D, t_0, Q, ne, "rq", "nonsmooth")
-fit3 <- qrismb(Z, covariate, D, t_0, Q, ne, "rq", "iterative")
+fit1 <- qrismb(Surv(Z, censored)~X, data=a, 1, Q, 200, "rq", "smooth")
+fit2 <- qrismb(Surv(Z, censored)~X, data=a, 2, Q, 200, "one", "nonsmooth")
+fit3 <- qrismb(Surv(Z, censored)~X, data=a, 3, Q, 200, "random", "iterative")
 
 data(cancer, package="survival")
 lung_rev <- lung[,c(2,3,4,5,7,8,9)]
@@ -63,15 +57,10 @@ lung_rev$sex <- as.numeric(lung$sex) - 1
 # covariate 4 : pat.karno: Karnofsky performance score as rated by patient
 # covariate 5 : meal.cal: Calories consumed at meals
 # covariate 6 : wt.loss: Weight loss in last six months (pounds)
-Z <- lung_rev$time
-covariate <- as.matrix(lung_rev[,c(3:6)])
-D <- lung_rev$status
-t_0 <- 5
-Q <- 0.5
-ne <- 200
 
-fit1 <- qrismb(Z, covariate, D, t_0, Q, ne, "rq", "smooth")
-fit2 <- qrismb(Z, covariate, D, t_0, Q, ne, "random", "nonsmooth")
+fit1 <- qrismb(Surv(time, status)~age+sex, data=lung_rev, 400, Q, 200, "rq", "smooth")
+fit2 <- qrismb(Surv(time, status)~age+sex, data=lung_rev, 500, Q, 200, "one", "nonsmooth")
+fit3 <- qrismb(Surv(time, status)~age+sex, data=lung_rev, 600, Q, 200, "random", "iterative")
 
 coef(fit1)
 coef(fit2)
