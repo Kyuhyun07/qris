@@ -26,6 +26,7 @@
 #'
 #' @export
 #' @importFrom survival Surv
+#' @importFrom survival survfit
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
 #' @example inst/examples/ex_qrismb.R
