@@ -7,7 +7,7 @@
 qrismb(
   formula,
   data,
-  t_0 = 0,
+  t0 = 0,
   Q = 0.5,
   ne = 100,
   init = "rq",
@@ -15,7 +15,7 @@ qrismb(
 )
 }
 \arguments{
-\item{t_0}{is the followup time(or basetime of analysis)}
+\item{t0}{is the followup time(or basetime of analysis)}
 
 \item{Q}{is the quantile}
 
@@ -51,69 +51,45 @@ Using two estimation methods
 2. Induced smoothing approach (smooth estimating equation)
 }
 \examples{
-#### 1. simulation data ####
-# a single binary covariate with success probability 0.5.
-# We generate failure time, T, from a Weibull distribution.
-# Potential censoring time, C, from uniform (0,c) independently from T.
-# Given condition r=rho_0, k=2, exp(beta_0)=5, exp(beta_1)=2
+library(qrismb)
 
-# 1.1 data generation function
-data.gen<-function(samplesize, censor){
-  sim=matrix(NA,samplesize,5)
-  colnames(sim) = c("T","C","Z","X","censored")
-  # Generate C_i
-  sim[,2] = runif(samplesize,0,censor)
-  # Covariates (Control=0, Treatment=1)
-  sim[,4] = rbinom(samplesize,size=1,p=0.5)
-  # Generate T_i (Given Condition r=rho_0, k=2, exp(beta_0)=5, exp(beta_1)=2))
-  unif = runif(n=samplesize ,min = 0,max = 1)
-  for (q in 1:samplesize){
-    if (sim[q,4]==0){
-      sim[q,1]={{-log(1-unif[q])}^(1/k)}/r.initial.0
-    } else {
-      sim[q,1]={{-log(1-unif[q])}^(1/k)}/r.initial.1
-    }
-  }
-  # Generate Y_i (min(T,C))
-  sim[,3] = apply(sim[,1:2], 1, FUN=min)
-  # Censoring indicator (Censored=0, Not censored=1)
-  sim[,5]=I(sim[,1]<sim[,2])
-  # Ordering
-  sim = sim[order(sim[,3]),]
-  n = nrow(sim)
-  sim = as.data.frame(sim)
-  return(sim)
+## Function to generate simulated data
+## Time is the observed survival time
+## Status is the censoring indicator
+## X is the covariate
+data.gen <- function(n) {
+    r0 <- .2 * sqrt(log(2))
+    r1 <- .1 * sqrt(log(2))
+    dat <- data.frame(censoring = runif(n, 0, 24.35),
+                      Time0 = sqrt(-log(1 - runif(n))),
+                      X = rbinom(n, 1, .5))
+    dat$Time0 <- ifelse(dat$X > 0, dat$Time0 / r1, dat$Time0 / r0)
+    dat$Time <- pmin(dat$Time0, dat$censoring)
+    dat$status <- 1 * (dat$Time0 < dat$censoring)
+    subset(dat, select = c(Time, status, X))
 }
 
-# 1.2 Given value
-exp.beta.initial.0=5
-exp.beta.initial.1=10
-k=2
-r.initial.0=(log(10/5))^(1/k)/exp.beta.initial.0
-r.initial.1=(log(10/5))^(1/k)/exp.beta.initial.1
-# c value of unif(0,c)
-c=24.35
-a<-data.gen(200,c)
+dat <- data.gen(200)
 
-fit1 <- qrismb(Surv(Z, censored)~X, data=a, 1, Q, 200, "rq", "smooth")
-fit2 <- qrismb(Surv(Z, censored)~X, data=a, 2, Q, 200, "one", "nonsmooth")
-fit3 <- qrismb(Surv(Z, censored)~X, data=a, 3, Q, 200, "random", "iterative")
+fm <- Surv(Time, status) ~ X
+(fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth"))
+(fit2 <- qrismb(fm, data = dat, t0 = 2, Q = 0.5, ne = 200, "one", "nonsmooth"))
+fit3 <- qrismb(fm, data = dat, t0 = 3, Q = 0.5, ne = 200, "random", "iterative")
 
-data(cancer, package="survival")
-lung_rev <- lung[,c(2,3,4,5,7,8,9)]
-# delta : censored = 0, death = 1
-lung_rev$status <- as.numeric(lung$status) - 1
-# covariate 1 : age (39~82)
-# covariate 2 : sex(male = 0, female = 1)
-lung_rev$sex <- as.numeric(lung$sex) - 1
-# covariate 3 : ph.karno: Karnofsky performance score (bad=0-good=100) rated by physician
-# covariate 4 : pat.karno: Karnofsky performance score as rated by patient
-# covariate 5 : meal.cal: Calories consumed at meals
-# covariate 6 : wt.loss: Weight loss in last six months (pounds)
+coef(fit1)
+coef(fit2)
 
-fit1 <- qrismb(Surv(time, status)~age+sex, data=lung_rev, 400, Q, 200, "rq", "smooth")
-fit2 <- qrismb(Surv(time, status)~age+sex, data=lung_rev, 500, Q, 200, "one", "nonsmooth")
-fit3 <- qrismb(Surv(time, status)~age+sex, data=lung_rev, 600, Q, 200, "random", "iterative")
+## Real data application
+data(cancer, package = "survival")
+lung2 <- subset(lung, select = c(time, status, age, sex))
+## tidy up the data
+lung2$status <- lung2$status - 1
+lung2$sex <- lung2$sex - 1
+
+fm <- Surv(time, status) ~ age + sex
+fit1 <- qrismb(fm, data = lung2, t0 = 400, Q = 0.5, ne = 200, "rq", "smooth")
+fit2 <- qrismb(fm, data = lung2, t0 = 500, Q = 0.5, ne = 200, "one", "nonsmooth")
+fit3 <- qrismb(fm, data = lung2, t0 = 600, Q = 0.5, ne = 200, "random", "iterative")
 
 coef(fit1)
 coef(fit2)

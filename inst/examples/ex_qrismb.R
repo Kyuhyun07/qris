@@ -19,8 +19,8 @@ data.gen <- function(n) {
 dat <- data.gen(200)
 
 fm <- Surv(Time, status) ~ X
-fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth")
-fit2 <- qrismb(fm, data = dat, t0 = 2, Q = 0.5, ne = 200, "one", "nonsmooth")
+(fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth"))
+(fit2 <- qrismb(fm, data = dat, t0 = 2, Q = 0.5, ne = 200, "one", "nonsmooth"))
 fit3 <- qrismb(fm, data = dat, t0 = 3, Q = 0.5, ne = 200, "random", "iterative")
 
 coef(fit1)

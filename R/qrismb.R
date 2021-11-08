@@ -151,12 +151,12 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
                 stop("More resampling iterations are necessary")
             } else {
                 se <- sqrt(diag(sigma))
-                out <- list(coefficient = coefficient, stderr = se)
+                out <- list(coefficient = coefficient, stderr = se, vcov = sigma)
             }
         } else {
-            coefficient <- c(NA,rep(NA,nc))
-            se <- c(NA,rep(NA,nc))
-            out <- list(coefficient=coefficient, stderr = se)
+            coefficient <- se <- rep(NA, nc + 1)
+            vcov <- matrix(NA, nc + 1, nc + 1)
+            out <- list(coefficient=coefficient, stderr = se, vcov = vcov)
         }
     } else if (method == "iterative") {
         ## method 2. : Iterative procedure with ISMB
@@ -224,7 +224,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
         new_V = cov(t(result.ismb))
         new_sigma = t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
         iter_SE_result = rbind(iter_SE_result , sqrt(diag(new_sigma)))
-        out <- list(coefficient = iter_beta_result, stderr = iter_SE_result, iterno = k+1)
+        out <- list(coefficient = iter_beta_result, stderr = iter_SE_result, vcov = new_sigma, iterno = k + 1)
     } else {
         ## method 3. : ISMB
         rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
@@ -261,13 +261,16 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
                 sigma <- t(inva) %*% v %*% inva
                 se <- sqrt(diag(sigma))
             }
-            out <- list(coefficient=coefficient, stderr = se)
+            out <- list(coefficient=coefficient, stderr = se, vcov = sigma)
         } else {
-            coefficient <- c(NA,rep(NA,nc))
-            se <- c(NA,rep(NA,nc))
-            out <- list(coefficient=coefficient, stderr = se)
+            coefficient <- se <- rep(NA, nc + 1)
+            vcov <- matrix(NA, nc + 1, nc + 1)
+            out <- list(coefficient=coefficient, stderr = se, vcov = vcov)
         }
     }
+    out$call <- scall
+    out$varNames <- colnames(covariate)
+    out <- out[order(names(out))]
     class(out) <- "qrismb"
     return(out)
 }
