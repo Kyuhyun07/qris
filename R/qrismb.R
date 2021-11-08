@@ -8,7 +8,7 @@
 #' @param nc is a number of covariates used in analysis
 #' @param covariate is a matrix of covariate (# row = # of subject, # of column = # of covariate(nc))
 #' @param D is a vector of censoring indicator (1 = not censored, 0 = censored)
-#' @param t_0 is the followup time(or basetime of analysis)
+#' @param t0 is the followup time(or basetime of analysis)
 #' @param Q is the quantile
 #' @param ne is number of multiplier bootstrapping for V matrix estimation
 #' @param init is option for initial guess of regression parameter ("random" assumes all coefficients as random numbers, "one" assumes all coefficients as 1s, otherwise a solution from rq function)
@@ -30,8 +30,8 @@
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
 #' @example inst/examples/ex_qrismb.R
-qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method="smooth"){
-    # Surv example : Surv(Time, status) ~ x1 + x2
+qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="smooth"){
+    ## Surv example : Surv(Time, status) ~ x1 + x2
     scall <- match.call()
     mnames <- c("", "formula", "data")
     cnames <- names(scall)
@@ -58,7 +58,7 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
     if(nc < 1){
         stop("Use at least one covariate")
     }
-    if(t_0<0) {
+    if(t0<0) {
         stop("basetime must be 0 and positive number")
     }
     if(length(Q) > 1) {
@@ -70,36 +70,32 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
     if(ne<=1) {
         stop("number of multiplier bootstrapping must greater than 1")
     }
-
     ## Suppress warning message
-    logZ <- suppressWarnings(log(data[,1]-t_0))
-    I <- as.numeric(data[,1]>=t_0)
+    logZ <- suppressWarnings(log(data[,1]-t0))
+    I <- as.numeric(data[,1]>=t0)
     data <- cbind(time = data[,1], logtime = logZ, I, data[,-1])
     data[is.na(data[,2]),2] <- -10
-    data[data[,2]==-Inf,2] <- -10
+    data[data[,2] == -Inf,2] <- -10
     data[n,4] <- 1
-    colnames(data)[1:4] <- c("Z", "log(Z-t_0)", "I[Z>t_0]","delta")
-    data = na.omit(data)
-    n = nrow(data)
-
+    colnames(data)[1:4] <- c("Z", "log(Z-t0)", "I[Z>t0]","delta")
+    data <- na.omit(data)
+    n <- nrow(data)
     ## Rcpp IPCW with jump weight
     sv <- survfit(Surv(data[,1], 1 - data[,4]) ~ 1)
-    if (t_0<=sv$time[1]){
-        ghatt_0 = 1
+    if (t0<=sv$time[1]){
+        ghatt0 <- 1
     } else {
-        ghatt_0 = sv$surv[min(which(sv$time>t_0))-1]
+        ghatt0 <- sv$surv[min(which(sv$time>t0))-1]
     }
-    W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)]*ghatt_0
+    W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)]*ghatt0
     W[is.na(W)] <- max(W, na.rm = TRUE)
     data[,ncol(data)+1] <- W
     colnames(data)[ncol(data)] <- c("weight")
-
-    # Covariate setting
+    ## Covariate setting
     X <- as.matrix(covariate)
     logZ <- data[,2]
     I <- data[,3]
     H <- diag(1/n, nc, nc)
-
     ## Guess beta option (rq : solution from rq, 0 : no effect of covariate, others : covariate)
     if (init == "random"){
         betastart <- rnorm(nc+1)
@@ -108,41 +104,40 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
     } else {
         betastart <- as.vector(rq.wfit(X, data[,2], tau=Q, weight=W)$coef)
     }
-
     if (method == "nonsmooth"){
-        # 1. : L1-minimization : Estimating equation for estimaing beta (using rq)
-        pseudo1 <- -apply(X*I*W,2,sum)
-        pseudo2 <- 2*apply(X*I*Q,2,sum)
+        ## 1. : L1-minimization : Estimating equation for estimaing beta (using rq)
+        pseudo1 <- -colSums(X * I * W)
+        pseudo2 <- 2 * colSums(X * I * Q)
         M <- 10^6
-        Y.reg <- c(data[,2],M,M)
-        X.reg <- rbind(X,rbind(pseudo1,pseudo2))
-        W.reg <- c(I*W,1,1)
-        Li.fit <- rq.wfit(X.reg,Y.reg,weights=W.reg)
+        Y.reg <- c(data[,2], M, M)
+        X.reg <- rbind(X, rbind(pseudo1, pseudo2))
+        W.reg <- c(I*W, 1, 1)
+        Li.fit <- rq.wfit(X.reg, Y.reg, weights = W.reg)
         coefficient <- as.vector(Li.fit$coefficients)
         ## Full multiplier bootstrap
         fb_result <- c()
         ## if (Li.fit$code == 1 | Li.fit$code == 2){
-        if (all(Li.fit$coefficients<=10)){
+        if (all(Li.fit$coefficients <= 10)){
             for (j in 1:ne){
-                # generating perturbation variable
+                ## generating perturbation variable
                 eta <- rexp(n,1)
                 if (all(data[,4]==rep(1,n))){
                     W_star <- rep(1,n)
                 } else {
                     Gest <- ghat(data[,1],1-data[,4],eta)
-                    if (t_0<=Gest$deathtime[1]){
-                        ghatstart_0 = 1
+                    if (t0<=Gest$deathtime[1]){
+                        ghatstart0 = 1
                     } else {
-                        ghatstart_0 = Gest$survp[min(which(Gest$deathtime>t_0))-1]
+                        ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
                     }
-                    W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)]*ghatstart_0
+                    W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
                 }
-                rev_pseudo1 <- -apply(X*I*W_star*eta,2,sum)
-                rev_pseudo2 <- 2*apply(X*I*eta*Q,2,sum)
+                rev_pseudo1 <- -colSums(X * I * W_star * eta)
+                rev_pseudo2 <- 2 * colSums(X * I * eta * Q)
                 M <- 10^6
                 rev_Y.reg <- c(data[,2],M,M)
-                rev_X.reg <- rbind(X,rbind(rev_pseudo1,rev_pseudo2))
+                rev_X.reg <- rbind(X,rbind(rev_pseudo1, rev_pseudo2))
                 rev_W.reg <- c(W_star*I*eta,1,1)
                 full_boot <- rq.wfit(rev_X.reg,rev_Y.reg,weights=rev_W.reg)
                 if (all(full_boot$coef<=10)){
@@ -152,46 +147,45 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
                 }
             }
             sigma <- try(cov(t(fb_result), use="complete.obs"), silent = T)
-            if(class(sigma)[1] == "try-error"|sum(!is.na(apply(fb_result,2,sum)))<=1){
+            if(class(sigma)[1] == "try-error" | sum(!is.na(colSums(fb_result))) <= 1){
                 stop("More resampling iterations are necessary")
             } else {
                 se <- sqrt(diag(sigma))
-                list(coefficient = coefficient, stderr = se)
+                out <- list(coefficient = coefficient, stderr = se)
             }
         } else {
             coefficient <- c(NA,rep(NA,nc))
             se <- c(NA,rep(NA,nc))
-            list(coefficient=coefficient, stderr = se)
+            out <- list(coefficient=coefficient, stderr = se)
         }
     } else if (method == "iterative") {
-        # method 2. : Iterative procedure with ISMB
+        ## method 2. : Iterative procedure with ISMB
         iter_beta_result <- old_beta <- new_beta <- betastart
         new_sigma <- old_sigma <- H
         iter_SE_result <- sqrt(diag(old_sigma))
-
         for (k in 1:10){
             number_iter <- k
             old_beta <- new_beta
             old_sigma <- new_sigma
             slope_a <- Amat(old_beta, X, W, old_sigma, I, logZ, Q)
-            # Step 1 : Update beta()
+            ## Step 1 : Update beta()
             new_beta <- old_beta - qr.solve(slope_a) %*% isObj(old_beta, X, W, H, I, logZ, Q)
             iter_beta_result <- rbind(iter_beta_result, t(new_beta))
-            # Step 2 : Update Sigma()
+            ## Step 2 : Update Sigma()
             result.ismb <- c()
             for (j in 1:ne){
-                # generating perturbation variable
+                ## generating perturbation variable
                 eta = rexp(n,1)
                 if (all(data[,4]==rep(1,n))){
                     W_star <- rep(1,n)
                 } else {
                     Gest <- ghat(data[,1],1-data[,4],eta)
-                    if (t_0<=Gest$deathtime[1]){
-                        ghatstart_0 = 1
+                    if (t0<=Gest$deathtime[1]){
+                        ghatstart0 = 1
                     } else {
-                        ghatstart_0 = Gest$survp[min(which(Gest$deathtime>t_0))-1]
+                        ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
                     }
-                    W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)]*ghatstart_0
+                    W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)]*ghatstart0
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
                 }
                 result <- rev_isObj(old_beta, X, W_star, H, eta, I, logZ, Q)
@@ -202,7 +196,7 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
             iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
             if(norm(new_beta-old_beta, "F")<1e-6) break
         }
-        # Last iteration
+        ## Last iteration
         old_beta <- new_beta
         old_sigma <- new_sigma
         slope_a <- Amat(old_beta, X, W, old_sigma, I, logZ, Q)
@@ -210,18 +204,18 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
         iter_beta_result <- rbind(iter_beta_result, t(new_beta))
         result.ismb <- c()
         for (j in 1:ne){
-            # generating perturbation variable
+            ## generating perturbation variable
             eta <- rexp(n,1)
             if (all(data[,4]==rep(1,n))){
                 W_star <- rep(1,n)
             } else {
                 Gest <- ghat(data[,1],1-data[,4],eta)
-                if (t_0<=Gest$deathtime[1]){
-                    ghatstart_0 = 1
+                if (t0<=Gest$deathtime[1]){
+                    ghatstart0 = 1
                 } else {
-                    ghatstart_0 = Gest$survp[min(which(Gest$deathtime>t_0))-1]
+                    ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
                 }
-                W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)]*ghatstart_0
+                W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)]*ghatstart0
                 W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
             result <- rev_isObj(old_beta, X, W_star, H, eta, I, logZ, Q)
@@ -230,9 +224,9 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
         new_V = cov(t(result.ismb))
         new_sigma = t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
         iter_SE_result = rbind(iter_SE_result , sqrt(diag(new_sigma)))
-        list(coefficient=iter_beta_result, stderr = iter_SE_result, iterno = k+1)
+        out <- list(coefficient = iter_beta_result, stderr = iter_SE_result, iterno = k+1)
     } else {
-        # method 3. : ISMB
+        ## method 3. : ISMB
         rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
         if (rcpp.fit$termcd == 1 | rcpp.fit$termcd == 2){
             coefficient <- rcpp.fit$x
@@ -245,12 +239,13 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
                     W_star <- rep(1,n)
                 } else {
                     Gest <- ghat(data[,1],1-data[,4],eta)
-                    if (t_0<=Gest$deathtime[1]){
-                        ghatstart_0 = 1
+                    if (t0<=Gest$deathtime[1]){
+                        ghatstart0 = 1
                     } else {
-                        ghatstart_0 = Gest$survp[min(which(Gest$deathtime>t_0))-1]
+                        ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
                     }
-                    W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)]*ghatstart_0
+                    W_star <- data[,4] /
+                        Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
                 }
                 result <- rev_isObj(coefficient, X, W_star, H, eta, I, logZ, Q)
@@ -266,13 +261,15 @@ qrismb <- function(formula, data, t_0 = 0, Q = 0.5, ne = 100, init="rq", method=
                 sigma <- t(inva) %*% v %*% inva
                 se <- sqrt(diag(sigma))
             }
-            list(coefficient=coefficient, stderr = se)
+            out <- list(coefficient=coefficient, stderr = se)
         } else {
             coefficient <- c(NA,rep(NA,nc))
             se <- c(NA,rep(NA,nc))
-            list(coefficient=coefficient, stderr = se)
+            out <- list(coefficient=coefficient, stderr = se)
         }
     }
+    class(out) <- "qrismb"
+    return(out)
 }
 
 #' Estimate Kaplan Meier estimate of the survival function of the censoring time C
@@ -303,4 +300,5 @@ ghat <- function(T,censor,wgt=1){
     }
     prodobj <- 1-ndeath/nrisk
     for(i in 1:length(deathtime)){survp[i] <- prod(prodobj[1:i])}
-    return(data.frame(cbind(deathtime,ndeath,nrisk,survp)))}
+    return(data.frame(cbind(deathtime,ndeath,nrisk,survp)))
+}
