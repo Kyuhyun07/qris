@@ -55,7 +55,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
     covariate <- as.matrix(data[,-(1:2), drop = FALSE])
     nc <- ncol(covariate)
     n <- nrow(covariate)
-    if(nc < 1){
+    if(nc < 2){
         stop("Use at least one covariate")
     }
     if(t0<0) {
@@ -93,17 +93,19 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
     colnames(data)[ncol(data)] <- c("weight")
     ## Covariate setting
     X <- as.matrix(covariate)
+    #X <- as.matrix(cbind(c(rep(1,n)),covariate))
     logZ <- data[,2]
     I <- data[,3]
     H <- diag(1/n, nc, nc)
     ## Guess beta option (rq : solution from rq, 0 : no effect of covariate, others : covariate)
     if (init == "random"){
-        betastart <- rnorm(nc+1)
+        betastart <- abs(rnorm(nc))
     } else if (init == "one"){
-        betastart <- c(1,rep(0,nc))
+        betastart <- c(1,rep(0,nc-1))
     } else {
         betastart <- as.vector(rq.wfit(X, data[,2], tau=Q, weight=W)$coef)
     }
+
     if (method == "nonsmooth"){
         ## 1. : L1-minimization : Estimating equation for estimaing beta (using rq)
         pseudo1 <- -colSums(X * I * W)
@@ -126,9 +128,9 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
                 } else {
                     Gest <- ghat(data[,1],1-data[,4],eta)
                     if (t0<=Gest$deathtime[1]){
-                        ghatstart0 = 1
+                        ghatstart0 <- 1
                     } else {
-                        ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
+                        ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
                     }
                     W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
@@ -154,55 +156,62 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
                 out <- list(coefficient = coefficient, stderr = se, vcov = sigma)
             }
         } else {
-            coefficient <- se <- rep(NA, nc + 1)
-            vcov <- matrix(NA, nc + 1, nc + 1)
-            out <- list(coefficient=coefficient, stderr = se, vcov = vcov)
+            coefficient <- se <- rep(NA, nc)
+            vcov <- matrix(NA, nc, nc)
+            out <- list(coefficient = coefficient, stderr = se, vcov = vcov)
         }
     } else if (method == "iterative") {
         ## method 2. : Iterative procedure with ISMB
         iter_beta_result <- old_beta <- new_beta <- betastart
-        new_sigma <- old_sigma <- H
-        iter_SE_result <- sqrt(diag(old_sigma))
+        new_sigma <- old_sigma <- diag(1, nc, nc)
+        new_h <- old_h <- H
+        iter_SE_result <- sqrt(diag(new_h))
+        iter_norm_result <- c()
         for (k in 1:10){
-            number_iter <- k
             old_beta <- new_beta
             old_sigma <- new_sigma
-            slope_a <- Amat(old_beta, X, W, old_sigma, I, logZ, Q)
+            old_h <- new_h
+            slope_olda <- Amat(old_beta, X, W, old_h, I, logZ, Q)
             ## Step 1 : Update beta()
-            new_beta <- old_beta - qr.solve(slope_a) %*% isObj(old_beta, X, W, H, I, logZ, Q)
+            new_beta <- old_beta - qr.solve(slope_olda) %*% (isObj(old_beta, X, W, old_sigma, I, logZ, Q)/n)
             iter_beta_result <- rbind(iter_beta_result, t(new_beta))
             ## Step 2 : Update Sigma()
             result.ismb <- c()
             for (j in 1:ne){
                 ## generating perturbation variable
-                eta = rexp(n,1)
+                eta <- rexp(n,1)
                 if (all(data[,4]==rep(1,n))){
                     W_star <- rep(1,n)
                 } else {
                     Gest <- ghat(data[,1],1-data[,4],eta)
                     if (t0<=Gest$deathtime[1]){
-                        ghatstart0 = 1
+                        ghatstart0 <- 1
                     } else {
-                        ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
+                        ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
                     }
                     W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)]*ghatstart0
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
                 }
-                result <- rev_isObj(old_beta, X, W_star, H, eta, I, logZ, Q)
+                result <- rev_isObj(new_beta, X, W_star, old_h, eta, I, logZ, Q)
                 result.ismb <- cbind(result.ismb,result)
             }
             new_V <- cov(t(result.ismb))
-            new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
+            slope_newa <- Amat(new_beta, X, W, old_h, I, logZ, Q)
+            new_sigma <- t(qr.solve(slope_newa)) %*% new_V %*% qr.solve(slope_newa)
+            new_h <- new_sigma
             iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-            if(norm(new_beta-old_beta, "F")<1e-6) break
+            iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+            if(norm(new_beta-old_beta, "F")<1e-4) break
         }
         ## Last iteration
         old_beta <- new_beta
         old_sigma <- new_sigma
-        slope_a <- Amat(old_beta, X, W, old_sigma, I, logZ, Q)
-        new_beta <- old_beta - qr.solve(slope_a) %*% isObj(old_beta, X, W, H, I, logZ, Q)
+        old_h <- new_h
+        slope_olda <- Amat(old_beta, X, W, old_h, I, logZ, Q)
+        new_beta <- old_beta - qr.solve(slope_olda) %*% (isObj(old_beta, X, W, old_sigma, I, logZ, Q)/n)
         iter_beta_result <- rbind(iter_beta_result, t(new_beta))
         result.ismb <- c()
+
         for (j in 1:ne){
             ## generating perturbation variable
             eta <- rexp(n,1)
@@ -211,20 +220,23 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
             } else {
                 Gest <- ghat(data[,1],1-data[,4],eta)
                 if (t0<=Gest$deathtime[1]){
-                    ghatstart0 = 1
+                    ghatstart0 <- 1
                 } else {
-                    ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
+                    ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
                 }
-                W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)]*ghatstart0
+                W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)]*ghatstart0
                 W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
-            result <- rev_isObj(old_beta, X, W_star, H, eta, I, logZ, Q)
-            result.ismb = cbind(result.ismb,result)
+            result <- rev_isObj(new_beta, X, W_star, old_h, eta, I, logZ, Q)
+            result.ismb <- cbind(result.ismb,result)
         }
-        new_V = cov(t(result.ismb))
-        new_sigma = t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
-        iter_SE_result = rbind(iter_SE_result , sqrt(diag(new_sigma)))
-        out <- list(coefficient = iter_beta_result, stderr = iter_SE_result, vcov = new_sigma, iterno = k + 1)
+        new_V <- cov(t(result.ismb))
+        slope_newa <- Amat(new_beta, X, W, old_h, I, logZ, Q)
+        new_sigma <- t(qr.solve(slope_newa)) %*% new_V %*% qr.solve(slope_newa)
+        new_h <- new_sigma
+        iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
+        iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+        out <- list(coefficient = iter_beta_result, stderr = iter_SE_result, vcov = new_sigma, iterno = k + 1, norm = iter_norm_result)
     } else {
         ## method 3. : ISMB
         rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
@@ -240,19 +252,19 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
                 } else {
                     Gest <- ghat(data[,1],1-data[,4],eta)
                     if (t0<=Gest$deathtime[1]){
-                        ghatstart0 = 1
+                        ghatstart0 <- 1
                     } else {
-                        ghatstart0 = Gest$survp[min(which(Gest$deathtime>t0))-1]
+                        ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
                     }
                     W_star <- data[,4] /
                         Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
                     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
                 }
-                result <- rev_isObj(coefficient, X, W_star, H, eta, I, logZ, Q)
+                result <- rev_isObj(coefficient, X, W_star, H, eta, I, logZ, Q)/n
                 rcpp.result.ismb <- cbind(rcpp.result.ismb,result)
             }
             v <- cov(t(rcpp.result.ismb))
-            rcpp.a <- Amat(coefficient, X, W, H, I, logZ, Q)
+            rcpp.a <- Amat(coefficient, X, W, H, I, logZ, Q)/n
             inva <- try(solve(rcpp.a))
             if(class(inva)[1] == "try-error"){
                 se <- rep(NA,nc+1)
@@ -263,8 +275,8 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
             }
             out <- list(coefficient=coefficient, stderr = se, vcov = sigma)
         } else {
-            coefficient <- se <- rep(NA, nc + 1)
-            vcov <- matrix(NA, nc + 1, nc + 1)
+            coefficient <- se <- rep(NA, nc)
+            vcov <- matrix(NA, nc, nc)
             out <- list(coefficient=coefficient, stderr = se, vcov = vcov)
         }
     }
