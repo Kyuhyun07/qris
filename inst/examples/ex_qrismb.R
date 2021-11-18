@@ -26,6 +26,14 @@ fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "random", "iterative")
 coef(fit1)
 coef(fit2)
 
+vcov(fit1)
+vcov(fit2)
+
+summary(fit1)
+summary(fit2)
+
+summary(fit3)
+
 ## Real data application
 data(cancer, package = "survival")
 lung2 <- subset(lung, select = c(time, status, age, sex))

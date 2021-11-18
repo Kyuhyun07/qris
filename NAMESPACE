@@ -2,10 +2,12 @@
 
 S3method(coef,qrismb)
 S3method(print,qrismb)
+S3method(print,summary.qrismb)
+S3method(summary,qrismb)
+S3method(vcov,qrismb)
 export(Surv)
 export(ghat)
 export(qrismb)
-export(survfit)
 importFrom(nleqslv,nleqslv)
 importFrom(quantreg,rq.wfit)
 importFrom(survival,Surv)

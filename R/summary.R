@@ -5,6 +5,13 @@ coef.qrismb <- function(x, ...) {
     coef
 }
 
+#' @exportS3Method vcov qrismb
+vcov.qrismb <- function(x, ...) {
+    vcov <- x$vcov
+    colnames(vcov) <- rownames(vcov) <- x$varNames
+    vcov
+}
+
 #' @exportS3Method print qrismb
 print.qrismb <- function(x, ...) {
     cat("Call: \n")
@@ -36,7 +43,7 @@ summary.qrismb <- function(x, ...) {
     out
 }
 
-#' @exportS3Method print summary qrismb
+#' @exportS3Method print summary.qrismb
 print.summary.qrismb <- function(x, ...){
     cat("Call:\n")
     print(x$call)
