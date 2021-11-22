@@ -72,12 +72,20 @@ data.gen <- function(n) {
 dat <- data.gen(200)
 
 fm <- Surv(Time, status) ~ X
-(fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth"))
-(fit2 <- qrismb(fm, data = dat, t0 = 2, Q = 0.5, ne = 200, "one", "nonsmooth"))
-fit3 <- qrismb(fm, data = dat, t0 = 3, Q = 0.5, ne = 200, "random", "iterative")
+fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth")
+fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "one", "nonsmooth")
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "random", "iterative")
 
 coef(fit1)
 coef(fit2)
+
+vcov(fit1)
+vcov(fit2)
+
+summary(fit1)
+summary(fit2)
+
+summary(fit3)
 
 ## Real data application
 data(cancer, package = "survival")
@@ -87,9 +95,9 @@ lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
-fit1 <- qrismb(fm, data = lung2, t0 = 400, Q = 0.5, ne = 200, "rq", "smooth")
-fit2 <- qrismb(fm, data = lung2, t0 = 500, Q = 0.5, ne = 200, "one", "nonsmooth")
-fit3 <- qrismb(fm, data = lung2, t0 = 600, Q = 0.5, ne = 200, "random", "iterative")
+fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "rq", "smooth")
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "rq", "nonsmooth")
+fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, "rq", "iterative")
 
 coef(fit1)
 coef(fit2)
