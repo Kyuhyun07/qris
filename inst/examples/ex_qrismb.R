@@ -24,7 +24,7 @@ fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "one", "nonsmooth")
 fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "random", "iterative")
 
 coef(fit1)
-coef(fit2)
+summary(fit2)
 
 ## Real data application
 data(cancer, package = "survival")
@@ -34,9 +34,9 @@ lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
-fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "rq", "smooth")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "rq", "nonsmooth")
+fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "random", "smooth")
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "one", "nonsmooth")
 fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, "rq", "iterative")
 
 coef(fit1)
-coef(fit2)
+summary(fit2)

@@ -1,13 +1,19 @@
 Package: qrismb
 Type: Package
-Title: Quantile regression using induced smoothing approach
-Version: 0.1.0
+Title: Quantile regression model for residual lifetime using induced smoothing approach
+Version: 1.0.0
 Date: 2021-09-28
-Authors@R: person("Kyu Hyun", "Kim", role = c("aut", "cre"), email = "kyuhyunkim07@yonsei.ac.kr")
-Description: This package includes functions to estimate quantile regression estimator using induced smoothing approach. Furthermore, it provides standard error of estimator based on multiplier bootstrap method.
-License: What license is it under?
+Authors@R: c(person("Kyu Hyun", "Kim", email = "kyuhyunkim07@yonsei.ac.kr", role = c("aut", "cre")), 
+	   person("Sangwook", "Kang", role = "aut"),
+	   person("Sy Han", "Chiou", role = c"aut"))
+Description: This package includes functions to estimate quantiles regression estimator of residual lifetime or failure time. It provides various options to estimate: the quantile regression estimator using induced smoothing approach(smooth), L1-minimization (non-smooth), and iterative procedure (iterative). Furthermore, it implements the methodology to estimate standard error of estimator based on efficient partial multiplier bootstrap method and robust sandwich estimator.
+Depends: R (>= 3.6.1)
+License: GPL (>= 3)
+URL: https://https://github.com/Kyuhyun07/qrismb
 Encoding: UTF-8
+LazyData: true
 RoxygenNote: 7.1.2
+NeedsCompilation: yes
 Imports: 
     nleqslv,
     quantreg,
@@ -16,4 +22,5 @@ Imports:
     scales,
     survival
 LinkingTo: 
-    Rcpp, RcppArmadillo
+    Rcpp, 
+    RcppArmadillo

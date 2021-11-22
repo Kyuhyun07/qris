@@ -201,7 +201,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
             new_h <- new_sigma
             iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
             iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
-            if(norm(new_beta-old_beta, "F")<1e-4) break
+            if(norm(new_beta-old_beta, "i")<1e-4) break
         }
         ## Last iteration
         old_beta <- new_beta
@@ -236,7 +236,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100, init="rq", method="
         new_h <- new_sigma
         iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
         iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
-        out <- list(coefficient = iter_beta_result, stderr = iter_SE_result, vcov = new_sigma, iterno = k + 1, norm = iter_norm_result)
+        out <- list(coefficient = tail(iter_beta_result,n=1), coefficient_result= iter_beta_result, stderr = tail(iter_SE_result,n=1), stderr_result = iter_SE_result, vcov = new_sigma, iterno = k + 1, norm = iter_norm_result)
     } else {
         ## method 3. : ISMB
         rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
