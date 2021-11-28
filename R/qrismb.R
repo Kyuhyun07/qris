@@ -28,6 +28,7 @@
 #' @importFrom survival Surv  survfit
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
+#' @importFrom stats pnorm rnorm
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                    init = c("rq", "one", "random"), 
@@ -87,7 +88,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   ## Defind initial value
   betastart <- abs(rnorm(nc))
   if (init == "one") betastart <- c(1, rep(0,nc-1))
-  if (init == "qr") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weight = W)$coef)
+  if (init == "qr") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
   ## collect all useful information
   info <- list(X = X, I = I, W = W, Q = Q, ne = ne, nc = nc, n = n, H = H, t0 = t0,
                logZ = logZ, data = data, betastart = betastart)
@@ -104,7 +105,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
 #' ghat
 #'
 #' @param Time is a vector of observed time, which is minimum of failure time and censored time
-#' @param event is a vector of censoring indicator (not censored = 1, censored = 0)
+#' @param censor is a vector of censoring indicator (not censored = 1, censored = 0)
 #' @param wgt is a vector of weight
 #'
 #'@return An object of class "\code{ghat}" estimate KM estimator of survival function of
@@ -116,7 +117,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
 #'   \item{survp}{a vector of survival probability at deathtime}
 #'   }
 #' @export
-ghat <- function(Time, censor, wgt) {
+ghat <- function(Time, censor, wgt = 1) {
   deathtime <- c(0, sort(unique(Time[censor > 0])))
   ndeath <- colSums(outer(Time, deathtime, "==") * censor * wgt)
   nrisk <- colSums(outer(Time, deathtime, ">=") * wgt)

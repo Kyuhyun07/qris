@@ -41,3 +41,4 @@ fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, "rq", "iterative")
 summary(fit1)
 summary(fit2)
 summary(fit3)
+

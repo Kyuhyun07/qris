@@ -71,12 +71,6 @@ fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth")
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "one", "nonsmooth")
 fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "random", "iterative")
 
-coef(fit1)
-summary(fit2)
-
-vcov(fit1)
-vcov(fit2)
-
 summary(fit1)
 summary(fit2)
 summary(fit3)
@@ -95,6 +89,8 @@ fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "random", "smooth")
 fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "one", "nonsmooth")
 fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, "rq", "iterative")
 
-coef(fit1)
+summary(fit1)
 summary(fit2)
+summary(fit3)
+
 }

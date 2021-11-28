@@ -5,14 +5,14 @@
 \title{Estimate Kaplan-Meier estimate of the survival function of the censoring time C
 ghat}
 \usage{
-ghat(Time, censor, wgt)
+ghat(Time, censor, wgt = 1)
 }
 \arguments{
 \item{Time}{is a vector of observed time, which is minimum of failure time and censored time}
 
-\item{wgt}{is a vector of weight}
+\item{censor}{is a vector of censoring indicator (not censored = 1, censored = 0)}
 
-\item{event}{is a vector of censoring indicator (not censored = 1, censored = 0)}
+\item{wgt}{is a vector of weight}
 }
 \value{
 An object of class "\code{ghat}" estimate KM estimator of survival function of
