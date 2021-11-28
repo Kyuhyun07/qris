@@ -2,13 +2,13 @@
 % Please edit documentation in R/qrismb.R
 \name{ghat}
 \alias{ghat}
-\title{Estimate Kaplan Meier estimate of the survival function of the censoring time C
+\title{Estimate Kaplan-Meier estimate of the survival function of the censoring time C
 ghat}
 \usage{
-ghat(T, censor, wgt = 1)
+ghat(Time, censor, wgt)
 }
 \arguments{
-\item{T}{is a vector of observed time, which is minimum of failure time and censored time}
+\item{Time}{is a vector of observed time, which is minimum of failure time and censored time}
 
 \item{wgt}{is a vector of weight}
 
@@ -25,6 +25,6 @@ The \code{ghat} object is a list containing at least the following components:
   }
 }
 \description{
-Estimate Kaplan Meier estimate of the survival function of the censoring time C
+Estimate Kaplan-Meier estimate of the survival function of the censoring time C
 ghat
 }

@@ -10,8 +10,8 @@ qrismb(
   t0 = 0,
   Q = 0.5,
   ne = 100,
-  init = "rq",
-  method = "smooth"
+  init = c("rq", "one", "random"),
+  method = c("smooth", "iterative", "nonsmooth")
 )
 }
 \arguments{
@@ -49,12 +49,9 @@ Using three estimation methods
 3. Iterative procedure with induced smoothing approach (smooth estimating equation)
 }
 \examples{
-library(qrismb)
-
-## Function to generate simulated data
-## Time is the observed survival time
-## Status is the censoring indicator
-## X is the covariate
+## #########################################
+## Simulated data
+## #########################################
 data.gen <- function(n) {
     r0 <- .2 * sqrt(log(2))
     r1 <- .1 * sqrt(log(2))
@@ -82,10 +79,11 @@ vcov(fit2)
 
 summary(fit1)
 summary(fit2)
-
 summary(fit3)
 
+## #########################################
 ## Real data application
+## #########################################
 data(cancer, package = "survival")
 lung2 <- subset(lung, select = c(time, status, age, sex))
 ## tidy up the data
