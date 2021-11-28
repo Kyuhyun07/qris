@@ -14,10 +14,10 @@ vcov.qrismb <- function(object, ...) {
 }
 
 #' @exportS3Method print qrismb
-print.qrismb <- function(object, ...) {
+print.qrismb <- function(x, ...) {
   cat("Call: \n")
-  dput(object$call)
-  mat <- rbind(object$varNames, format(object$coefficient, digits = 5))
+  dput(x$call)
+  mat <- rbind(x$varNames, format(x$coefficient, digits = 5))
   prmatrix(mat, rowlab = rep("", nrow(mat)),
            collab = rep("", ncol(mat)), quote = FALSE)
 }
@@ -43,11 +43,11 @@ summary.qrismb <- function(object, ...) {
 }
 
 #' @exportS3Method print summary.qrismb
-print.summary.qrismb <- function(object, ...){
+print.summary.qrismb <- function(x, ...){
   cat("Call:\n")
-  print(object$call)
+  print(x$call)
   cat("\n")
   cat("qrismb Estimator")
   cat("\n")
-  printCoefmat(as.matrix(object$coefficients), P.values = TRUE, has.Pvalue = TRUE)
+  printCoefmat(as.matrix(x$coefficients), P.values = TRUE, has.Pvalue = TRUE)
 }
