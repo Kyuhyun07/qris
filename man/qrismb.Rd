@@ -15,29 +15,26 @@ qrismb(
 )
 }
 \arguments{
+\item{formula}{a formula expression, of the form \code{response ~ predictors}.
+The \code{response} is a \code{Surv} object with right censoring.}
+
+\item{data}{an optional data.frame in which to interpret the variables occurring in the \code{formula}.}
+
 \item{t0}{is the followup time(or basetime of analysis)}
 
 \item{Q}{is the quantile}
 
 \item{ne}{is number of multiplier bootstrapping for V matrix estimation}
 
-\item{init}{is option for initial guess of regression parameter ("random" assumes all coefficients as random numbers, "one" assumes all coefficients as 1s, otherwise a solution from rq function)}
+\item{init}{is an option for specifying the initial values of the parameters estimates ("rq" is default in which the estimates from the non-smooth counterpart is specified and "one" specifies all values to be 1s)}
 
-\item{method}{is option how to estimate coefficient and standard error of it
-("nonsmooth" uses non-smooth estimating equation : L1-minimization method in coefficient estimation, and full multiplier bootstrap in standard error estimation.
-"smooth" uses induced smoothed estimating equation : nonlinear equation solver in coefficient estimation and partial multiplier bootstrap in standard error estimation
-"iterative" uses induced smoothed estmating eqution and iterative calculation updating coefficient and SE).}
-
-\item{Z}{is a vector of observed time, which is minimum of failure time and censored time}
-
-\item{nc}{is a number of covariates used in analysis}
-
-\item{covariate}{is a matrix of covariate (# row = # of subject, # of column = # of covariate(nc))}
-
-\item{D}{is a vector of censoring indicator (1 = not censored, 0 = censored)}
+\item{is}{an option for specifying the methods of parameters and and standard errors estimation
+("smooth" is default in which parameters estimates and their standard errors ore obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
+  "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
+  "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)}
 }
 \value{
-An object of class "\code{qrismb}" representing the fit.
+An object of class "\code{qrismb}" contains model fitting results.
 The \code{qrismb} object is a list containing at least the following components:
 \describe{
   \item{coefficient}{a vector of point estimates}
@@ -46,9 +43,10 @@ The \code{qrismb} object is a list containing at least the following components:
   }
 }
 \description{
-Using two estimation methods
+Using three estimation methods
 1. L1-minimization(non-smooth estimating equation)
 2. Induced smoothing approach (smooth estimating equation)
+3. Iterative procedure with induced smoothing approach (smooth estimating equation)
 }
 \examples{
 library(qrismb)
@@ -77,7 +75,7 @@ fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "one", "nonsmooth")
 fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "random", "iterative")
 
 coef(fit1)
-coef(fit2)
+summary(fit2)
 
 vcov(fit1)
 vcov(fit2)
@@ -95,10 +93,10 @@ lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
-fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "rq", "smooth")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "rq", "nonsmooth")
+fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "random", "smooth")
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "one", "nonsmooth")
 fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, "rq", "iterative")
 
 coef(fit1)
-coef(fit2)
+summary(fit2)
 }

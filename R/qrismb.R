@@ -1,22 +1,22 @@
 #' Estimate a quantile regression estimator of residual lifetime from survival data
 #'
-#' Using two estimation methods
+#' Using three estimation methods
 #' 1. L1-minimization(non-smooth estimating equation)
 #' 2. Induced smoothing approach (smooth estimating equation)
+#' 3. Iterative procedure with induced smoothing approach (smooth estimating equation)
 #'
-#' @param Z is a vector of observed time, which is minimum of failure time and censored time
-#' @param nc is a number of covariates used in analysis
-#' @param covariate is a matrix of covariate (# row = # of subject, # of column = # of covariate(nc))
-#' @param D is a vector of censoring indicator (1 = not censored, 0 = censored)
+#' @param formula  a formula expression, of the form \code{response ~ predictors}.
+#'     The \code{response} is a \code{Surv} object with right censoring.
+#' @param data an optional data.frame in which to interpret the variables occurring in the \code{formula}.
 #' @param t0 is the followup time(or basetime of analysis)
 #' @param Q is the quantile
 #' @param ne is number of multiplier bootstrapping for V matrix estimation
-#' @param init is option for initial guess of regression parameter ("random" assumes all coefficients as random numbers, "one" assumes all coefficients as 1s, otherwise a solution from rq function)
-#' @param method is option how to estimate coefficient and standard error of it
-#' ("nonsmooth" uses non-smooth estimating equation : L1-minimization method in coefficient estimation, and full multiplier bootstrap in standard error estimation.
-#' "smooth" uses induced smoothed estimating equation : nonlinear equation solver in coefficient estimation and partial multiplier bootstrap in standard error estimation
-#' "iterative" uses induced smoothed estmating eqution and iterative calculation updating coefficient and SE).
-#' @return An object of class "\code{qrismb}" representing the fit.
+#' @param init is an option for specifying the initial values of the parameters estimates ("rq" is default in which the estimates from the non-smooth counterpart is specified and "one" specifies all values to be 1s)
+#' @param is an option for specifying the methods of parameters and and standard errors estimation
+#'("smooth" is default in which parameters estimates and their standard errors ore obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
+#'   "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
+#'   "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)
+#' @return An object of class "\code{qrismb}" contains model fitting results.
 #' The \code{qrismb} object is a list containing at least the following components:
 #' \describe{
 #'   \item{coefficient}{a vector of point estimates}

@@ -9,7 +9,20 @@
 \description{
 The package offers ...
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://https://github.com/Kyuhyun07/qrismb}
+}
+
+}
 \author{
 \strong{Maintainer}: Kyu Hyun Kim \email{kyuhyunkim07@yonsei.ac.kr}
+
+Authors:
+\itemize{
+  \item Sangwook Kang
+  \item Sy Han Chiou
+}
 
 }

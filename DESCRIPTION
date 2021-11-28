@@ -5,7 +5,7 @@ Version: 1.0.0
 Date: 2021-09-28
 Authors@R: c(person("Kyu Hyun", "Kim", email = "kyuhyunkim07@yonsei.ac.kr", role = c("aut", "cre")), 
 	   person("Sangwook", "Kang", role = "aut"),
-	   person("Sy Han", "Chiou", role = c"aut"))
+	   person("Sy Han", "Chiou", role = "aut"))
 Description: This package includes functions to estimate quantiles regression estimator of residual lifetime or failure time. It provides various options to estimate: the quantile regression estimator using induced smoothing approach(smooth), L1-minimization (non-smooth), and iterative procedure (iterative). Furthermore, it implements the methodology to estimate standard error of estimator based on efficient partial multiplier bootstrap method and robust sandwich estimator.
 Depends: R (>= 3.6.1)
 License: GPL (>= 3)
