@@ -12,7 +12,7 @@ knitr::opts_chunk$set(comment = NA, prompt = TRUE, collapse = TRUE)
 <!-- badges: start -->
 <!-- badges: end -->
 
-The __qrismb__ package implements a regression modeling of the quantiles of residual life, remaining lifetime at a specific time. For estimation of regression parameters, we applies an induced smoothed version of the existing non-smooth estimating equations approaches, and also uses L1-minimization approach as well. Furthermore, iterative procedure is implemented. For estimation of regression parameter, "smooth" method uses a robust sandwich-type covariance estimator of regression estimators with resampling method, and "nonsmooth" method uses full multiplier bootstrap approach. To handle data subject to right censoring, inverse probabilities of censoring are incorporated as weights. 
+The __qrismb__ package implements estimation procedures for a regression model of the quantiles of residual life, remaining lifetime at a specific time, subject to right censoring. For estimation of regression parameters, we consider an induced smoothed method that solves smoothed weighted estimating equations. We also consider the estimation method that solves the original non-smooth weighted estimating equations via a L1 minimization method. To handle data subject to right censoring, inverse probabilities of censoring are incorporated as weights. For standard errors estimation, a robust sandwich-type covariance estimator aided by an efficient resampling method, and a full multiplier bootstrap approach are considered for the induced smoothed estimator (“smooth”) and non-smooth estimator (“nonsmooth”), respectively. Furthermore, an iterative procedure that simultaneously estimates regression parameters and their standard errors is implemented.
 
 
 ## Installation
@@ -30,24 +30,25 @@ There are two examples
 
 ```{r example}
 data.gen <- function(n) {
-  r0 <- .2 * sqrt(log(2))
-  r1 <- .1 * sqrt(log(2))
-  dat <- data.frame(censoring = runif(n, 0, 24.35),
-                    Time0 = sqrt(-log(1 - runif(n))),
-                    X = rbinom(n, 1, .5))
-  dat$Time0 <- ifelse(dat$X > 0, dat$Time0 / r1, dat$Time0 / r0)
-  dat$Time <- pmin(dat$Time0, dat$censoring)
-  dat$status <- 1 * (dat$Time0 < dat$censoring)
-  subset(dat, select = c(Time, status, X))
+    r0 <- .2 * sqrt(log(2))
+    r1 <- .1 * sqrt(log(2))
+    dat <- data.frame(censoring = runif(n, 0, 24.35),
+                      Time0 = sqrt(-log(1 - runif(n))),
+                      X = rbinom(n, 1, .5))
+    dat$Time0 <- ifelse(dat$X > 0, dat$Time0 / r1, dat$Time0 / r0)
+    dat$Time <- pmin(dat$Time0, dat$censoring)
+    dat$status <- 1 * (dat$Time0 < dat$censoring)
+    subset(dat, select = c(Time, status, X))
 }
+
 set.seed(1)
 dat <- data.gen(200)
 
 library(qrismb)
 fm <- Surv(Time, status) ~ X
-fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth")
-fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "one", "nonsmooth")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "random", "iterative")
+fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
+fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "userinput", c(2,1))
 
 coef(fit1)
 summary(fit2)
@@ -68,9 +69,9 @@ lung2$sex <- lung2$sex - 1
 library(qrismb)
 set.seed(1)
 fm <- Surv(time, status) ~ age + sex
-fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "random", "smooth")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "one", "nonsmooth")
-fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, "rq", "iterative")
+fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative")
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "userinput", c(1,0,1))
+fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
 
 coef(fit1)
 summary(fit2)

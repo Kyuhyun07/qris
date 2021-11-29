@@ -11,11 +11,15 @@
 #' @param t0 is the followup time(or basetime of analysis)
 #' @param Q is the quantile
 #' @param ne is number of multiplier bootstrapping for V matrix estimation
-#' @param init is an option for specifying the initial values of the parameters estimates ("rq" is default in which the estimates from the non-smooth counterpart is specified and "one" specifies all values to be 1s)
-#' @param is an option for specifying the methods of parameters and and standard errors estimation
+#' @param method is an option for specifying the methods of parameters and and standard errors estimation
 #'("smooth" is default in which parameters estimates and their standard errors ore obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
-#'   "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
-#'   "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)
+#' "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
+#' "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)
+#' @param init is an option for specifying the initial values of the parameters estimates
+#' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
+#' "noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
+#' "userinput" specifies a user defined vector as an initial value)
+#' @param userinit is a user defined initial guess vector if user chooses "userinput" as init parameter.
 #' @return An object of class "\code{qrismb}" contains model fitting results.
 #' The \code{qrismb} object is a list containing at least the following components:
 #' \describe{
@@ -31,8 +35,9 @@
 #' @importFrom stats pnorm rnorm
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
-                   init = c("rq", "one", "random"), 
-                   method = c("smooth", "iterative", "nonsmooth")){
+                   method = c("smooth", "iterative", "nonsmooth"),
+                   init = c("rq", "noeffect","userinput"),
+                   userinit){
   ## Surv example : Surv(Time, status) ~ x1 + x2
   scall <- match.call()
   mnames <- c("", "formula", "data")
@@ -45,6 +50,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   obj <- unclass(m[,1])
   method <- match.arg(method)
   init <- match.arg(init)
+  # user initial value
   if (class(m[[1]]) != "Surv" || ncol(obj) > 2)
     stop("qrismb only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
@@ -76,8 +82,10 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   n <- nrow(data)
   ## Rcpp IPCW with jump weight
   sv <- survfit(Surv(data[, 1], 1 - data[, 4]) ~ 1)
-  if (t0 <= sv$time[1]) ghatt0 <- 1
-  else ghatt0 <- sv$surv[min(which(sv$time>t0))-1]
+  # if (t0 <= sv$time[1]) ghatt0 <- 1
+  # else ghatt0 <- sv$surv[min(which(sv$time>t0))-1]
+  if (t0 <= sv$time[1]) {ghatt0 <- 1
+  } else {ghatt0 <- sv$surv[min(which(sv$time>t0))-1]}
   W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
   W[is.na(W)] <- max(W, na.rm = TRUE)
   data[, ncol(data) + 1] <- W
@@ -86,14 +94,18 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   I <- data[,3]
   H <- diag(1 / n, nc, nc)
   ## Defind initial value
-  betastart <- abs(rnorm(nc))
-  if (init == "one") betastart <- c(1, rep(0,nc-1))
-  if (init == "qr") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
+  betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
+  if (init == "noeffect") betastart <- c(1, rep(0,nc-1))
+  # User defined initial value
+  if (init == "userinput"){
+      if (is.numeric(userinit)&is.vector(userinit)) betastart <- as.vector(userinit)
+      else stop("userinit must be a numerical vector")
+  }
   ## collect all useful information
   info <- list(X = X, I = I, W = W, Q = Q, ne = ne, nc = nc, n = n, H = H, t0 = t0,
                logZ = logZ, data = data, betastart = betastart)
   ## pass to fit
-  out <- qrismb.fit(info, method)  
+  out <- qrismb.fit(info, method)
   out$call <- scall
   out$varNames <- colnames(covariate)
   out <- out[order(names(out))]
@@ -122,21 +134,22 @@ ghat <- function(Time, censor, wgt = 1) {
   ndeath <- colSums(outer(Time, deathtime, "==") * censor * wgt)
   nrisk <- colSums(outer(Time, deathtime, ">=") * wgt)
   survp <- cumprod(1 - ndeath / nrisk)
-  out <- data.frame(ndeath, nrisk, survp)
-  cbind(deathtime, rbind(out[1,], out[-nrow(out),]))
+  out <- data.frame(deathtime, ndeath, nrisk, survp)
 }
 
 ## ## Old version with loops
-## ghat <- function(Time, censor, wgt = 1){
-##   deathtime <- c(0,unique(sort(Time[censor[] == 1])))
-##   nrisk <- ndeath <- survp <- rep(0,length(deathtime))
-##   nrisk[1] <- sum((0 <= Time) * wgt)
-##   ndeath[1] <- sum((Time == 0) * censor * wgt)
-##   for(i in 2:length(deathtime)){
-##     nrisk[i] <- sum((deathtime[i-1] <= Time) * wgt)
-##     ndeath[i] <- sum((Time == deathtime[i - 1]) * censor * wgt)
-##   }
-##   prodobj <- 1-ndeath / nrisk
-##   survp <- cumprod(prodobj)
-##   return(data.frame(cbind(deathtime, ndeath, nrisk, survp)))
-## }
+# ghat <- function(Time, censor, wgt = 1){
+#   deathtime <- c(0,unique(sort(Time[censor[] == 1])))
+#   nrisk <- ndeath <- survp <- rep(0,length(deathtime))
+#   # nrisk[1] <- sum((0 <= Time) * wgt)
+#   # ndeath[1] <- sum((Time == 0) * censor * wgt)
+#   for(i in 1:length(deathtime)){
+#       # nrisk[i] <- sum((deathtime[i-1] <= Time) * wgt)
+#       # ndeath[i] <- sum((Time == deathtime[i-1]) * censor * wgt)
+#       nrisk[i] <- sum((deathtime[i] <= Time) * wgt)
+#       ndeath[i] <- sum((Time == deathtime[i]) * censor * wgt)
+#   }
+#   prodobj <- 1-ndeath / nrisk
+#   survp <- cumprod(prodobj)
+#   return(data.frame(cbind(deathtime, ndeath, nrisk, survp)))
+# }

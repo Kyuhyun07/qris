@@ -10,8 +10,9 @@ qrismb(
   t0 = 0,
   Q = 0.5,
   ne = 100,
-  init = c("rq", "one", "random"),
-  method = c("smooth", "iterative", "nonsmooth")
+  method = c("smooth", "iterative", "nonsmooth"),
+  init = c("rq", "noeffect", "userinput"),
+  userinit
 )
 }
 \arguments{
@@ -26,12 +27,17 @@ The \code{response} is a \code{Surv} object with right censoring.}
 
 \item{ne}{is number of multiplier bootstrapping for V matrix estimation}
 
-\item{init}{is an option for specifying the initial values of the parameters estimates ("rq" is default in which the estimates from the non-smooth counterpart is specified and "one" specifies all values to be 1s)}
-
-\item{is}{an option for specifying the methods of parameters and and standard errors estimation
+\item{method}{is an option for specifying the methods of parameters and and standard errors estimation
 ("smooth" is default in which parameters estimates and their standard errors ore obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
-  "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
-  "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)}
+"nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
+"iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)}
+
+\item{init}{is an option for specifying the initial values of the parameters estimates
+("rq" is default in which the estimates from the non-smooth counterpart is specified,
+"noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
+"userinput" specifies a user defined vector as an initial value)}
+
+\item{userinit}{is a user defined initial guess vector if user chooses "userinput" as init parameter.}
 }
 \value{
 An object of class "\code{qrismb}" contains model fitting results.
@@ -67,9 +73,9 @@ data.gen <- function(n) {
 dat <- data.gen(200)
 
 fm <- Surv(Time, status) ~ X
-fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "rq", "smooth")
-fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "one", "nonsmooth")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "random", "iterative")
+fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
+fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "userinput", c(2,1))
 
 summary(fit1)
 summary(fit2)
@@ -85,9 +91,9 @@ lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
-fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "random", "smooth")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "one", "nonsmooth")
-fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, "rq", "iterative")
+fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative")
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "userinput", c(1,0,1))
+fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
 
 summary(fit1)
 summary(fit2)
