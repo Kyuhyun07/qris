@@ -14,11 +14,10 @@ data.gen <- function(n) {
 }
 
 dat <- data.gen(200)
-
 fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "userinput", c(2,1))
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", c(2, 1))
 
 summary(fit1)
 summary(fit2)
@@ -35,10 +34,9 @@ lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
 fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "userinput", c(1,0,1))
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", c(1, 0, 1))
 fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
 
 summary(fit1)
 summary(fit2)
 summary(fit3)
-

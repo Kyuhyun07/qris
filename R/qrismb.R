@@ -8,7 +8,7 @@
 #' @param formula  a formula expression, of the form \code{response ~ predictors}.
 #'     The \code{response} is a \code{Surv} object with right censoring.
 #' @param data an optional data.frame in which to interpret the variables occurring in the \code{formula}.
-#' @param t0 is the followup time(or basetime of analysis)
+#' @param t0 is the followup time (or basetime of analysis)
 #' @param Q is the quantile
 #' @param ne is number of multiplier bootstrapping for V matrix estimation
 #' @param method is an option for specifying the methods of parameters and and standard errors estimation
@@ -19,12 +19,12 @@
 #' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 #' "noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
 #' "userinput" specifies a user defined vector as an initial value)
-#' @param userinit is a user defined initial guess vector if user chooses "userinput" as init parameter.
 #' @return An object of class "\code{qrismb}" contains model fitting results.
 #' The \code{qrismb} object is a list containing at least the following components:
 #' \describe{
 #'   \item{coefficient}{a vector of point estimates}
 #'   \item{stderr}{a vector of standard error of point estiamtes}
+#'   \item{vcov}{a matrix of the estimated variance-covariance matrix}
 #'   \item{iterno}{a number of itertation until convergence (only for iterative procedure)}
 #'   }
 #'
@@ -33,12 +33,11 @@
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
 #' @importFrom stats pnorm rnorm
+#' @importFrom stringr str_replace
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                    method = c("smooth", "iterative", "nonsmooth"),
-                   init = c("rq", "noeffect","userinput"),
-                   userinit){
-  ## Surv example : Surv(Time, status) ~ x1 + x2
+                   init = c("rq", "noeffect")) {
   scall <- match.call()
   mnames <- c("", "formula", "data")
   cnames <- names(scall)
@@ -48,9 +47,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   m <- eval(mcall, parent.frame())
   mterms <- attr(m, "terms")
   obj <- unclass(m[,1])
-  method <- match.arg(method)
-  init <- match.arg(init)
-  # user initial value
+  method <- match.arg(method)  
   if (class(m[[1]]) != "Surv" || ncol(obj) > 2)
     stop("qrismb only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
@@ -61,7 +58,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
     data <- cbind(obj, model.matrix(mterms, m))
   }
   data <- as.data.frame(data)
-  X <- covariate <- as.matrix(data[,-(1:2), drop = FALSE])
+  X <- covariate <- as.matrix(data[, -(1:2), drop = FALSE])
   nc <- ncol(covariate)
   n <- nrow(covariate)
   ## Checks
@@ -82,8 +79,6 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   n <- nrow(data)
   ## Rcpp IPCW with jump weight
   sv <- survfit(Surv(data[, 1], 1 - data[, 4]) ~ 1)
-  # if (t0 <= sv$time[1]) ghatt0 <- 1
-  # else ghatt0 <- sv$surv[min(which(sv$time>t0))-1]
   if (t0 <= sv$time[1]) {ghatt0 <- 1
   } else {ghatt0 <- sv$surv[min(which(sv$time>t0))-1]}
   W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
@@ -93,13 +88,21 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   logZ <- data[,2]
   I <- data[,3]
   H <- diag(1 / n, nc, nc)
-  ## Defind initial value
-  betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
-  if (init == "noeffect") betastart <- c(1, rep(0,nc-1))
-  # User defined initial value
-  if (init == "userinput"){
-      if (is.numeric(userinit)&is.vector(userinit)) betastart <- as.vector(userinit)
-      else stop("userinit must be a numerical vector")
+  ## Define initial value
+  if (is.character(init)) {
+    init <- tryCatch(match.arg(init),
+                     error = function(e) {
+                       tmp <- conditionMessage(e)
+                       tmp <- str_replace(tmp, "'arg'", "'init'")
+                       cat(tmp, "or a numerical vector \n")
+                       on.exit(options(show.error.messages = F))
+                     })
+    if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
+    if (init == "noeffect") betastart <- c(1, rep(0,nc-1))
+  } else {
+    if (!is.numeric(init)) stop("User specified initial value must be a numerical vector")
+    if (length(init) != nc) stop("User specified initial value must match the number of covariates")
+    betastart <- as.vector(init)
   }
   ## collect all useful information
   info <- list(X = X, I = I, W = W, Q = Q, ne = ne, nc = nc, n = n, H = H, t0 = t0,
@@ -113,15 +116,14 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   return(out)
 }
 
-#' Estimate Kaplan-Meier estimate of the survival function of the censoring time C
-#' ghat
+#' Calculate the weighted Kaplan-Meier estimate
 #'
 #' @param Time is a vector of observed time, which is minimum of failure time and censored time
 #' @param censor is a vector of censoring indicator (not censored = 1, censored = 0)
 #' @param wgt is a vector of weight
 #'
-#'@return An object of class "\code{ghat}" estimate KM estimator of survival function of
-#' The \code{ghat} object is a list containing at least the following components:
+#' @return
+#' A data frame containing the following components:
 #' \describe{
 #'   \item{deathtime}{the observed time}
 #'   \item{ndeath}{a vector of number of subject who experienced event at deathtime}
@@ -134,7 +136,7 @@ ghat <- function(Time, censor, wgt = 1) {
   ndeath <- colSums(outer(Time, deathtime, "==") * censor * wgt)
   nrisk <- colSums(outer(Time, deathtime, ">=") * wgt)
   survp <- cumprod(1 - ndeath / nrisk)
-  out <- data.frame(deathtime, ndeath, nrisk, survp)
+  data.frame(deathtime, ndeath, nrisk, survp)
 }
 
 ## ## Old version with loops

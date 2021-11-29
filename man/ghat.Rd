@@ -2,8 +2,7 @@
 % Please edit documentation in R/qrismb.R
 \name{ghat}
 \alias{ghat}
-\title{Estimate Kaplan-Meier estimate of the survival function of the censoring time C
-ghat}
+\title{Calculate the weighted Kaplan-Meier estimate}
 \usage{
 ghat(Time, censor, wgt = 1)
 }
@@ -15,8 +14,7 @@ ghat(Time, censor, wgt = 1)
 \item{wgt}{is a vector of weight}
 }
 \value{
-An object of class "\code{ghat}" estimate KM estimator of survival function of
-The \code{ghat} object is a list containing at least the following components:
+A data frame containing the following components:
 \describe{
   \item{deathtime}{the observed time}
   \item{ndeath}{a vector of number of subject who experienced event at deathtime}
@@ -25,6 +23,5 @@ The \code{ghat} object is a list containing at least the following components:
   }
 }
 \description{
-Estimate Kaplan-Meier estimate of the survival function of the censoring time C
-ghat
+Calculate the weighted Kaplan-Meier estimate
 }

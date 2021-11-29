@@ -11,8 +11,7 @@ qrismb(
   Q = 0.5,
   ne = 100,
   method = c("smooth", "iterative", "nonsmooth"),
-  init = c("rq", "noeffect", "userinput"),
-  userinit
+  init = c("rq", "noeffect")
 )
 }
 \arguments{
@@ -21,7 +20,7 @@ The \code{response} is a \code{Surv} object with right censoring.}
 
 \item{data}{an optional data.frame in which to interpret the variables occurring in the \code{formula}.}
 
-\item{t0}{is the followup time(or basetime of analysis)}
+\item{t0}{is the followup time (or basetime of analysis)}
 
 \item{Q}{is the quantile}
 
@@ -36,8 +35,6 @@ The \code{response} is a \code{Surv} object with right censoring.}
 ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 "noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
 "userinput" specifies a user defined vector as an initial value)}
-
-\item{userinit}{is a user defined initial guess vector if user chooses "userinput" as init parameter.}
 }
 \value{
 An object of class "\code{qrismb}" contains model fitting results.
@@ -45,6 +42,7 @@ The \code{qrismb} object is a list containing at least the following components:
 \describe{
   \item{coefficient}{a vector of point estimates}
   \item{stderr}{a vector of standard error of point estiamtes}
+  \item{vcov}{a matrix of the estimated variance-covariance matrix}
   \item{iterno}{a number of itertation until convergence (only for iterative procedure)}
   }
 }
@@ -71,11 +69,10 @@ data.gen <- function(n) {
 }
 
 dat <- data.gen(200)
-
 fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "userinput", c(2,1))
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", c(2, 1))
 
 summary(fit1)
 summary(fit2)
@@ -92,11 +89,10 @@ lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
 fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "userinput", c(1,0,1))
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", c(1, 0, 1))
 fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
 
 summary(fit1)
 summary(fit2)
 summary(fit3)
-
 }
