@@ -28,7 +28,7 @@ You can install the released version of qrismb from
 [GitHub](https://github.com/Kyuhyun07/qrismb) with:
 
 ``` r
-> # install.packages("devtools")
+> ## install.packages("devtools")
 > devtools::install_github("Kyuhyun07/qrismb")
 > library(qrismb)
 ```
@@ -57,11 +57,11 @@ There are two examples
 > fm <- Surv(Time, status) ~ X
 > fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
 > fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
-> fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "userinput", c(2,1))
+> fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", c(2,1))
 > 
 > coef(fit1)
 (Intercept)           X 
-   1.252776    0.810027 
+  1.2395248   0.8525343 
 > summary(fit2)
 Call:
 qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
@@ -69,8 +69,8 @@ qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth"
 
 qrismb Estimator
             estimate std.Error z.value   p.value    
-(Intercept)   1.2395    0.0861  14.401 < 2.2e-16 ***
-X             0.8525    0.1191   7.157 < 2.2e-16 ***
+(Intercept)   1.2528    0.0992  12.626 < 2.2e-16 ***
+X             0.8100    0.1302   6.221 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > vcov(fit3)
@@ -83,7 +83,6 @@ X           -0.07026059 27.25328957
 > ## 2. real data example
 > ## Load "retinopathy" data from R survival package
 > library(survival)
-Warning: package 'survival' was built under R version 3.6.2
 > ## Real data application
 > data(cancer, package = "survival")
 > lung2 <- subset(lung, select = c(time, status, age, sex))
@@ -95,7 +94,7 @@ Warning: package 'survival' was built under R version 3.6.2
 > set.seed(1)
 > fm <- Surv(time, status) ~ age + sex
 > fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative")
-> fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "userinput", c(1,0,1))
+> fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", c(1,0,1))
 > fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
 > 
 > coef(fit1)
@@ -104,21 +103,20 @@ Warning: package 'survival' was built under R version 3.6.2
 > summary(fit2)
 Call:
 qrismb(formula = fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, 
-    method = "nonsmooth", init = "userinput", userinit = c(1, 
-        0, 1))
+    method = "nonsmooth", init = c(1, 0, 1))
 
 qrismb Estimator
             estimate std.Error z.value p.value    
-(Intercept)   9.1260    2.2833   3.997  0.0001 ***
-age          -0.0654    0.0363  -1.805  0.0711 .  
-sex           1.7389    0.6270   2.773  0.0055 ** 
+(Intercept)   5.6362    0.9068   6.215  <2e-16 ***
+age          -0.0015    0.0136  -0.108  0.9142    
+sex           0.4489    0.1949   2.304  0.0212 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > vcov(fit3)
             (Intercept)           age           sex
-(Intercept)  0.76950264 -0.0112458777  0.0200614670
-age         -0.01124588  0.0001669553 -0.0004766159
-sex          0.02006147 -0.0004766159  0.0434881028
+(Intercept)  6.05215483 -0.0949605456 -0.0644246628
+age         -0.09496055  0.0015012139 -0.0007793163
+sex         -0.06442466 -0.0007793163  0.4841417760
 ```
 
 ## Reference

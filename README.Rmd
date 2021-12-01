@@ -20,10 +20,16 @@ The __qrismb__ package implements estimation procedures for a regression model o
 You can install the released version of qrismb from [GitHub](https://github.com/Kyuhyun07/qrismb) with:
 
 ```{r github, eval = FALSE}
-# install.packages("devtools")
+## install.packages("devtools")
 devtools::install_github("Kyuhyun07/qrismb")
 library(qrismb)
 ```
+
+```{r, include = FALSE}
+library(qrismb)
+```
+
+
 ## Example
 
 There are two examples
@@ -48,7 +54,7 @@ library(qrismb)
 fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "userinput", c(2,1))
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", c(2,1))
 
 coef(fit1)
 summary(fit2)
@@ -70,7 +76,7 @@ library(qrismb)
 set.seed(1)
 fm <- Surv(time, status) ~ age + sex
 fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "userinput", c(1,0,1))
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", c(1,0,1))
 fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
 
 coef(fit1)
