@@ -10,7 +10,7 @@ qrismb.fit <- function(info, method) {
          nonsmooth = qrismb.nonsmooth(info))
 }
 
-qrismb.smooth <- function(info) {
+qrismb.nonsmooth <- function(info) {
   ## 1. : L1-minimization : Estimating equation for estimaing beta (using rq)
   out <- with(info, {
     M <- 1e6
@@ -143,7 +143,7 @@ qrismb.iter <- function(info) {
   out
 }
 
-qrismb.nonsmooth <- function(info) {
+qrismb.smooth <- function(info) {
   out <- with(info, {
     rcpp.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
     if (rcpp.fit$termcd == 1 | rcpp.fit$termcd == 2) {

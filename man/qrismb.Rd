@@ -20,14 +20,14 @@ The \code{response} is a \code{Surv} object with right censoring.}
 
 \item{data}{an optional data.frame in which to interpret the variables occurring in the \code{formula}.}
 
-\item{t0}{is the followup time (or basetime of analysis)}
+\item{t0}{is the followup time (or basetime of analysis). The default followup time is set to 0.}
 
-\item{Q}{is the quantile}
+\item{Q}{is the quantile. The default quantile is set to 0.5.}
 
-\item{ne}{is number of multiplier bootstrapping for V matrix estimation}
+\item{ne}{is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.}
 
 \item{method}{is an option for specifying the methods of parameters and and standard errors estimation
-("smooth" is default in which parameters estimates and their standard errors ore obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
+("smooth" is default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
 "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
 "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)}
 

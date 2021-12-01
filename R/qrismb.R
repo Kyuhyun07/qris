@@ -8,11 +8,11 @@
 #' @param formula  a formula expression, of the form \code{response ~ predictors}.
 #'     The \code{response} is a \code{Surv} object with right censoring.
 #' @param data an optional data.frame in which to interpret the variables occurring in the \code{formula}.
-#' @param t0 is the followup time (or basetime of analysis)
-#' @param Q is the quantile
-#' @param ne is number of multiplier bootstrapping for V matrix estimation
+#' @param t0 is the followup time (or basetime of analysis). The default followup time is set to 0.
+#' @param Q is the quantile. The default quantile is set to 0.5.
+#' @param ne is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.
 #' @param method is an option for specifying the methods of parameters and and standard errors estimation
-#'("smooth" is default in which parameters estimates and their standard errors ore obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
+#'("smooth" is default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
 #' "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
 #' "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)
 #' @param init is an option for specifying the initial values of the parameters estimates
@@ -29,7 +29,7 @@
 #'   }
 #'
 #' @export
-#' @importFrom survival Surv  survfit
+#' @importFrom survival Surv
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
 #' @importFrom stats pnorm rnorm
@@ -47,7 +47,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   m <- eval(mcall, parent.frame())
   mterms <- attr(m, "terms")
   obj <- unclass(m[,1])
-  method <- match.arg(method)  
+  method <- match.arg(method)
   if (class(m[[1]]) != "Surv" || ncol(obj) > 2)
     stop("qrismb only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
@@ -78,12 +78,23 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   data <- na.omit(data)
   n <- nrow(data)
   ## Rcpp IPCW with jump weight
-  sv <- survfit(Surv(data[, 1], 1 - data[, 4]) ~ 1)
-  if (t0 <= sv$time[1]) {ghatt0 <- 1
-  } else {ghatt0 <- sv$surv[min(which(sv$time>t0))-1]}
-  W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
+  # Use survfit
+  # sv <- survfit(Surv(data[, 1], 1 - data[, 4]) ~ 1)
+  # if (t0 <= sv$time[1]) {ghatt0 <- 1
+  # } else {ghatt0 <- sv$surv[min(which(sv$time>t0))-1]}
+  # W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
+  # W[is.na(W)] <- max(W, na.rm = TRUE)
+  # data[, ncol(data) + 1] <- W
+  
+  # ghat
+  Gfirst <- ghat(data[,1],1-data[,4])
+  gfirststart0 <- 1
+  if (t0 > Gfirst$deathtime[1]) gfirststart0 <- Gfirst$survp[min(which(Gfirst$deathtime>t0))-1]
+  W <- data[,4] /
+    Gfirst$survp[findInterval(data[,1] , Gfirst$deathtime)] * gfirststart0
   W[is.na(W)] <- max(W, na.rm = TRUE)
   data[, ncol(data) + 1] <- W
+  
   colnames(data)[ncol(data)] <- c("weight")
   logZ <- data[,2]
   I <- data[,3]
