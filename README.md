@@ -55,6 +55,7 @@ There are two examples
 > fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
 > fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
 > fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", c(2,1))
+> 
 > coef(fit1)
 (Intercept)           X 
   1.2395248   0.8525343 
