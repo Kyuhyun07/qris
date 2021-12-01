@@ -20,10 +20,16 @@ The __qrismb__ package implements estimation procedures for a regression model o
 You can install the released version of qrismb from [GitHub](https://github.com/Kyuhyun07/qrismb) with:
 
 ```{r github, eval = FALSE}
-# install.packages("devtools")
+## install.packages("devtools")
 devtools::install_github("Kyuhyun07/qrismb")
 library(qrismb)
 ```
+
+```{r, include = FALSE}
+library(qrismb)
+```
+
+
 ## Example
 
 There are two examples
@@ -40,16 +46,13 @@ data.gen <- function(n) {
     dat$status <- 1 * (dat$Time0 < dat$censoring)
     subset(dat, select = c(Time, status, X))
 }
-
 set.seed(1)
 dat <- data.gen(200)
-
 library(qrismb)
 fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "userinput", c(2,1))
-
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", c(2,1))
 coef(fit1)
 summary(fit2)
 vcov(fit3)
@@ -65,14 +68,12 @@ lung2 <- subset(lung, select = c(time, status, age, sex))
 ## tidy up the data
 lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
-
 library(qrismb)
 set.seed(1)
 fm <- Surv(time, status) ~ age + sex
-fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative")
-fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "userinput", c(1,0,1))
+fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative", "rq")
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", c(1,0,1))
 fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
-
 coef(fit1)
 summary(fit2)
 vcov(fit3)
@@ -85,4 +86,3 @@ Chiou, S., Kang, S., and Yan, J. (2014).  Fitting accelerated failure time model
 Li, R., Huang, X., & Cortes, J. (2016). Quantile residual life regression with longitudinal biomarker measurements for dynamic prediction. *Journal of the Royal Statistical Society*. **Series C** (Applied Statistics), 755-773.
 
 Jung, S. H., Jeong, J. H., & Bandos, H. (2009). Regression on quantile residual life. *Biometrics*, **65**(4), 1203-1212.
-
