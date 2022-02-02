@@ -11,14 +11,18 @@
 #' @param t0 is the followup time (or basetime of analysis). The default followup time is set to 0.
 #' @param Q is the quantile. The default quantile is set to 0.5.
 #' @param ne is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.
-#' @param method is an option for specifying the methods of parameters and and standard errors estimation
-#'("smooth" is default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations and partial multiplier bootstrapping, respectively.
-#' "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation and a full multiplier bootstrappong in standard errors estimation.
-#' "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates and their standard errors based on induced smoothed estmating equtions and partial multiplier bootstrapping)
+#' @param method is an option for specifying the methods of parameters estimation.
+#'("smooth" is default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations.
+#' "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation.
+#' "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates.)
+#' @param se is an option for specifying the methods of standard errors estimation
+#'("pmb" is default in which parameters estimates' standard errors are obtained via partial multiplier bootstrapping. 
+#' It is only for "smooth" and "iterative" options.
+#' "fmb" uses a full multiplier bootstrapping in standard errors estimation.
 #' @param init is an option for specifying the initial values of the parameters estimates
 #' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 #' "noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
-#' "userinput" specifies a user defined vector as an initial value)
+#' User defined vector as an initial value)
 #' @return An object of class "\code{qrismb}" contains model fitting results.
 #' The \code{qrismb} object is a list containing at least the following components:
 #' \describe{
@@ -29,7 +33,7 @@
 #'   }
 #'
 #' @export
-#' @importFrom survival Surv
+#' @importFrom survival Surv survfit
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
 #' @importFrom stats pnorm rnorm
@@ -37,6 +41,7 @@
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                    method = c("smooth", "iterative", "nonsmooth"),
+                   se = c("fmb","pmb"),
                    init = c("rq", "noeffect")) {
   scall <- match.call()
   mnames <- c("", "formula", "data")
@@ -48,6 +53,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   mterms <- attr(m, "terms")
   obj <- unclass(m[,1])
   method <- match.arg(method)
+  se <- match.arg(se)
   if (class(m[[1]]) != "Surv" || ncol(obj) > 2)
     stop("qrismb only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
@@ -79,22 +85,13 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   n <- nrow(data)
   ## Rcpp IPCW with jump weight
   # Use survfit
-  # sv <- survfit(Surv(data[, 1], 1 - data[, 4]) ~ 1)
-  # if (t0 <= sv$time[1]) {ghatt0 <- 1
-  # } else {ghatt0 <- sv$surv[min(which(sv$time>t0))-1]}
-  # W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
-  # W[is.na(W)] <- max(W, na.rm = TRUE)
-  # data[, ncol(data) + 1] <- W
-  
-  # ghat
-  Gfirst <- ghat(data[,1],1-data[,4])
-  gfirststart0 <- 1
-  if (t0 > Gfirst$deathtime[1]) gfirststart0 <- Gfirst$survp[min(which(Gfirst$deathtime>t0))-1]
-  W <- data[,4] /
-    Gfirst$survp[findInterval(data[,1] , Gfirst$deathtime)] * gfirststart0
+  sv <- survfit(Surv(data[, 1], 1 - data[, 4]) ~ 1)
+  if (t0 <= sv$time[1]) {ghatt0 <- 1
+  } else {ghatt0 <- sv$surv[min(which(sv$time>t0))-1]}
+  W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
   W[is.na(W)] <- max(W, na.rm = TRUE)
   data[, ncol(data) + 1] <- W
-  
+
   colnames(data)[ncol(data)] <- c("weight")
   logZ <- data[,2]
   I <- data[,3]
@@ -117,7 +114,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   }
   ## collect all useful information
   info <- list(X = X, I = I, W = W, Q = Q, ne = ne, nc = nc, n = n, H = H, t0 = t0,
-               logZ = logZ, data = data, betastart = betastart)
+               logZ = logZ, data = data, betastart = betastart, se = se)
   ## pass to fit
   out <- qrismb.fit(info, method)
   out$call <- scall
