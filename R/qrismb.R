@@ -18,7 +18,7 @@
 #' @param se is an option for specifying the methods of standard errors estimation
 #'("pmb" is default in which parameters estimates' standard errors are obtained via partial multiplier bootstrapping. 
 #' It is only for "smooth" and "iterative" options.
-#' "fmb" uses a full multiplier bootstrapping in standard errors estimation.
+#' "fmb" uses a full multiplier bootstrapping in standard errors estimation. In "nonsmooth" method, "pmb" option is not available.
 #' @param init is an option for specifying the initial values of the parameters estimates
 #' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 #' "noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
@@ -40,9 +40,9 @@
 #' @importFrom stringr str_replace
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
-                   method = c("smooth", "iterative", "nonsmooth"),
-                   se = c("fmb","pmb"),
-                   init = c("rq", "noeffect")) {
+                 method = c("smooth", "iterative", "nonsmooth"),
+                 se = c("fmb","pmb"),
+                 init = c("rq", "noeffect")) {
   scall <- match.call()
   mnames <- c("", "formula", "data")
   cnames <- names(scall)
@@ -91,7 +91,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
   W[is.na(W)] <- max(W, na.rm = TRUE)
   data[, ncol(data) + 1] <- W
-
+  
   colnames(data)[ncol(data)] <- c("weight")
   logZ <- data[,2]
   I <- data[,3]
@@ -146,20 +146,3 @@ ghat <- function(Time, censor, wgt = 1) {
   survp <- cumprod(1 - ndeath / nrisk)
   data.frame(deathtime, ndeath, nrisk, survp)
 }
-
-## ## Old version with loops
-# ghat <- function(Time, censor, wgt = 1){
-#   deathtime <- c(0,unique(sort(Time[censor[] == 1])))
-#   nrisk <- ndeath <- survp <- rep(0,length(deathtime))
-#   # nrisk[1] <- sum((0 <= Time) * wgt)
-#   # ndeath[1] <- sum((Time == 0) * censor * wgt)
-#   for(i in 1:length(deathtime)){
-#       # nrisk[i] <- sum((deathtime[i-1] <= Time) * wgt)
-#       # ndeath[i] <- sum((Time == deathtime[i-1]) * censor * wgt)
-#       nrisk[i] <- sum((deathtime[i] <= Time) * wgt)
-#       ndeath[i] <- sum((Time == deathtime[i]) * censor * wgt)
-#   }
-#   prodobj <- 1-ndeath / nrisk
-#   survp <- cumprod(prodobj)
-#   return(data.frame(cbind(deathtime, ndeath, nrisk, survp)))
-# }
