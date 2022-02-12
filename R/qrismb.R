@@ -106,7 +106,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                        on.exit(options(show.error.messages = F))
                      })
     if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
-    if (init == "noeffect") betastart <- c(1, rep(0,nc-1))
+    if (init == "noeffect") betastart <- c(1, rep(0, nc-1))
   } else {
     if (!is.numeric(init)) stop("User specified initial value must be a numerical vector")
     if (length(init) != nc) stop("User specified initial value must match the number of covariates")

@@ -23,6 +23,9 @@ summary(fit1)
 summary(fit2)
 summary(fit3)
 
+# Plot example
+qrplot.qrismb(fit1, t0s = c(0,1), Qs = c(0.05,0.2), ne = 100)
+
 ## #########################################
 ## Real data application
 ## #########################################
@@ -40,3 +43,6 @@ fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "pmb", "r
 summary(fit1)
 summary(fit2)
 summary(fit3)
+
+# Plot example
+qrplot.qrismb(fit1, t0s = c(0,1), Qs = c(0.05,0.2), ne = 100)
