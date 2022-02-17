@@ -1,4 +1,4 @@
-## #########################################
+## ######################################### 
 ## Simulated data
 ## #########################################
 data.gen <- function(n) {
@@ -13,18 +13,16 @@ data.gen <- function(n) {
     subset(dat, select = c(Time, status, X))
 }
 
+set.seed(1)
 dat <- data.gen(200)
 fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", "rq")
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "noeffect")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", c(2, 1))
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", c(1, 1))
 
 summary(fit1)
 summary(fit2)
 summary(fit3)
-
-## Plot example
-plot(fit1, t0s = c(0,1), Qs = c(0.05, 0.2), ne = 100)
 
 ## #########################################
 ## Real data application
@@ -44,5 +42,3 @@ summary(fit1)
 summary(fit2)
 summary(fit3)
 
-# Plot example
-plot(fit1, t0s = c(0,1), Qs = c(0.05,0.2), ne = 100)

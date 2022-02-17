@@ -1,8 +1,8 @@
 Package: qrismb
 Type: Package
 Title: Quantile Regression Model for Residual Lifetime Using an Induced Smoothing Approach
-Version: 1.0.0
-Date: 2021-09-28
+Version: 0.1.1
+Date: 2022-02-17
 Authors@R: c(person("Kyu Hyun", "Kim", email = "kyuhyunkim07@yonsei.ac.kr", role = c("aut", "cre")), 
 	   person("Sangwook", "Kang", role = "aut"),
 	   person("Sy Han", "Chiou", role = "aut"))
@@ -17,13 +17,9 @@ NeedsCompilation: yes
 Imports: 
     nleqslv,
     quantreg,
-    Rcpp,
-    scales,
     stringr,
     survival,
-    ggplot2,
-    ggpubr,
-    reshape
+    ggplot2
 LinkingTo: 
     Rcpp, 
     RcppArmadillo

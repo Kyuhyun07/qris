@@ -1,93 +1,85 @@
+globalVariables("variable")
+
 #' Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data
 #'
-#' @param object is an qrismb object
-#' @param type is a indicator that which parameter designated to x value (1 = t0, 2 = quantile); when not specified, the default value is 2.
+#' @param x is an qrismb object or a data.frame returned by plot.qrismb
 #' @param t0s is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}
 #' @param Qs  is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}
-#' @param ne is the number of multiplier bootstrapping
-#' when not specified, multiplier bootstrap will be carried out with the \code{ne} specified in \code{object};
-#' when \eqn{ne = 0}, only the point estimates will be plotted;
-#' when \eqn{ne > 1}, both the point estimates and the 95\% Wald CI will be plotted.
+#' @param ne is the number of multiplier bootstrapping for standard error esitmation.
+#' @param vari is a character string to ...
+#' @param byQs put Qs on x-axis; only used when both t0s and Qs are specified.
+#' @param exportData is a logical variable to specify wheter to return the data.frame used to construct ggplot
+#' @param ... for future extension
 #'
-#' @importFrom ggplot2 facet_wrap geom_line ggplot xlab ylab aes geom_ribbon
-#' @importFrom ggplot2 ggtitle scale_x_continuous scale_y_continuous theme element_text
-#' @importFrom reshape melt
-#' @importFrom ggpubr ggarrange
+#' @importFrom stats vcov coef update
+#' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_ribbon labs xlab ylab
 #' @export
 #' @method plot qrismb
-plot.qrismb <- function(object, type = 2, t0s = c(0,t0), Qs = c(0.05,Q), ne = 100, ...) {
-  ## Draw 95% CI plot of point estimate against t0 at different quantiles
-  if (type == 1) {
-    t0s <- seq(t0s[1], t0s[2], length.out = 4)
-    if (t0s[1] == t0s[4]) t0s <- t0s[1]
-    t0s <- round(t0s,2)
-    Qs <- seq(Qs[1], Qs[2], by = 0.05)
-    n <- length(Qs)
-    result_coef <- result_se <- plots <- list()
-    for (i in 1:n){
-      q.now <- Qs[i]
-      d <- as.data.frame(do.call(cbind, lapply(t0s, function(t)
-        summary(update(fit1, t0 = t , Q = q.now, ne = 100))[[2]][,1:2])))
-      d <- as.data.frame(t(d))
-      d$t <- rep(t0s,each=2)
-      ## Seperate coef and StdErr data.frame (1=coef, 0=StdErr)
-      d$row <- seq_len(nrow(d)) %% 2
-      d_coef <- d[d$row == 1, ]
-      d_se <- d[d$row == 0, ]
-      d_coef$row <- NULL
-      d_se$row <- NULL
-      result_coef[[i]] <- melt(d_coef, id = "t")
-      se <- melt(d_se, id = "t")$value
-      result_coef[[i]] <- cbind(result_coef[[i]], se)
-      plots[[i]] <- ggplot(result_coef[[i]], aes(x = t, y = value)) +
-        geom_ribbon(aes(ymax = value + 1.96 * se, ymin = value - 1.96 * se),fill = "slategray3") +
-        geom_line(color = "firebrick",size = 1) +
-        facet_wrap(~ variable, scales = "free") +
-        scale_x_continuous(limits = c(0, max(result_coef[[i]]$value)), breaks = t0s) +
-        scale_y_continuous(limits = c(min(result_coef[[i]]$value - 4 * result_coef[[i]]$se),
-                                      max(result_coef[[i]]$value + 4 * result_coef[[i]]$se))) +
-        xlab(expression(t[0])) + ylab(expression(beta)) +
-        ggtitle(paste0("Q = ", round(q.now, 2))) +
-        theme(plot.title = element_text(hjust = 0.5))
-    }
-    ggarrange(plotlist=plots, ncol = 1, nrow = n)
-    ## Draw 95% CI plot of point estimate against quantile at different t0
-  } else if (type == 2) {
-    t0s <- seq(t0s[1], t0s[2], length.out=4)
-    if (t0s[1] == t0s[4]){
-      t0s <- t0s[1]
-    }
-    Qs <- seq(Qs[1], Qs[2], by = 0.05)
-    n <- length(t0s)
-    result_coef <- result_se <- plots <- list()
-    for (i in 1:n){
-      t0.now <- t0s[i]
-      d <- as.data.frame(do.call(cbind, lapply(Qs, function(q)
-        summary(update(fit1, t0 = t0.now , Q = q, ne = 100))[[2]][,1:2])))
-      d <- as.data.frame(t(d))
-      d$Q <- rep(Qs,each=2)
-      ## Seperate coef and StdErr data.frame (1=coef, 0=StdErr)
-      d$row <- seq_len(nrow(d)) %% 2
-      d_coef <- d[d$row == 1, ]
-      d_se <- d[d$row == 0, ]
-      d_coef$row <- NULL
-      d_se$row <- NULL
-      result_coef[[i]] <- melt(d_coef, id = "Q")
-      se <- melt(d_se, id = "Q")$value
-      result_coef[[i]] <- cbind(result_coef[[i]], se)
-      plots[[i]] <- ggplot(result_coef[[i]], aes(x = Q, y = value)) +
-        geom_ribbon(aes(ymax = value + 1.96*se, ymin = value - 1.96*se),fill = "slategray3") +
-        geom_line(color = "firebrick",size = 1) +
-        facet_wrap(~ variable, scales = "free") +
-        scale_x_continuous(limits = c(0.05, max(result_coef[[i]]$Q)), breaks = Qs) +
-        scale_y_continuous(limits = c(min(result_coef[[i]]$value - 4 * result_coef[[i]]$se),
-                                      max(result_coef[[i]]$value + 4 * result_coef[[i]]$se))) +
-        xlab(expression(tau)) + ylab(expression(beta)) +
-        ggtitle(paste0("t0 = ", round(t0.now, 2))) +
-        theme(plot.title = element_text(hjust = 0.5))
-    }
-    ggarrange(plotlist = plots, ncol = 1, nrow = n)
+#'
+#' @example inst/examples/ex_plot.R
+plot.qrismb <- function(x, t0s = NULL, Qs = NULL, ne = NULL, vari = NULL,
+                  byQs = FALSE, exportData = FALSE, ...) {
+  ## Assign default values
+  ## When both t0s and Qs are NULL, we plot it by Qs? which is easier or more informative?
+  if (all(is.null(t0s), is.null(Qs))) {
+    Qs <- 1:9 / 10
+    t0s <- x$para$t0
   } else {
-    stop("Please choose x variable of graph (either 1 = t0 or 2 = quantile")
+    if (!is.null(Qs)) {
+      Qs <- sort(Qs)
+      if (min(Qs) <= 0 | max(Qs) >= 1) stop("Qs outisde [0, 1]") 
+    }
+    if (!is.null(t0s)) {
+      t0s <- sort(t0s)
+      if (min(t0s) <= 0) stop("t0s is negative")
+    }
+    if (is.null(Qs)) Qs <- x$para$Q
+    if (is.null(t0s)) t0s <- x$para$t0
+  }
+  if (x$para$method == "iterative")
+    stop('Effect plot is not yet available for method = "iterative"')
+  if (is.null(vari)) vari <- x$varNames
+  vari <- intersect(vari, x$varNames)
+  if (length(vari) == 0) stop('No matching variable names')
+  if (is.null(ne)) ne <- x$para$ne
+  if (ne < 0) stop("ne must greater than 0")
+  if (is.null(x$ggdat)) {
+    d <- expand.grid(Qs = Qs, t0s = t0s, KEEP.OUT.ATTRS = F)
+    ddd <- apply(d, 1, function(dd) {
+      tmp <- update(x, t0 = dd['t0s'], Q = dd['Qs'], ne = ne)
+      c(coef(tmp), sqrt(diag(vcov(tmp))))
+    })
+    nc <- length(x$varNames)
+    Est <- as.data.frame(t(ddd[1:nc,]))
+    if (ne > 0) SE <- as.data.frame(t(ddd[nc + 1:nc,]))
+    ## Prepare data for ggplot
+    ## return this if exportStat?
+    d <- d[rep(1:nrow(d), nc),]
+    d$variable <- factor(rep(x$varNames, each = ncol(ddd)))
+    d$Est <- unlist(Est, use.names = F)
+    if (ne > 0) d$SE <- unlist(SE, use.names = F)
+    d <- d[complete.cases(d),] ## remove missing
+    rownames(d) <- NULL
+  } else d <- x$ggdat
+  d <- subset(d, variable %in% vari)
+  if (length(unique(d$t0s)) == 1) byQs <- TRUE
+  if (byQs) ## Q on x-axis
+    p <- ggplot(d, aes(x = Qs, y = Est, col = variable)) + geom_line() +
+      facet_wrap(~ factor(t0s, labels = paste0("Basetime is ", unique(t0s)))) + 
+      xlab("Quantiles")
+  else   
+    ## t0s on x-axis
+    p <- ggplot(d, aes(x = t0s, y = Est, col = variable)) + geom_line() +
+      facet_wrap(~ factor(Qs, labels = paste0("Quantile is ", unique(Qs)))) + 
+      xlab("Basetimes")
+  if (ne > 0)   
+    p <- p + geom_ribbon(aes(ymax = Est + 1.96 * SE, ymin = Est - 1.96 * SE, fill = variable),
+                         alpha = .2, show.legend = FALSE)
+  p <- p + labs(color = "Covariates") + ylab("Regression coefficients")
+  print(p)
+  if (exportData) {
+    x$ggdat <- d
+    x$gg <- p
+    return(x) 
   }
 }

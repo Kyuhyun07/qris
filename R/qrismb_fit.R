@@ -114,14 +114,14 @@ qrismb.iter <- function(info) {
         iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
         if(norm(new_beta-old_beta, "i") < 1e-3) break
       } ## end for loop
-      
       ## Last iteration
       old_beta <- new_beta
       old_sigma <- new_sigma
       old_h <- new_h
-      slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
+      slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q) / n
       ## Step 1 : Update beta()
-      new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
+      ## convergence problem in a
+      new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q) / n)
       iter_beta_result <- rbind(iter_beta_result, t(new_beta))
       ## Step 2 : Update Sigma()
       result.fmb <- c()

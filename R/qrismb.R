@@ -119,7 +119,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   out <- qrismb.fit(info, method)
   out$call <- scall
   out$varNames <- colnames(covariate)
-  out$para <- list(Q = Q, t0 = t0, ne = ne)
+  out$para <- list(method = method, Q = Q, t0 = t0, ne = ne)
   out <- out[order(names(out))]
   class(out) <- "qrismb"
   return(out)
