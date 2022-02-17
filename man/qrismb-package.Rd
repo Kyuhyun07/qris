@@ -12,7 +12,7 @@ The package offers ...
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://https://github.com/Kyuhyun07/qrismb}
+  \item \url{https://github.com/Kyuhyun07/qrismb}
 }
 
 }

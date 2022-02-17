@@ -23,8 +23,8 @@ summary(fit1)
 summary(fit2)
 summary(fit3)
 
-# Plot example
-qrplot.qrismb(fit1, t0s = c(0,1), Qs = c(0.05,0.2), ne = 100)
+## Plot example
+plot(fit1, t0s = c(0,1), Qs = c(0.05, 0.2), ne = 100)
 
 ## #########################################
 ## Real data application
@@ -45,4 +45,4 @@ summary(fit2)
 summary(fit3)
 
 # Plot example
-qrplot.qrismb(fit1, t0s = c(0,1), Qs = c(0.05,0.2), ne = 100)
+plot(fit1, t0s = c(0,1), Qs = c(0.05,0.2), ne = 100)
