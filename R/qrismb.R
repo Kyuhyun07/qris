@@ -72,7 +72,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   if(t0 < 0) stop("basetime must be 0 and positive number")
   if(length(Q) > 1) stop("Multiple taus not allowed in qrismb")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
-  if(ne <= 1) stop("number of multiplier bootstrapping must greater than 1")
+  ## if(ne <= 1) stop("number of multiplier bootstrapping must greater than 1")
   ## Suppress warning message
   logZ <- suppressWarnings(log(data[,1] - t0))
   I <- as.numeric(data[,1] >= t0)
@@ -119,7 +119,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   out <- qrismb.fit(info, method)
   out$call <- scall
   out$varNames <- colnames(covariate)
-  out$para <- list(Q = Q, t0 = t0, ne = ne)
+  out$para <- list(method = method, Q = Q, t0 = t0, ne = ne)
   out <- out[order(names(out))]
   class(out) <- "qrismb"
   return(out)

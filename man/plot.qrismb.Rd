@@ -4,22 +4,93 @@
 \alias{plot.qrismb}
 \title{Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data}
 \usage{
-\method{plot}{qrismb}(object, type = 2, t0s = c(0, t0), Qs = c(0.05, Q), ne = 100, ...)
+\method{plot}{qrismb}(
+  x,
+  t0s = NULL,
+  Qs = NULL,
+  ne = NULL,
+  vari = NULL,
+  byQs = FALSE,
+  exportData = FALSE,
+  ...
+)
 }
 \arguments{
-\item{object}{is an qrismb object}
-
-\item{type}{is a indicator that which parameter designated to x value (1 = t0, 2 = quantile); when not specified, the default value is 2.}
+\item{x}{is an qrismb object or a data.frame returned by plot.qrismb}
 
 \item{t0s}{is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}}
 
 \item{Qs}{is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}}
 
-\item{ne}{is the number of multiplier bootstrapping
-when not specified, multiplier bootstrap will be carried out with the \code{ne} specified in \code{object};
-when \eqn{ne = 0}, only the point estimates will be plotted;
-when \eqn{ne > 1}, both the point estimates and the 95\% Wald CI will be plotted.}
+\item{ne}{is the number of multiplier bootstrapping for standard error esitmation.}
+
+\item{vari}{is a character string to ...}
+
+\item{byQs}{put Qs on x-axis; only used when both t0s and Qs are specified.}
+
+\item{exportData}{is a logical variable to specify wheter to return the data.frame used to construct ggplot}
+
+\item{...}{for future extension}
 }
 \description{
 Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data
+}
+\examples{
+data(cancer, package = "survival")
+lung2 <- subset(lung, select = c(time, status, age, sex))
+## tidy up the data
+lung2$status <- lung2$status - 1
+lung2$sex <- lung2$sex - 1
+
+fm <- Surv(time, status) ~ age + sex
+fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
+fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "fmb", c(1, 0, 1))
+
+summary(fit1)
+summary(fit2)
+
+## Give a error message when method = 'iterative'
+plot(fit1)
+
+## Plot with default values; Qs <- 1:9 / 10 and t0s = fit2$para$t0 (in this case 30)
+plot(fit2)
+
+## Plot with default values and without 95\% CI;
+## much faster, especially with multiples values of Qs and t0s
+plot(fit2, ne = 0)
+## Other specifications
+plot(fit2, t0s = 1:6 * 10, ne = 0)
+plot(fit2, Qs = 3:6 / 10, ne = 0)
+plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10, ne = 0)
+plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10, ne = 0, byQs = TRUE)
+
+plot(fit2, t0s = 1:5 * 10)
+plot(fit2, Qs = 3:6 / 10)
+plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10)
+plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10, byQs = TRUE)
+
+## Choose what variables to plot
+plot(fit2, t0s = 1:6 * 10)
+plot(fit2, t0s = 1:6 * 10, vari = c("sex", "age"))
+plot(fit2, t0s = 1:6 * 10, vari = "sex")
+
+plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10)
+plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10, vari = c("sex", "age"))
+plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10, vari = "sex")
+
+## Export data feature:
+## this allows users to create their own ggplot if they don't like our graphical parameters
+## this is also useful if one wants to change byQs or vari
+fit2 <- plot(fit2, Qs = 3:6 / 10, t0s = 1:6 * 10, exportDat = TRUE)
+str(fit2$ggdat)
+plot(fit2, byQs = FALSE)
+plot(fit2, byQs = TRUE)
+
+plot(fit2, byQs = FALSE, vari = c("sex", "age"))
+plot(fit2, byQs = TRUE, vari = c("sex", "age"))
+plot(fit2, byQs = FALSE, vari = "sex")
+plot(fit2, byQs = TRUE, vari = "sex")
+
+plot(fit2, byQs = FALSE, vari = fit2$varNames[1:2])
+plot(fit2, byQs = TRUE, vari = fit2$varNames[1:2])
 }

@@ -22,6 +22,11 @@ qrismb.nonsmooth <- function(info) {
     Li.fit <- rq.wfit(X.reg, Y.reg, weights = W.reg)
     coefficient <- as.vector(Li.fit$coefficients)
     if (all(Li.fit$coefficients <= 10)){
+      if (ne <= 1) {
+        se <- rep(NA, nc)
+        vcov <- matrix(NA, nc, nc)
+        return(list(coefficient = coefficient, stderr = se, vcov = vcov))
+      }
       if (se == "fmb"){
         fmb.result <- c()
         for (j in 1:ne){
@@ -56,12 +61,12 @@ qrismb.nonsmooth <- function(info) {
           out <- list(coefficient = coefficient, stderr = fmb.se, vcov = fmb.sigma)
         }
       } else {
-        stop("Only full multiplier bootstrapping is available for nonsmooth estimating equation approach")
+        stop("Only full multiplier bootstrapping (fmb) is available for nonsmooth estimating equation approach")
       }
     } else {
       coefficient <- se <- rep(NA, nc)
       vcov <- matrix(NA, nc, nc)
-      out <- list(coefficient=coefficient, stderr = se, vcov = vcov)
+      out <- list(coefficient = coefficient, stderr = se, vcov = vcov)
     }})
   out
 }
@@ -109,14 +114,14 @@ qrismb.iter <- function(info) {
         iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
         if(norm(new_beta-old_beta, "i") < 1e-3) break
       } ## end for loop
-      
       ## Last iteration
       old_beta <- new_beta
       old_sigma <- new_sigma
       old_h <- new_h
-      slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
+      slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q) / n
       ## Step 1 : Update beta()
-      new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
+      ## convergence problem in a
+      new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q) / n)
       iter_beta_result <- rbind(iter_beta_result, t(new_beta))
       ## Step 2 : Update Sigma()
       result.fmb <- c()
@@ -228,6 +233,11 @@ qrismb.smooth <- function(info) {
     smooth.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
     if (smooth.fit$termcd == 1 | smooth.fit$termcd == 2) {
       coefficient <- smooth.fit$x
+      if (ne <= 1) {
+        se <- rep(NA, nc)
+        vcov <- matrix(NA, nc, nc)
+        return(list(coefficient = coefficient, stderr = se, vcov = vcov))
+      }
       if (se == "fmb"){
         ## Full multiplier bootstrap
         smooth.fmb.result <- c()
