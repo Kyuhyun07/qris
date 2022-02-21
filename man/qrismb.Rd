@@ -12,7 +12,7 @@ qrismb(
   ne = 100,
   method = c("smooth", "iterative", "nonsmooth"),
   se = c("fmb", "pmb"),
-  init = c("rq", "noeffect")
+  init = "rq"
 )
 }
 \arguments{
@@ -39,7 +39,6 @@ It is only for "smooth" and "iterative" options.
 
 \item{init}{is an option for specifying the initial values of the parameters estimates
 ("rq" is default in which the estimates from the non-smooth counterpart is specified,
-"noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
 User defined vector as an initial value)}
 }
 \value{
@@ -77,10 +76,9 @@ data.gen <- function(n) {
 set.seed(1)
 dat <- data.gen(200)
 fm <- Surv(Time, status) ~ X
-fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", "rq")
-fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "noeffect")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", c(1, 1))
-
+fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
+fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
 summary(fit1)
 summary(fit2)
 summary(fit3)

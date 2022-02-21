@@ -85,74 +85,90 @@ qrismb.iter <- function(info) {
         old_h <- new_h
         slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
         ## Step 1 : Update beta()
-        new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
-        iter_beta_result <- rbind(iter_beta_result, t(new_beta))
-        ## Step 2 : Update Sigma()
-        result.fmb <- c()
-        for (j in 1:ne){
-          ## generating perturbation variable
-          eta <- rexp(n, 1)
-          if (all(data[, 4] == rep(1, n))){
-            W_star <- rep(1, n)
-          } else {
-            Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-            ghatstart0 <- 1
-            if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-            W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
-            W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+        ## Singular matrix 'a' error message and break
+        if (class(try(qr.solve(slope_a),silent=TRUE))[1]=="try-error") {
+          warning("‘A’ matrix is singular during iteration. Please try the non-iterative method.")
+          break
+        } else {
+          new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
+          iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+          ## Step 2 : Update Sigma()
+          result.fmb <- c()
+          for (j in 1:ne){
+            ## generating perturbation variable
+            eta <- rexp(n, 1)
+            if (all(data[, 4] == rep(1, n))){
+              W_star <- rep(1, n)
+            } else {
+              Gest <- ghat(data[, 1], 1 - data[, 4], eta)
+              ghatstart0 <- 1
+              if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
+              W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
+              W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+            }
+            fmb.fit <- nleqslv(old_beta, function(b) rev_isObj(b, X, W_star, old_h, eta, I, logZ, Q)/n)
+            if (fmb.fit$termcd == 1 | fmb.fit$termcd == 2) {
+              result.fmb <- cbind(result.fmb,fmb.fit$x)
+            } else {
+              result.fmb <- cbind(result.fmb,rep(NA, length(fmb.fit$x)))
+            }
           }
-          fmb.fit <- nleqslv(old_beta, function(b) rev_isObj(b, X, W_star, old_h, eta, I, logZ, Q)/n)
-          if (fmb.fit$termcd == 1 | fmb.fit$termcd == 2) {
-            result.fmb <- cbind(result.fmb,fmb.fit$x)
+          new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
+          if (class(try(new_sigma,silent=TRUE))[1]=="try-error") {
+            warning("Futher fmb method is inapplicable to this dataset. Please try other estimation methods")
+            new_sigma <- old_sigma
+            break
           } else {
-            result.fmb <- cbind(result.fmb,rep(NA, length(fmb.fit$x)))
+            new_h <- new_sigma
+            iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
+            iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+            if(iter_norm_result[k]>=100*iter_norm_result[1]) {
+              warning("Point estimation result is diverging")
+              break
+            }
+            if(norm(new_beta-old_beta, "i") < 1e-3) break
           }
         }
-        new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
-        new_h <- new_sigma
-        iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-        iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
-        if(norm(new_beta-old_beta, "i") < 1e-3) break
       } ## end for loop
-      ## Last iteration
-      old_beta <- new_beta
-      old_sigma <- new_sigma
-      old_h <- new_h
-      slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q) / n
-      ## Step 1 : Update beta()
-      ## convergence problem in a
-      new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q) / n)
-      iter_beta_result <- rbind(iter_beta_result, t(new_beta))
-      ## Step 2 : Update Sigma()
-      result.fmb <- c()
-      for (j in 1:ne){
-        ## generating perturbation variable
-        eta <- rexp(n, 1)
-        if (all(data[, 4] == rep(1, n))){
-          W_star <- rep(1, n)
-        } else {
-          Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-          ghatstart0 <- 1
-          if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-          W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
-          W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
-        }
-        fmb.fit <- nleqslv(old_beta, function(b) rev_isObj(b, X, W_star, old_h, eta, I, logZ, Q)/n)
-        if (fmb.fit$termcd == 1 | fmb.fit$termcd == 2) {
-          result.fmb <- cbind(result.fmb,fmb.fit$x)
-        } else {
-          result.fmb <- cbind(result.fmb,rep(NA, length(fmb.fit$x)))
-        }
-      }
-      new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
-      new_h <- new_sigma
-      iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-      iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+      # ## Last iteration
+      # old_beta <- new_beta
+      # old_sigma <- new_sigma
+      # old_h <- new_h
+      # slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q) / n
+      # ## Step 1 : Update beta()
+      # ## convergence problem in a
+      # new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q) / n)
+      # iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+      # ## Step 2 : Update Sigma()
+      # result.fmb <- c()
+      # for (j in 1:ne){
+      #   ## generating perturbation variable
+      #   eta <- rexp(n, 1)
+      #   if (all(data[, 4] == rep(1, n))){
+      #     W_star <- rep(1, n)
+      #   } else {
+      #     Gest <- ghat(data[, 1], 1 - data[, 4], eta)
+      #     ghatstart0 <- 1
+      #     if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
+      #     W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
+      #     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+      #   }
+      #   fmb.fit <- nleqslv(old_beta, function(b) rev_isObj(b, X, W_star, old_h, eta, I, logZ, Q)/n)
+      #   if (fmb.fit$termcd == 1 | fmb.fit$termcd == 2) {
+      #     result.fmb <- cbind(result.fmb,fmb.fit$x)
+      #   } else {
+      #     result.fmb <- cbind(result.fmb,rep(NA, length(fmb.fit$x)))
+      #   }
+      # }
+      # new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
+      # new_h <- new_sigma
+      # iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
+      # iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
       out <- list(coefficient = tail(iter_beta_result, n = 1),
                   coefficient_result = iter_beta_result,
                   stderr = tail(iter_SE_result, n = 1),
                   stderr_result = iter_SE_result,
-                  vcov = new_sigma, iterno = k + 1,
+                  vcov = new_sigma, iterno = k,
                   norm = iter_norm_result)
     } else {
       for (k in 1:10){
@@ -161,68 +177,78 @@ qrismb.iter <- function(info) {
         old_h <- new_h
         slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
         ## Step 1 : Update beta()
-        new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
-        iter_beta_result <- rbind(iter_beta_result, t(new_beta))
-        ## Step 2 : Update Sigma()
-        result.pmb <- c()
-        for (j in 1:ne){
-          ## generating perturbation variable
-          eta <- rexp(n, 1)
-          if (all(data[, 4] == rep(1, n))){
-            W_star <- rep(1, n)
-          } else {
-            Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-            ghatstart0 <- 1
-            if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-            W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
-            W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+        ## Singular matrix 'a' error message and break
+        if (class(try(qr.solve(slope_a),silent=TRUE))[1]=="try-error") {
+          warning("‘A’ matrix is singular during iteration. Please try the non-iterative method.")
+          break
+        } else {
+          new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
+          iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+          ## Step 2 : Update Sigma()
+          result.pmb <- c()
+          for (j in 1:ne){
+            ## generating perturbation variable
+            eta <- rexp(n, 1)
+            if (all(data[, 4] == rep(1, n))){
+              W_star <- rep(1, n)
+            } else {
+              Gest <- ghat(data[, 1], 1 - data[, 4], eta)
+              ghatstart0 <- 1
+              if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
+              W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
+              W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+            }
+            pmb.eval <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n
+            result.pmb <- cbind(result.pmb, pmb.eval)
           }
-          pmb.eval <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n
-          result.pmb <- cbind(result.pmb, pmb.eval)
+          new_V <- cov(t(result.pmb), use = "complete.obs")
+          new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
+          new_h <- new_sigma
+          iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
+          iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+          if(iter_norm_result[k]>=100*iter_norm_result[1]) {
+            warning("Point estimation result is diverging")
+            break
+            }
+          if(norm(new_beta-old_beta, "i") < 1e-3) break
         }
-        new_V <- cov(t(result.pmb), use = "complete.obs")
-        new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
-        new_h <- new_sigma
-        iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-        iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
-        if(norm(new_beta-old_beta, "i") < 1e-3) break
       } ## end for loop
       
-      ## Last iteration
-      old_beta <- new_beta
-      old_sigma <- new_sigma
-      old_h <- new_h
-      slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
-      ## Step 1 : Update beta()
-      new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
-      iter_beta_result <- rbind(iter_beta_result, t(new_beta))
-      ## Step 2 : Update Sigma()
-      result.pmb <- c()
-      for (j in 1:ne){
-        ## generating perturbation variable
-        eta <- rexp(n, 1)
-        if (all(data[, 4] == rep(1, n))){
-          W_star <- rep(1, n)
-        } else {
-          Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-          ghatstart0 <- 1
-          if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-          W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
-          W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
-        }
-        pmb.eval <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n
-        result.pmb <- cbind(result.pmb, pmb.eval)
-      }
-      new_V <- cov(t(result.pmb), use = "complete.obs")
-      new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
-      new_h <- new_sigma
-      iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-      iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+      # ## Last iteration
+      # old_beta <- new_beta
+      # old_sigma <- new_sigma
+      # old_h <- new_h
+      # slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
+      # ## Step 1 : Update beta()
+      # new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
+      # iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+      # ## Step 2 : Update Sigma()
+      # result.pmb <- c()
+      # for (j in 1:ne){
+      #   ## generating perturbation variable
+      #   eta <- rexp(n, 1)
+      #   if (all(data[, 4] == rep(1, n))){
+      #     W_star <- rep(1, n)
+      #   } else {
+      #     Gest <- ghat(data[, 1], 1 - data[, 4], eta)
+      #     ghatstart0 <- 1
+      #     if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
+      #     W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
+      #     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+      #   }
+      #   pmb.eval <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n
+      #   result.pmb <- cbind(result.pmb, pmb.eval)
+      # }
+      # new_V <- cov(t(result.pmb), use = "complete.obs")
+      # new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
+      # new_h <- new_sigma
+      # iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
+      # iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
       out <- list(coefficient = tail(iter_beta_result, n = 1),
                   coefficient_result = iter_beta_result,
                   stderr = tail(iter_SE_result, n = 1),
                   stderr_result = iter_SE_result,
-                  vcov = new_sigma, iterno = k + 1,
+                  vcov = new_sigma, iterno = k,
                   norm = iter_norm_result)
     }})
   out
@@ -289,11 +315,12 @@ qrismb.smooth <- function(info) {
         }
         pmb.v <- try(cov(t(smooth.pmb.result), use = "complete.obs"), silent = T)
         pmb.a <- Amat(coefficient, X, W, H, I, logZ, Q) / n
-        pmb.inva <- try(solve(pmb.a))
-        if(class(pmb.inva)[1] == "try-error") {
+        ## Singular matrix 'a' error message and break
+        if (class(try(qr.solve(pmb.a),silent=TRUE))[1]=="try-error") {
           pmb.se <- rep(NA,nc+1)
-          stop("Slope matrix is singular matrix")
+          stop("‘A’ matrix is singular during iteration. Please try the nonsmooth method." )
         } else {
+          pmb.inva <- qr.solve(pmb.a)
           pmb.sigma <- t(pmb.inva) %*% pmb.v %*% pmb.inva
           pmb.se <- sqrt(diag(pmb.sigma))
         }

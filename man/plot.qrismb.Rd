@@ -22,13 +22,13 @@
 
 \item{Qs}{is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}}
 
-\item{ne}{is the number of multiplier bootstrapping for standard error esitmation.}
+\item{ne}{is the number of multiplier bootstrapping for standard error estimation.}
 
-\item{vari}{is a character string to ...}
+\item{vari}{is a character string to choose variables to draw the regression coefficient.}
 
 \item{byQs}{put Qs on x-axis; only used when both t0s and Qs are specified.}
 
-\item{exportData}{is a logical variable to specify wheter to return the data.frame used to construct ggplot}
+\item{exportData}{is a logical variable to specify whether to return the data.frame used to construct ggplot}
 
 \item{...}{for future extension}
 }

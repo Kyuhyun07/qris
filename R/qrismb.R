@@ -21,7 +21,6 @@
 #' "fmb" uses a full multiplier bootstrapping in standard errors estimation. In "nonsmooth" method, "pmb" option is not available.
 #' @param init is an option for specifying the initial values of the parameters estimates
 #' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
-#' "noeffect" specifies no covariate effect except for intercept c(1,0,0, ...)
 #' User defined vector as an initial value)
 #' @return An object of class "\code{qrismb}" contains model fitting results.
 #' The \code{qrismb} object is a list containing at least the following components:
@@ -42,7 +41,8 @@
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                  method = c("smooth", "iterative", "nonsmooth"),
                  se = c("fmb","pmb"),
-                 init = c("rq", "noeffect")) {
+                 # init = c("rq", "ones")
+                 init = "rq") {
   scall <- match.call()
   mnames <- c("", "formula", "data")
   cnames <- names(scall)
@@ -106,7 +106,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                        on.exit(options(show.error.messages = F))
                      })
     if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
-    if (init == "noeffect") betastart <- c(1, rep(0, nc-1))
+    # if (init == "ones") betastart <- c(rep(1, nc))
   } else {
     if (!is.numeric(init)) stop("User specified initial value must be a numerical vector")
     if (length(init) != nc) stop("User specified initial value must match the number of covariates")

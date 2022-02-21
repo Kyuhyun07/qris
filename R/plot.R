@@ -5,10 +5,10 @@ globalVariables("variable")
 #' @param x is an qrismb object or a data.frame returned by plot.qrismb
 #' @param t0s is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}
 #' @param Qs  is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}
-#' @param ne is the number of multiplier bootstrapping for standard error esitmation.
-#' @param vari is a character string to ...
+#' @param ne is the number of multiplier bootstrapping for standard error estimation.
+#' @param vari is a character string to choose variables to draw the regression coefficient.
 #' @param byQs put Qs on x-axis; only used when both t0s and Qs are specified.
-#' @param exportData is a logical variable to specify wheter to return the data.frame used to construct ggplot
+#' @param exportData is a logical variable to specify whether to return the data.frame used to construct ggplot
 #' @param ... for future extension
 #'
 #' @importFrom stats vcov coef update
@@ -74,7 +74,7 @@ plot.qrismb <- function(x, t0s = NULL, Qs = NULL, ne = NULL, vari = NULL,
       xlab("Basetimes")
   if (ne > 0)   
     p <- p + geom_ribbon(aes(ymax = Est + 1.96 * SE, ymin = Est - 1.96 * SE, fill = variable),
-                         alpha = .2, show.legend = FALSE)
+                         linetype = 2, alpha = .2, show.legend = FALSE)
   p <- p + labs(color = "Covariates") + ylab("Regression coefficients")
   print(p)
   if (exportData) {
