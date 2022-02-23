@@ -7,7 +7,7 @@ Authors@R: c(person("Kyu Hyun", "Kim", email = "kyuhyunkim07@yonsei.ac.kr", role
 	   person("Sangwook", "Kang", role = "aut"),
 	   person("Sy Han", "Chiou", role = "aut"))
 Description: This package includes functions to fit quantiles regression models for censored residual lifetimes. It provides various options for regression parameters estimation: the induced smoothing approach (smooth), and L1-minimization (non-smooth).  It also implements the estimation methods for standard errors of the regression parameters estimates based on an efficient partial multiplier bootstrap method and robust sandwich estimator. Furthermore, a simulataneous procedure of estimating regression parameters and their standard errors via an iteratively updating procedure is implemented (iterative).
-Depends: R (>= 3.6.1)
+Depends: R (>= 3.6.0)
 License: GPL (>= 3)
 URL: https://github.com/Kyuhyun07/qrismb
 Encoding: UTF-8

@@ -87,7 +87,7 @@ qrismb.iter <- function(info) {
         ## Step 1 : Update beta()
         ## Singular matrix 'a' error message and break
         if (class(try(qr.solve(slope_a),silent=TRUE))[1]=="try-error") {
-          warning("‘A’ matrix is singular during iteration. Please try the non-iterative method.")
+          warning("'A' matrix is singular during iteration. Please try the non-iterative method.")
           break
         } else {
           new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
@@ -152,7 +152,7 @@ qrismb.iter <- function(info) {
         ## Step 1 : Update beta()
         ## Singular matrix 'a' error message and break
         if (class(try(qr.solve(slope_a),silent=TRUE))[1]=="try-error") {
-          warning("‘A’ matrix is singular during iteration. Please try the non-iterative method.")
+          warning("'A' matrix is singular during iteration. Please try the non-iterative method.")
           break
         } else {
           new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
@@ -191,37 +191,6 @@ qrismb.iter <- function(info) {
           if(norm(new_beta-old_beta, "i") < control$tol) break
         }
       } ## end for loop
-      
-      # ## Last iteration
-      # old_beta <- new_beta
-      # old_sigma <- new_sigma
-      # old_h <- new_h
-      # slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
-      # ## Step 1 : Update beta()
-      # new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
-      # iter_beta_result <- rbind(iter_beta_result, t(new_beta))
-      # ## Step 2 : Update Sigma()
-      # result.pmb <- c()
-      # for (j in 1:ne){
-      #   ## generating perturbation variable
-      #   eta <- rexp(n, 1)
-      #   if (all(data[, 4] == rep(1, n))){
-      #     W_star <- rep(1, n)
-      #   } else {
-      #     Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-      #     ghatstart0 <- 1
-      #     if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-      #     W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
-      #     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
-      #   }
-      #   pmb.eval <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n
-      #   result.pmb <- cbind(result.pmb, pmb.eval)
-      # }
-      # new_V <- cov(t(result.pmb), use = "complete.obs")
-      # new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
-      # new_h <- new_sigma
-      # iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-      # iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
       out <- list(coefficient = tail(iter_beta_result, n = 1),
                   trace.coefficient = iter_beta_result,
                   stderr = tail(iter_SE_result, n = 1),
@@ -296,7 +265,7 @@ qrismb.smooth <- function(info) {
         ## Singular matrix 'a' error message and break
         if (class(try(qr.solve(pmb.a),silent=TRUE))[1]=="try-error") {
           pmb.se <- rep(NA,nc+1)
-          stop("‘A’ matrix is singular during iteration. Please try the nonsmooth method." )
+          stop("'A' matrix is singular during iteration. Please try the nonsmooth method." )
         } else {
           pmb.inva <- qr.solve(pmb.a)
           pmb.sigma <- t(pmb.inva) %*% pmb.v %*% pmb.inva

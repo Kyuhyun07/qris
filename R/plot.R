@@ -11,7 +11,7 @@ globalVariables("variable")
 ## #' @param exportData is a logical variable to specify whether to return the data.frame used to construct ggplot
 #' @param ... for future extension
 #'
-#' @importFrom stats vcov coef update
+#' @importFrom stats vcov coef update complete.cases
 #' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_ribbon labs xlab ylab
 #' @export
 #' @method plot qrismb

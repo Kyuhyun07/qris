@@ -32,7 +32,7 @@ lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
-fit <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "fmb")
+fit <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 50, "nonsmooth", "fmb")
 
 ## Plot with default values; Qs <- 1:9 / 10 and t0s = fit2$para$t0 (in this case 30)
 plot(fit)
