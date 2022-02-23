@@ -48,13 +48,46 @@ There are two examples
 +     dat$status <- 1 * (dat$Time0 < dat$censoring)
 +     subset(dat, select = c(Time, status, X))
 + }
+> 
 > set.seed(1)
 > dat <- data.gen(200)
-> library(qrismb)
 > fm <- Surv(Time, status) ~ X
-> fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "rq")
-> fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "noeffect")
-> fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", c(2,1))
+> fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
+> fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
+> fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
+> summary(fit1)
+Call:
+qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "smooth", 
+    se = "pmb", init = c(1, 1))
+
+qrismb Estimator
+            estimate std.Error z.value   p.value    
+(Intercept)   1.2395    0.0779  15.922 < 2.2e-16 ***
+X             0.8525    0.1220   6.990 < 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+> summary(fit2)
+Call:
+qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
+    se = "fmb", init = "rq")
+
+qrismb Estimator
+            estimate std.Error z.value   p.value    
+(Intercept)   1.2528    0.0992  12.626 < 2.2e-16 ***
+X             0.8100    0.1302   6.221 < 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+> summary(fit3)
+Call:
+qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "iterative", 
+    se = "pmb", init = "rq")
+
+qrismb Estimator
+            estimate std.Error z.value   p.value    
+(Intercept)   1.2398    0.0717  17.285 < 2.2e-16 ***
+X             0.8530    0.1188   7.179 < 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > 
 > coef(fit1)
 (Intercept)           X 
@@ -62,7 +95,7 @@ There are two examples
 > summary(fit2)
 Call:
 qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
-    init = "noeffect")
+    se = "fmb", init = "rq")
 
 qrismb Estimator
             estimate std.Error z.value   p.value    
@@ -71,10 +104,14 @@ X             0.8100    0.1302   6.221 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > vcov(fit3)
-            (Intercept)           X
-(Intercept)  0.01722485 -0.07026059
-X           -0.07026059 27.25328957
+             (Intercept)            X
+(Intercept)  0.005144076 -0.005910375
+X           -0.005910375  0.014115022
+> 
+> plot(fit1)
 ```
+
+![](README_files/figure-gfm/example-1.png)<!-- -->
 
 ``` r
 > ## 2. real data example
@@ -86,33 +123,53 @@ X           -0.07026059 27.25328957
 > ## tidy up the data
 > lung2$status <- lung2$status - 1
 > lung2$sex <- lung2$sex - 1
-> library(qrismb)
-> set.seed(1)
+> 
 > fm <- Surv(time, status) ~ age + sex
-> fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative", "rq")
-> fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", c(1,0,1))
-> fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "noeffect")
-> coef(fit1)
-(Intercept)         age         sex 
-5.206477586 0.006945976 0.182889952 
-> summary(fit2)
+> fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
+> fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "fmb", c(1, 0, 1))
+> fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "pmb", "rq")
+> 
+> summary(fit1)
 Call:
-qrismb(formula = fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, 
-    method = "nonsmooth", init = c(1, 0, 1))
+qrismb(formula = fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, 
+    method = "iterative", se = "pmb", init = "rq")
 
 qrismb Estimator
             estimate std.Error z.value p.value    
-(Intercept)   5.6362    0.9068   6.215  <2e-16 ***
-age          -0.0015    0.0136  -0.108  0.9142    
-sex           0.4489    0.1949   2.304  0.0212 *  
+(Intercept)   6.1730    0.6035  10.228  <2e-16 ***
+age          -0.0095    0.0091  -1.038  0.2991    
+sex           0.4885    0.1646   2.967  0.0030 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-> vcov(fit3)
-            (Intercept)           age           sex
-(Intercept)  6.05215483 -0.0949605456 -0.0644246628
-age         -0.09496055  0.0015012139 -0.0007793163
-sex         -0.06442466 -0.0007793163  0.4841417760
+> summary(fit2)
+Call:
+qrismb(formula = fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, 
+    method = "nonsmooth", se = "fmb", init = c(1, 0, 1))
+
+qrismb Estimator
+            estimate std.Error z.value p.value    
+(Intercept)   5.6362    0.9262   6.085  <2e-16 ***
+age          -0.0015    0.0142  -0.103  0.9183    
+sex           0.4489    0.2089   2.148  0.0317 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+> summary(fit3)
+Call:
+qrismb(formula = fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, 
+    method = "smooth", se = "pmb", init = "rq")
+
+qrismb Estimator
+            estimate std.Error z.value p.value    
+(Intercept)   8.6285    2.3845   3.619  0.0003 ***
+age          -0.0601    0.0377  -1.596  0.1104    
+sex           1.8121    0.7050   2.570  0.0102 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+> 
+> plot(fit2)
 ```
+
+![](README_files/figure-gfm/example2-1.png)<!-- -->
 
 ## Reference
 
