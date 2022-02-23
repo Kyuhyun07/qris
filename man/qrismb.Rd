@@ -12,7 +12,8 @@ qrismb(
   ne = 100,
   method = c("smooth", "iterative", "nonsmooth"),
   se = c("fmb", "pmb"),
-  init = "rq"
+  init = "rq",
+  control = qrismb.control()
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ It is only for "smooth" and "iterative" options.
 \item{init}{is an option for specifying the initial values of the parameters estimates
 ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 User defined vector as an initial value)}
+
+\item{control}{controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when method = "iterative".}
 }
 \value{
 An object of class "\code{qrismb}" contains model fitting results.
@@ -79,6 +82,7 @@ fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
 fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "fmb", "rq", control = qrismb.control(iterno = 20, tol = 1e-5, trace = TRUE))
 summary(fit1)
 summary(fit2)
 summary(fit3)

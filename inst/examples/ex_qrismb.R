@@ -19,6 +19,7 @@ fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
 fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "fmb", "rq", control = qrismb.control(iterno = 20, tol = 1e-5, trace = TRUE))
 summary(fit1)
 summary(fit2)
 summary(fit3)

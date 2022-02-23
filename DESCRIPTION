@@ -19,7 +19,8 @@ Imports:
     quantreg,
     stringr,
     survival,
-    ggplot2
+    ggplot2,
+    Rcpp
 LinkingTo: 
     Rcpp, 
     RcppArmadillo

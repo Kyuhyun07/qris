@@ -79,7 +79,7 @@ qrismb.iter <- function(info) {
     iter_SE_result <- sqrt(diag(new_sigma))
     iter_norm_result <- c()
     if (se == "fmb") {
-      for (k in 1:10){
+      for (k in 1:control$iterno){
         old_beta <- new_beta
         old_sigma <- new_sigma
         old_h <- new_h
@@ -114,6 +114,11 @@ qrismb.iter <- function(info) {
             }
           }
           new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
+          ## Trace the result
+          if (control$trace) {
+            cat("\n beta:", as.numeric(new_beta), "\n")
+            cat("\n se:", as.numeric(sqrt(diag(new_sigma))), "\n")
+          }
           if (class(try(new_sigma,silent=TRUE))[1]=="try-error") {
             warning("Futher fmb method is inapplicable to this dataset. Please try other estimation methods")
             new_sigma <- old_sigma
@@ -126,7 +131,7 @@ qrismb.iter <- function(info) {
               warning("Point estimation result is diverging")
               break
             }
-            if(norm(new_beta-old_beta, "i") < 1e-3) break
+            if(norm(new_beta-old_beta, "i") < control$tol) break
           }
         }
       } ## end for loop
@@ -171,7 +176,7 @@ qrismb.iter <- function(info) {
                   vcov = new_sigma, iterno = k,
                   norm = iter_norm_result)
     } else {
-      for (k in 1:10){
+      for (k in 1:control$iterno){
         old_beta <- new_beta
         old_sigma <- new_sigma
         old_h <- new_h
@@ -204,13 +209,18 @@ qrismb.iter <- function(info) {
           new_V <- cov(t(result.pmb), use = "complete.obs")
           new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
           new_h <- new_sigma
+          ## Trace the result
+          if (control$trace) {
+            cat("\n beta:", as.numeric(new_beta), "\n")
+            cat("\n se:", as.numeric(sqrt(diag(new_sigma))), "\n")
+          }
           iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
           iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
           if(iter_norm_result[k]>=100*iter_norm_result[1]) {
             warning("Point estimation result is diverging")
             break
             }
-          if(norm(new_beta-old_beta, "i") < 1e-3) break
+          if(norm(new_beta-old_beta, "i") < control$tol) break
         }
       } ## end for loop
       

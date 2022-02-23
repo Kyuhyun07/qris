@@ -22,6 +22,7 @@
 #' @param init is an option for specifying the initial values of the parameters estimates
 #' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 #' User defined vector as an initial value)
+#' @param control controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when method = "iterative".
 #' @return An object of class "\code{qrismb}" contains model fitting results.
 #' The \code{qrismb} object is a list containing at least the following components:
 #' \describe{
@@ -37,12 +38,13 @@
 #' @importFrom nleqslv nleqslv
 #' @importFrom stats pnorm rnorm
 #' @importFrom stringr str_replace
+#' @import Rcpp
 #' @example inst/examples/ex_qrismb.R
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                  method = c("smooth", "iterative", "nonsmooth"),
                  se = c("fmb","pmb"),
-                 # init = c("rq", "ones")
-                 init = "rq") {
+                 init = "rq",
+                 control = qrismb.control()) {
   scall <- match.call()
   mnames <- c("", "formula", "data")
   cnames <- names(scall)
@@ -72,7 +74,6 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   if(t0 < 0) stop("basetime must be 0 and positive number")
   if(length(Q) > 1) stop("Multiple taus not allowed in qrismb")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
-  ## if(ne <= 1) stop("number of multiplier bootstrapping must greater than 1")
   ## Suppress warning message
   logZ <- suppressWarnings(log(data[,1] - t0))
   I <- as.numeric(data[,1] >= t0)
@@ -106,7 +107,6 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                        on.exit(options(show.error.messages = F))
                      })
     if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
-    # if (init == "ones") betastart <- c(rep(1, nc))
   } else {
     if (!is.numeric(init)) stop("User specified initial value must be a numerical vector")
     if (length(init) != nc) stop("User specified initial value must match the number of covariates")
@@ -114,7 +114,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   }
   ## collect all useful information
   info <- list(X = X, I = I, W = W, Q = Q, ne = ne, nc = nc, n = n, H = H, t0 = t0,
-               logZ = logZ, data = data, betastart = betastart, se = se)
+               logZ = logZ, data = data, betastart = betastart, se = se, control = control)
   ## pass to fit
   out <- qrismb.fit(info, method)
   out$call <- scall
@@ -146,4 +146,21 @@ ghat <- function(Time, censor, wgt = 1) {
   nrisk <- colSums(outer(Time, deathtime, ">=") * wgt)
   survp <- cumprod(1 - ndeath / nrisk)
   data.frame(deathtime, ndeath, nrisk, survp)
+}
+
+#' Auxiliary for Controlling qrismb
+#'
+#' Auxiliary function as user interface for \code{qrismb} fitting.
+#'
+#' When \code{trace} is TRUE, output for each iteration is printed to the screen.
+#' 
+#' @param iterno max number of iteration.
+#' @param tol tolerance of convergence
+#' @param trace a binary variable, determine whether to display output for each iteration.
+#'
+#' @export
+#' @return A list with the arguments as components.
+#' @seealso \code{\link{qrismb}}
+qrismb.control <- function(iterno = 10, tol = 1e-3, trace = FALSE) {
+  list(iterno = iterno, tol = tol, trace = trace)
 }
