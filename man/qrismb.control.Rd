@@ -4,10 +4,10 @@
 \alias{qrismb.control}
 \title{Auxiliary for Controlling qrismb}
 \usage{
-qrismb.control(iterno = 10, tol = 0.001, trace = FALSE)
+qrismb.control(maxiter = 10, tol = 0.001, trace = FALSE)
 }
 \arguments{
-\item{iterno}{max number of iteration.}
+\item{maxiter}{max number of iteration.}
 
 \item{tol}{tolerance of convergence}
 

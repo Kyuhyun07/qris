@@ -79,7 +79,7 @@ qrismb.iter <- function(info) {
     iter_SE_result <- sqrt(diag(new_sigma))
     iter_norm_result <- c()
     if (se == "fmb") {
-      for (k in 1:control$iterno){
+      for (k in 1:control$maxiter){
         old_beta <- new_beta
         old_sigma <- new_sigma
         old_h <- new_h
@@ -116,7 +116,8 @@ qrismb.iter <- function(info) {
           new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
           ## Trace the result
           if (control$trace) {
-            cat("\n beta:", as.numeric(new_beta), "\n")
+            cat("\n Step:", k)
+            cat("\n beta:", as.numeric(new_beta))
             cat("\n se:", as.numeric(sqrt(diag(new_sigma))), "\n")
           }
           if (class(try(new_sigma,silent=TRUE))[1]=="try-error") {
@@ -128,55 +129,22 @@ qrismb.iter <- function(info) {
             iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
             iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
             if(iter_norm_result[k]>=100*iter_norm_result[1]) {
-              warning("Point estimation result is diverging")
+              warning("Point estimation failed to converge.")
               break
             }
             if(norm(new_beta-old_beta, "i") < control$tol) break
           }
         }
       } ## end for loop
-      # ## Last iteration
-      # old_beta <- new_beta
-      # old_sigma <- new_sigma
-      # old_h <- new_h
-      # slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q) / n
-      # ## Step 1 : Update beta()
-      # ## convergence problem in a
-      # new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q) / n)
-      # iter_beta_result <- rbind(iter_beta_result, t(new_beta))
-      # ## Step 2 : Update Sigma()
-      # result.fmb <- c()
-      # for (j in 1:ne){
-      #   ## generating perturbation variable
-      #   eta <- rexp(n, 1)
-      #   if (all(data[, 4] == rep(1, n))){
-      #     W_star <- rep(1, n)
-      #   } else {
-      #     Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-      #     ghatstart0 <- 1
-      #     if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-      #     W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
-      #     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
-      #   }
-      #   fmb.fit <- nleqslv(old_beta, function(b) rev_isObj(b, X, W_star, old_h, eta, I, logZ, Q)/n)
-      #   if (fmb.fit$termcd == 1 | fmb.fit$termcd == 2) {
-      #     result.fmb <- cbind(result.fmb,fmb.fit$x)
-      #   } else {
-      #     result.fmb <- cbind(result.fmb,rep(NA, length(fmb.fit$x)))
-      #   }
-      # }
-      # new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
-      # new_h <- new_sigma
-      # iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-      # iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+      
       out <- list(coefficient = tail(iter_beta_result, n = 1),
-                  coefficient_result = iter_beta_result,
+                  trace.coefficient = iter_beta_result,
                   stderr = tail(iter_SE_result, n = 1),
-                  stderr_result = iter_SE_result,
+                  trace.stderr = iter_SE_result,
                   vcov = new_sigma, iterno = k,
                   norm = iter_norm_result)
     } else {
-      for (k in 1:control$iterno){
+      for (k in 1:control$maxiter){
         old_beta <- new_beta
         old_sigma <- new_sigma
         old_h <- new_h
@@ -255,9 +223,9 @@ qrismb.iter <- function(info) {
       # iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
       # iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
       out <- list(coefficient = tail(iter_beta_result, n = 1),
-                  coefficient_result = iter_beta_result,
+                  trace.coefficient = iter_beta_result,
                   stderr = tail(iter_SE_result, n = 1),
-                  stderr_result = iter_SE_result,
+                  trace.stderr = iter_SE_result,
                   vcov = new_sigma, iterno = k,
                   norm = iter_norm_result)
     }})
@@ -299,7 +267,7 @@ qrismb.smooth <- function(info) {
         }
         fmb.sigma <- try(cov(t(smooth.fmb.result), use = "complete.obs"), silent = T)
         if(class(fmb.sigma)[1] == "try-error" | sum(!is.na(colSums(smooth.fmb.result))) <= 1){
-          stop("More resampling iterations are necessary")
+          stop("More resampling iterations are needed")
         } else {
           fmb.se <- sqrt(diag(fmb.sigma))
           out <- list(coefficient = coefficient, stderr = fmb.se, vcov = fmb.sigma)

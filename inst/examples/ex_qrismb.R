@@ -1,6 +1,7 @@
 ## ######################################### 
 ## Simulated data
 ## #########################################
+
 data.gen <- function(n) {
     r0 <- .2 * sqrt(log(2))
     r1 <- .1 * sqrt(log(2))
@@ -18,8 +19,9 @@ dat <- data.gen(200)
 fm <- Surv(Time, status) ~ X
 fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
 fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
-fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "fmb", "rq", control = qrismb.control(iterno = 20, tol = 1e-5, trace = TRUE))
+fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "fmb", "rq",
+               control = qrismb.control(maxit = 20, tol = 1e-3, trace = TRUE))
+
 summary(fit1)
 summary(fit2)
 summary(fit3)

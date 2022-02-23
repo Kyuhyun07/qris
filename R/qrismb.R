@@ -29,7 +29,7 @@
 #'   \item{coefficient}{a vector of point estimates}
 #'   \item{stderr}{a vector of standard error of point estiamtes}
 #'   \item{vcov}{a matrix of the estimated variance-covariance matrix}
-#'   \item{iterno}{a number of itertation until convergence (only for iterative procedure)}
+#'   \item{maxiter}{a number of itertation until convergence (only for iterative procedure)}
 #'   }
 #'
 #' @export
@@ -43,7 +43,7 @@
 qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                  method = c("smooth", "iterative", "nonsmooth"),
                  se = c("fmb","pmb"),
-                 init = "rq",
+                 init = c("rq", "noeffect"),
                  control = qrismb.control()) {
   scall <- match.call()
   mnames <- c("", "formula", "data")
@@ -120,6 +120,10 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   out$call <- scall
   out$varNames <- colnames(covariate)
   out$para <- list(method = method, Q = Q, t0 = t0, ne = ne)
+  if (info$control$trace) {
+    rownames(out$trace.coefficient) <- rownames(out$trace.stderr) <- NULL
+    colnames(out$trace.coefficient) <- colnames(out$trace.stderr) <- out$varNames
+  }
   out <- out[order(names(out))]
   class(out) <- "qrismb"
   return(out)
@@ -154,13 +158,13 @@ ghat <- function(Time, censor, wgt = 1) {
 #'
 #' When \code{trace} is TRUE, output for each iteration is printed to the screen.
 #' 
-#' @param iterno max number of iteration.
+#' @param maxiter max number of iteration.
 #' @param tol tolerance of convergence
 #' @param trace a binary variable, determine whether to display output for each iteration.
 #'
 #' @export
 #' @return A list with the arguments as components.
 #' @seealso \code{\link{qrismb}}
-qrismb.control <- function(iterno = 10, tol = 1e-3, trace = FALSE) {
-  list(iterno = iterno, tol = tol, trace = trace)
+qrismb.control <- function(maxiter = 10, tol = 1e-3, trace = FALSE) {
+  list(maxiter = maxiter, tol = tol, trace = trace)
 }
