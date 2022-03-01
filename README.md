@@ -1,12 +1,12 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# qrismb
+# qris
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The **qrismb** package implements estimation procedures for a regression
+The **qris** package implements estimation procedures for a regression
 model of the quantiles of residual life, remaining lifetime at a
 specific time, subject to right censoring. For estimation of regression
 parameters, we consider an induced smoothed method that solves smoothed
@@ -23,13 +23,13 @@ and their standard errors is implemented.
 
 ## Installation
 
-You can install the released version of qrismb from
-[GitHub](https://github.com/Kyuhyun07/qrismb) with:
+You can install the released version of qris from
+[GitHub](https://github.com/Kyuhyun07/qris) with:
 
 ``` r
 > ## install.packages("devtools")
-> devtools::install_github("Kyuhyun07/qrismb")
-> library(qrismb)
+> devtools::install_github("Kyuhyun07/qris")
+> library(qris)
 ```
 
 ## Example
@@ -49,18 +49,29 @@ There are two examples
 +     subset(dat, select = c(Time, status, X))
 + }
 > 
+> library(survival)
 > set.seed(1)
 > dat <- data.gen(200)
 > fm <- Surv(Time, status) ~ X
-> fit1 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
-> fit2 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
-> fit3 <- qrismb(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
+> fit1 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
+> fit2 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
+> fit3 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "fmb", "rq",
++                control = qris.control(maxit = 20, tol = 1e-3, trace = TRUE))
+
+ Step: 1
+ beta: 1.239291 0.8531057
+ se: 0.09210374 0.1227197 
+
+ Step: 2
+ beta: 1.239863 0.8527304
+ se: 0.07852733 0.1262729 
+> 
 > summary(fit1)
 Call:
-qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "smooth", 
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "smooth", 
     se = "pmb", init = c(1, 1))
 
-qrismb Estimator
+qris Estimator
             estimate std.Error z.value   p.value    
 (Intercept)   1.2395    0.0779  15.922 < 2.2e-16 ***
 X             0.8525    0.1220   6.990 < 2.2e-16 ***
@@ -68,10 +79,10 @@ X             0.8525    0.1220   6.990 < 2.2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit2)
 Call:
-qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
     se = "fmb", init = "rq")
 
-qrismb Estimator
+qris Estimator
             estimate std.Error z.value   p.value    
 (Intercept)   1.2528    0.0992  12.626 < 2.2e-16 ***
 X             0.8100    0.1302   6.221 < 2.2e-16 ***
@@ -79,13 +90,14 @@ X             0.8100    0.1302   6.221 < 2.2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit3)
 Call:
-qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "iterative", 
-    se = "pmb", init = "rq")
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "iterative", 
+    se = "fmb", init = "rq", control = qris.control(maxit = 20, 
+        tol = 0.001, trace = TRUE))
 
-qrismb Estimator
+qris Estimator
             estimate std.Error z.value   p.value    
-(Intercept)   1.2398    0.0717  17.285 < 2.2e-16 ***
-X             0.8530    0.1188   7.179 < 2.2e-16 ***
+(Intercept)   1.2399    0.0785  15.789 < 2.2e-16 ***
+X             0.8527    0.1263   6.753 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > 
@@ -94,10 +106,10 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
   1.2395248   0.8525343 
 > summary(fit2)
 Call:
-qrismb(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
     se = "fmb", init = "rq")
 
-qrismb Estimator
+qris Estimator
             estimate std.Error z.value   p.value    
 (Intercept)   1.2528    0.0992  12.626 < 2.2e-16 ***
 X             0.8100    0.1302   6.221 < 2.2e-16 ***
@@ -105,8 +117,8 @@ X             0.8100    0.1302   6.221 < 2.2e-16 ***
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > vcov(fit3)
              (Intercept)            X
-(Intercept)  0.005144076 -0.005910375
-X           -0.005910375  0.014115022
+(Intercept)  0.006166542 -0.006948767
+X           -0.006948767  0.015944839
 > 
 > plot(fit1)
 ```
@@ -125,16 +137,16 @@ X           -0.005910375  0.014115022
 > lung2$sex <- lung2$sex - 1
 > 
 > fm <- Surv(time, status) ~ age + sex
-> fit1 <- qrismb(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
-> fit2 <- qrismb(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "fmb", c(1, 0, 1))
-> fit3 <- qrismb(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "pmb", "rq")
+> fit1 <- qris(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
+> fit2 <- qris(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "fmb", c(1, 0, 1))
+> fit3 <- qris(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "pmb", "rq")
 > 
 > summary(fit1)
 Call:
-qrismb(formula = fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, 
-    method = "iterative", se = "pmb", init = "rq")
+qris(formula = fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, method = "iterative", 
+    se = "pmb", init = "rq")
 
-qrismb Estimator
+qris Estimator
             estimate std.Error z.value p.value    
 (Intercept)   6.1730    0.6035  10.228  <2e-16 ***
 age          -0.0095    0.0091  -1.038  0.2991    
@@ -143,10 +155,10 @@ sex           0.4885    0.1646   2.967  0.0030 **
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit2)
 Call:
-qrismb(formula = fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, 
+qris(formula = fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, 
     method = "nonsmooth", se = "fmb", init = c(1, 0, 1))
 
-qrismb Estimator
+qris Estimator
             estimate std.Error z.value p.value    
 (Intercept)   5.6362    0.9262   6.085  <2e-16 ***
 age          -0.0015    0.0142  -0.103  0.9183    
@@ -155,10 +167,10 @@ sex           0.4489    0.2089   2.148  0.0317 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit3)
 Call:
-qrismb(formula = fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, 
+qris(formula = fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, 
     method = "smooth", se = "pmb", init = "rq")
 
-qrismb Estimator
+qris Estimator
             estimate std.Error z.value p.value    
 (Intercept)   8.6285    2.3845   3.619  0.0003 ***
 age          -0.0601    0.0377  -1.596  0.1104    
