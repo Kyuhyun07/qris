@@ -2,7 +2,7 @@ globalVariables("variable")
 
 #' Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data
 #'
-#' @param x is an qrismb object or a data.frame returned by plot.qrismb
+#' @param x is an qris object or a data.frame returned by plot.qris
 #' @param t0s is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}
 #' @param Qs  is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}
 #' @param ne is the number of multiplier bootstrapping for standard error estimation.
@@ -14,10 +14,10 @@ globalVariables("variable")
 #' @importFrom stats vcov coef update complete.cases
 #' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_ribbon labs xlab ylab
 #' @export
-#' @method plot qrismb
+#' @method plot qris
 #'
 #' @example inst/examples/ex_plot.R
-plot.qrismb <- function(x, t0s = NULL, Qs = NULL, ne = NULL, vari = NULL,
+plot.qris <- function(x, t0s = NULL, Qs = NULL, ne = NULL, vari = NULL,
                   byQs = FALSE, ...) {
   ## Assign default values
   ## When both t0s and Qs are NULL, we plot it by Qs? which is easier or more informative?

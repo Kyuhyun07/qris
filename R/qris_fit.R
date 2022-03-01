@@ -1,16 +1,16 @@
-#' A wrapper for the different qrismb fit
+#' A wrapper for the different qris fit
 #'
 #' This version is more flexible for future extension
 #' 
 #' @noRd
-qrismb.fit <- function(info, method) {
+qris.fit <- function(info, method) {
   switch(method,
-         smooth = qrismb.smooth(info),
-         iterative = qrismb.iter(info),
-         nonsmooth = qrismb.nonsmooth(info))
+         smooth = qris.smooth(info),
+         iterative = qris.iter(info),
+         nonsmooth = qris.nonsmooth(info))
 }
 
-qrismb.nonsmooth <- function(info) {
+qris.nonsmooth <- function(info) {
   ## 1. : L1-minimization : Estimating equation for estimating beta (using rq)
   out <- with(info, {
     M <- 1e6
@@ -71,7 +71,7 @@ qrismb.nonsmooth <- function(info) {
   out
 }
 
-qrismb.iter <- function(info) {
+qris.iter <- function(info) {
   out <- with(info, {
     iter_beta_result <- old_beta <- new_beta <- betastart
     new_h <- old_h <- H
@@ -201,7 +201,7 @@ qrismb.iter <- function(info) {
   out
 }
 
-qrismb.smooth <- function(info) {
+qris.smooth <- function(info) {
   out <- with(info, {
     smooth.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
     if (smooth.fit$termcd == 1 | smooth.fit$termcd == 2) {

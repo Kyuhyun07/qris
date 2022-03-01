@@ -23,8 +23,8 @@
 #' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 #' User defined vector as an initial value)
 #' @param control controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when method = "iterative".
-#' @return An object of class "\code{qrismb}" contains model fitting results.
-#' The \code{qrismb} object is a list containing at least the following components:
+#' @return An object of class "\code{qris}" contains model fitting results.
+#' The \code{qris} object is a list containing at least the following components:
 #' \describe{
 #'   \item{coefficient}{a vector of point estimates}
 #'   \item{stderr}{a vector of standard error of point estiamtes}
@@ -39,12 +39,12 @@
 #' @importFrom stats pnorm rnorm
 #' @importFrom stringr str_replace
 #' @import Rcpp
-#' @example inst/examples/ex_qrismb.R
-qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
+#' @example inst/examples/ex_qris.R
+qris <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
                  method = c("smooth", "iterative", "nonsmooth"),
                  se = c("fmb","pmb"),
                  init = c("rq", "noeffect"),
-                 control = qrismb.control()) {
+                 control = qris.control()) {
   scall <- match.call()
   mnames <- c("", "formula", "data")
   cnames <- names(scall)
@@ -57,7 +57,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   method <- match.arg(method)
   se <- match.arg(se)
   if (class(m[[1]]) != "Surv" || ncol(obj) > 2)
-    stop("qrismb only supports Surv object with right censoring.", call. = FALSE)
+    stop("qris only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
   ## Create data; the first 2 columns are from Surv(), e.g., time, status, x1, x2, ...
   if (formula == ~1) {
@@ -72,7 +72,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   ## Checks
   if(nc < 2) stop("Use at least one covariate")
   if(t0 < 0) stop("basetime must be 0 and positive number")
-  if(length(Q) > 1) stop("Multiple taus not allowed in qrismb")
+  if(length(Q) > 1) stop("Multiple taus not allowed in qris")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
   ## Suppress warning message
   logZ <- suppressWarnings(log(data[,1] - t0))
@@ -116,7 +116,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   info <- list(X = X, I = I, W = W, Q = Q, ne = ne, nc = nc, n = n, H = H, t0 = t0,
                logZ = logZ, data = data, betastart = betastart, se = se, control = control)
   ## pass to fit
-  out <- qrismb.fit(info, method)
+  out <- qris.fit(info, method)
   out$call <- scall
   out$varNames <- colnames(covariate)
   out$para <- list(method = method, Q = Q, t0 = t0, ne = ne)
@@ -125,7 +125,7 @@ qrismb <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
     colnames(out$trace.coefficient) <- colnames(out$trace.stderr) <- out$varNames
   }
   out <- out[order(names(out))]
-  class(out) <- "qrismb"
+  class(out) <- "qris"
   return(out)
 }
 
@@ -152,9 +152,9 @@ ghat <- function(Time, censor, wgt = 1) {
   data.frame(deathtime, ndeath, nrisk, survp)
 }
 
-#' Auxiliary for Controlling qrismb
+#' Auxiliary for Controlling qris
 #'
-#' Auxiliary function as user interface for \code{qrismb} fitting.
+#' Auxiliary function as user interface for \code{qris} fitting.
 #'
 #' When \code{trace} is TRUE, output for each iteration is printed to the screen.
 #' 
@@ -164,7 +164,7 @@ ghat <- function(Time, censor, wgt = 1) {
 #'
 #' @export
 #' @return A list with the arguments as components.
-#' @seealso \code{\link{qrismb}}
-qrismb.control <- function(maxiter = 10, tol = 1e-3, trace = FALSE) {
+#' @seealso \code{\link{qris}}
+qris.control <- function(maxiter = 10, tol = 1e-3, trace = FALSE) {
   list(maxiter = maxiter, tol = tol, trace = trace)
 }

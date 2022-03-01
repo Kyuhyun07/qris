@@ -3,16 +3,16 @@
 
 #' @noRd
 Amat <- function(b, X, W_star, H, I, logT, Q) {
-    .Call('_qrismb_Amat', PACKAGE = 'qrismb', b, X, W_star, H, I, logT, Q)
+    .Call('_qris_Amat', PACKAGE = 'qris', b, X, W_star, H, I, logT, Q)
 }
 
 #' @noRd
 isObj <- function(b, X, W, H, I, logT, Q) {
-    .Call('_qrismb_isObj', PACKAGE = 'qrismb', b, X, W, H, I, logT, Q)
+    .Call('_qris_isObj', PACKAGE = 'qris', b, X, W, H, I, logT, Q)
 }
 
 #' @noRd
 rev_isObj <- function(b, X, W, H, E, I, logT, Q) {
-    .Call('_qrismb_rev_isObj', PACKAGE = 'qrismb', b, X, W, H, E, I, logT, Q)
+    .Call('_qris_rev_isObj', PACKAGE = 'qris', b, X, W, H, E, I, logT, Q)
 }
 
