@@ -7,3 +7,4 @@ README.md
 .Rhistory
 ^README\.Rmd$
 README_files
+^qris\.Rproj$
