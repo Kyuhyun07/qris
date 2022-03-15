@@ -265,7 +265,7 @@ qris.smooth <- function(info) {
         ## Singular matrix 'a' error message and break
         if (class(try(qr.solve(pmb.a),silent=TRUE))[1]=="try-error") {
           pmb.se <- rep(NA,nc+1)
-          stop("'A' matrix is singular during iteration. Please try the nonsmooth method." )
+          stop("'A' matrix is singular during iteration. Please try the nonsmooth method.")
         } else {
           pmb.inva <- qr.solve(pmb.a)
           pmb.sigma <- t(pmb.inva) %*% pmb.v %*% pmb.inva

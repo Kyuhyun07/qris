@@ -36,7 +36,7 @@
 #' @importFrom survival Surv survfit
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
-#' @importFrom stats pnorm rnorm
+#' @importFrom stats pnorm rnorm complete.cases
 #' @importFrom stringr str_replace
 #' @import Rcpp
 #' @example inst/examples/ex_qris.R
