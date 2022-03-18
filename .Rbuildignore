@@ -9,3 +9,6 @@ README.md
 README_files
 qris.Rproj
 .DS_Store
+^appveyor\.yml$
+^\.github$
+^\.travis\.yml$
