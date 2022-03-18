@@ -13,6 +13,9 @@ install:
 cache:
   - C:\RLibrary
 
+environment:
+  GCC_PATH: gcc-4.6.3
+  
 # Adapt as necessary starting from here
 
 build_script:
