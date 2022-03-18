@@ -6,10 +6,8 @@
 <!-- badges: start -->
 
 [![AppVeyor build
-status](https://ci.appveyor.com/api/projects/status/github/Kyuhyun07/qris?branch=master&svg=true)](https://ci.appveyor.com/project/Kyuhyun07/qris)
+status](https://ci.appveyor.com/api/projects/status/ibq7asah7tmym46b/branch/master?svg=true)](https://ci.appveyor.com/project/stc04003/qris-shjbv/branch/master)
 [![R-CMD-check](https://github.com/Kyuhyun07/qris/workflows/R-CMD-check/badge.svg)](https://github.com/Kyuhyun07/qris/actions)
-[![Travis build
-status](https://travis-ci.com/Kyuhyun07/qris.svg?branch=master)](https://travis-ci.com/Kyuhyun07/qris)
 <!-- badges: end -->
 
 The **qris** package implements estimation procedures for a regression

@@ -10,9 +10,8 @@ knitr::opts_chunk$set(comment = NA, prompt = TRUE, collapse = TRUE)
 # qris
 
 <!-- badges: start -->
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/Kyuhyun07/qris?branch=master&svg=true)](https://ci.appveyor.com/project/Kyuhyun07/qris)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/ibq7asah7tmym46b/branch/master?svg=true)](https://ci.appveyor.com/project/stc04003/qris-shjbv/branch/master)
 [![R-CMD-check](https://github.com/Kyuhyun07/qris/workflows/R-CMD-check/badge.svg)](https://github.com/Kyuhyun07/qris/actions)
-[![Travis build status](https://travis-ci.com/Kyuhyun07/qris.svg?branch=master)](https://travis-ci.com/Kyuhyun07/qris)
 <!-- badges: end -->
 
 The __qris__ package implements estimation procedures for a regression model of the quantiles of residual life, remaining lifetime at a specific time, subject to right censoring. For estimation of regression parameters, we consider an induced smoothed method that solves smoothed weighted estimating equations. We also consider the estimation method that solves the original non-smooth weighted estimating equations via a L1 minimization method. To handle data subject to right censoring, inverse probabilities of censoring are incorporated as weights. For standard errors estimation, a robust sandwich-type covariance estimator aided by an efficient resampling method, and a full multiplier bootstrap approach are considered for the induced smoothed estimator (“smooth”) and non-smooth estimator (“nonsmooth”), respectively. Furthermore, an iterative procedure that simultaneously estimates regression parameters and their standard errors is implemented.
