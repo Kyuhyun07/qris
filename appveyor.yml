@@ -14,7 +14,7 @@ cache:
   - C:\RLibrary
 
 environment:
-  GCC_PATH: gcc-4.6.3
+  GCC_PATH: mingw_64
   
 # Adapt as necessary starting from here
 
