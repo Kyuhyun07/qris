@@ -124,7 +124,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 (Intercept)  0.006166542 -0.006948767
 X           -0.006948767  0.015944839
 > 
-> plot(fit1)
+> plot(fit1, Qs = 4:6 / 10)
 ```
 
 ![](README_files/figure-gfm/example-1.png)<!-- -->
@@ -152,9 +152,9 @@ qris(formula = fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, method = "iterative"
 
 qris Estimator
             estimate std.Error z.value p.value    
-(Intercept)   6.1730    0.6035  10.228  <2e-16 ***
-age          -0.0095    0.0091  -1.038  0.2991    
-sex           0.4885    0.1646   2.967  0.0030 ** 
+(Intercept)   6.1747    0.7032   8.781  <2e-16 ***
+age          -0.0095    0.0108  -0.880  0.3790    
+sex           0.4873    0.1675   2.909  0.0036 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit2)
@@ -164,9 +164,9 @@ qris(formula = fm, data = lung2, t0 = 30, Q = 0.5, ne = 200,
 
 qris Estimator
             estimate std.Error z.value p.value    
-(Intercept)   5.6362    0.9262   6.085  <2e-16 ***
-age          -0.0015    0.0142  -0.103  0.9183    
-sex           0.4489    0.2089   2.148  0.0317 *  
+(Intercept)   5.6362    0.8650   6.516  <2e-16 ***
+age          -0.0015    0.0132  -0.110  0.9122    
+sex           0.4489    0.2175   2.064  0.0390 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit3)
@@ -176,18 +176,21 @@ qris(formula = fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,
 
 qris Estimator
             estimate std.Error z.value p.value    
-(Intercept)   8.6285    2.3845   3.619  0.0003 ***
-age          -0.0601    0.0377  -1.596  0.1104    
-sex           1.8121    0.7050   2.570  0.0102 *  
+(Intercept)   8.6285    2.6138   3.301  0.0010 ***
+age          -0.0601    0.0416  -1.446  0.1481    
+sex           1.8121    0.6657   2.722  0.0065 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > 
-> plot(fit2)
+> plot(fit2, Qs = 4:6 / 10)
 ```
 
 ![](README_files/figure-gfm/example2-1.png)<!-- -->
 
 ## Reference
+
+Kim, K., and Kang, S., (2022). Smoothed quantile regression for censored
+residual life.
 
 Chiou, S., Kang, S., and Yan, J. (2014). Fitting accelerated failure
 time model in routine survival analysis with R package aftgee. *Journal
