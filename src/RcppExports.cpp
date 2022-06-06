@@ -16,7 +16,6 @@ arma::mat Amat(arma::vec b, arma::mat X, arma::vec W_star, arma::mat H, arma::ve
 RcppExport SEXP _qris_Amat(SEXP bSEXP, SEXP XSEXP, SEXP W_starSEXP, SEXP HSEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type W_star(W_starSEXP);
@@ -33,7 +32,6 @@ arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec I,
 RcppExport SEXP _qris_isObj(SEXP bSEXP, SEXP XSEXP, SEXP WSEXP, SEXP HSEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type W(WSEXP);
@@ -50,7 +48,6 @@ arma::mat rev_isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::ve
 RcppExport SEXP _qris_rev_isObj(SEXP bSEXP, SEXP XSEXP, SEXP WSEXP, SEXP HSEXP, SEXP ESEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type W(WSEXP);

@@ -5,7 +5,7 @@ using namespace arma;
 // [[Rcpp::plugins(cpp11)]]
 
 //' @noRd
-// [[Rcpp::export]]
+// [[Rcpp::export(rng = FALSE)]]
 arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H,
 		arma::vec I, arma::vec logT, double Q) {
   arma::mat m1 = X % repmat(I, 1, X.n_cols);
