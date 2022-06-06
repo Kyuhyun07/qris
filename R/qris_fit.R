@@ -162,8 +162,7 @@ qris.iter <- function(info) {
               W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
               W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
-            pmb.eval <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n
-            result.pmb[,j] <- pmb.eval
+            result.pmb[,j] <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n           
           }
           new_V <- cov(t(result.pmb), use = "complete.obs")
           new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
@@ -237,22 +236,23 @@ qris.smooth <- function(info) {
       } else if (se == "pmb") {
         ## Partial Multiplier Bootstrap
         smooth.pmb.result <- matrix(NA, nc, ne)
+        eList <- isObjL(smooth.fit$x, X, W, H, I, logZ, Q)
         for (j in 1:ne){
           ## generating perturbation variable
-          eta <- rexp(n,1)
+          eta <- rexp(n)
           if (all(data[, 4] == rep(1, n))){
             W_star <- rep(1, n)
           } else {
-            Gest <- ghat(data[,1],1-data[,4],eta)
+            Gest <- ghat(data[,1],1 - data[,4], eta)
             ghatstart0 <- 1
             if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
             W_star <- data[,4] /
               Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
             W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
           }
-          pmb.eval <- rev_isObj(coefficient, X, W_star, H, eta, I, logZ, Q) / n
-          smooth.pmb.result[,j] <- pmb.eval
-        }
+          ## smooth.pmb.result[,j] <- rev_isObj(coefficient, X, W_star, H, eta, I, logZ, Q) / n
+          smooth.pmb.result[,j] <- with(eList, t(m1 * eta) %*% (m2 * W_star - Q)) / n
+        }       
         pmb.v <- try(cov(t(smooth.pmb.result), use = "complete.obs"), silent = T)
         pmb.a <- Amat(coefficient, X, W, H, I, logZ, Q) / n
         ## Singular matrix 'a' error message and break

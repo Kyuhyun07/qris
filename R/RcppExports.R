@@ -12,6 +12,11 @@ isObj <- function(b, X, W, H, I, logT, Q) {
 }
 
 #' @noRd
+isObjL <- function(b, X, W, H, I, logT, Q) {
+    .Call('_qris_isObjL', PACKAGE = 'qris', b, X, W, H, I, logT, Q)
+}
+
+#' @noRd
 rev_isObj <- function(b, X, W, H, E, I, logT, Q) {
     .Call('_qris_rev_isObj', PACKAGE = 'qris', b, X, W, H, E, I, logT, Q)
 }

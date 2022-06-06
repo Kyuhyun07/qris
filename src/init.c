@@ -10,11 +10,13 @@
 /* .Call calls */
 extern SEXP _qris_Amat(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _qris_isObj(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP _qris_isObjL(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP _qris_rev_isObj(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_qris_Amat",      (DL_FUNC) &_qris_Amat,      7},
     {"_qris_isObj",     (DL_FUNC) &_qris_isObj,     7},
+    {"_qris_isObjL",    (DL_FUNC) &_qris_isObjL,    7},
     {"_qris_rev_isObj", (DL_FUNC) &_qris_rev_isObj, 8},
     {NULL, NULL, 0}
 };
