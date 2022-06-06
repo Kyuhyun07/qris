@@ -28,7 +28,7 @@ qris.nonsmooth <- function(info) {
         return(list(coefficient = coefficient, stderr = se, vcov = vcov))
       }
       if (se == "fmb"){
-        fmb.result <- c()
+        fmb.result <- matrix(NA, nc, ne)
         for (j in 1:ne){
           ## generating perturbation variable
           eta <- rexp(n, 1)
@@ -44,14 +44,12 @@ qris.nonsmooth <- function(info) {
           rev_pseudo1 <- -colSums(X * W_star * eta)
           rev_pseudo2 <- 2 * colSums(X * I * eta * Q)
           rev_Y.reg <- c(data[,2], M, M)
-          rev_X.reg <- rbind(X,rbind(rev_pseudo1, rev_pseudo2))
+          rev_X.reg <- rbind(X, rbind(rev_pseudo1, rev_pseudo2))
           rev_W.reg <- c(W_star * I * eta, 1, 1)
           fmb.fit <- rq.wfit(rev_X.reg, rev_Y.reg, weights = rev_W.reg)
           if (all(fmb.fit$coef <= 10)){
-            fmb.result <- cbind(fmb.result, as.vector(fmb.fit$coef))
-          } else {
-            fmb.result <- cbind(fmb.result, rep(NA, nc))
-          }
+            fmb.result[, j] <- as.vector(fmb.fit$coef)
+          } 
         }
         fmb.sigma <- try(cov(t(fmb.result), use = "complete.obs"), silent = T)
         if(class(fmb.sigma)[1] == "try-error" | sum(!is.na(colSums(fmb.result))) <= 1){
@@ -73,11 +71,12 @@ qris.nonsmooth <- function(info) {
 
 qris.iter <- function(info) {
   out <- with(info, {
-    iter_beta_result <- old_beta <- new_beta <- betastart
     new_h <- old_h <- H
     new_sigma <- old_sigma <- H*n
-    iter_SE_result <- sqrt(diag(new_sigma))
-    iter_norm_result <- c()
+    iter_beta_result <- iter_SE_result <- matrix(NA, control$maxiter, nc)
+    iter_beta_result[1,] <- old_beta <- new_beta <- betastart
+    iter_SE_result[1,] <- sqrt(diag(new_sigma))
+    iter_norm_result <- rep(NA, control$maxiter)
     if (se == "fmb") {
       for (k in 1:control$maxiter){
         old_beta <- new_beta
@@ -91,9 +90,9 @@ qris.iter <- function(info) {
           break
         } else {
           new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
-          iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+          iter_beta_result[k,] <- t(new_beta)
           ## Step 2 : Update Sigma()
-          result.fmb <- c()
+          result.fmb <- matrix(NA, nc, ne)
           for (j in 1:ne){
             ## generating perturbation variable
             eta <- rexp(n, 1)
@@ -106,11 +105,10 @@ qris.iter <- function(info) {
               W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
               W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
-            fmb.fit <- nleqslv(old_beta, function(b) rev_isObj(b, X, W_star, old_h, eta, I, logZ, Q)/n)
+            fmb.fit <- nleqslv(old_beta, function(b)
+              rev_isObj(b, X, W_star, old_h, eta, I, logZ, Q)/n)
             if (fmb.fit$termcd == 1 | fmb.fit$termcd == 2) {
-              result.fmb <- cbind(result.fmb,fmb.fit$x)
-            } else {
-              result.fmb <- cbind(result.fmb,rep(NA, length(fmb.fit$x)))
+              result.fmb[, j] <- fmb.fit$x
             }
           }
           new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
@@ -126,8 +124,8 @@ qris.iter <- function(info) {
             break
           } else {
             new_h <- new_sigma
-            iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-            iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+            iter_SE_result[k,] <- sqrt(diag(new_sigma))
+            iter_norm_result[k] <- norm(new_beta-old_beta, "F")
             if(iter_norm_result[k]>=100*iter_norm_result[1]) {
               warning("Point estimation failed to converge.")
               break
@@ -136,13 +134,6 @@ qris.iter <- function(info) {
           }
         }
       } ## end for loop
-      
-      out <- list(coefficient = tail(iter_beta_result, n = 1),
-                  trace.coefficient = iter_beta_result,
-                  stderr = tail(iter_SE_result, n = 1),
-                  trace.stderr = iter_SE_result,
-                  vcov = new_sigma, iterno = k,
-                  norm = iter_norm_result)
     } else {
       for (k in 1:control$maxiter){
         old_beta <- new_beta
@@ -151,14 +142,14 @@ qris.iter <- function(info) {
         slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
         ## Step 1 : Update beta()
         ## Singular matrix 'a' error message and break
-        if (class(try(qr.solve(slope_a),silent=TRUE))[1]=="try-error") {
+        if (class(try(qr.solve(slope_a), silent=TRUE))[1]=="try-error") {
           warning("'A' matrix is singular during iteration. Please try the non-iterative method.")
           break
         } else {
           new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
-          iter_beta_result <- rbind(iter_beta_result, t(new_beta))
+          iter_beta_result[k,] <- t(new_beta)
           ## Step 2 : Update Sigma()
-          result.pmb <- c()
+          result.pmb <- matrix(NA, nc, ne)
           for (j in 1:ne){
             ## generating perturbation variable
             eta <- rexp(n, 1)
@@ -172,7 +163,7 @@ qris.iter <- function(info) {
               W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
             pmb.eval <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n
-            result.pmb <- cbind(result.pmb, pmb.eval)
+            result.pmb[,j] <- pmb.eval
           }
           new_V <- cov(t(result.pmb), use = "complete.obs")
           new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
@@ -182,8 +173,8 @@ qris.iter <- function(info) {
             cat("\n beta:", as.numeric(new_beta), "\n")
             cat("\n se:", as.numeric(sqrt(diag(new_sigma))), "\n")
           }
-          iter_SE_result <- rbind(iter_SE_result , sqrt(diag(new_sigma)))
-          iter_norm_result <- rbind(iter_norm_result , norm(new_beta-old_beta, "F"))
+          iter_SE_result[k,] <- sqrt(diag(new_sigma))
+          iter_norm_result[k] <- norm(new_beta-old_beta, "F")
           if(iter_norm_result[k]>=100*iter_norm_result[1]) {
             warning("Point estimation result is diverging")
             break
@@ -191,13 +182,17 @@ qris.iter <- function(info) {
           if(norm(new_beta-old_beta, "i") < control$tol) break
         }
       } ## end for loop
-      out <- list(coefficient = tail(iter_beta_result, n = 1),
-                  trace.coefficient = iter_beta_result,
-                  stderr = tail(iter_SE_result, n = 1),
-                  trace.stderr = iter_SE_result,
-                  vcov = new_sigma, iterno = k,
-                  norm = iter_norm_result)
-    }})
+    }
+    iter_beta_result <- iter_beta_result[!is.na(iter_beta_result[,1]),]
+    iter_SE_result <- iter_SE_result[!is.na(iter_SE_result[,1]),]
+    iter_norm_result <- iter_norm_result[!is.na(iter_norm_result)]
+    out <- list(coefficient = tail(iter_beta_result, n = 1),
+                trace.coefficient = iter_beta_result,
+                stderr = tail(iter_SE_result, n = 1),
+                trace.stderr = iter_SE_result,
+                vcov = new_sigma, iterno = k,
+                norm = iter_norm_result)   
+  })
   out
 }
 
@@ -213,7 +208,7 @@ qris.smooth <- function(info) {
       }
       if (se == "fmb"){
         ## Full multiplier bootstrap
-        smooth.fmb.result <- c()
+        smooth.fmb.result <- matrix(NA, nc, ne)
         for (j in 1:ne){
           ## generating perturbation variable
           eta <- rexp(n,1)
@@ -229,10 +224,8 @@ qris.smooth <- function(info) {
           }
           fmb.fit <- nleqslv(coefficient, function(b) rev_isObj(b, X, W_star, H, eta, I, logZ, Q))
           if (fmb.fit$termcd == 1 | fmb.fit$termcd == 2) {
-            smooth.fmb.result <- cbind(smooth.fmb.result,fmb.fit$x)
-          } else {
-            smooth.fmb.result <- cbind(smooth.fmb.result,rep(NA, length(fmb.fit$x)))
-          }
+            smooth.fmb.result[,j] <- fmb.fit$x
+          } 
         }
         fmb.sigma <- try(cov(t(smooth.fmb.result), use = "complete.obs"), silent = T)
         if(class(fmb.sigma)[1] == "try-error" | sum(!is.na(colSums(smooth.fmb.result))) <= 1){
@@ -243,7 +236,7 @@ qris.smooth <- function(info) {
         }
       } else if (se == "pmb") {
         ## Partial Multiplier Bootstrap
-        smooth.pmb.result <- c()
+        smooth.pmb.result <- matrix(NA, nc, ne)
         for (j in 1:ne){
           ## generating perturbation variable
           eta <- rexp(n,1)
@@ -258,7 +251,7 @@ qris.smooth <- function(info) {
             W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
           }
           pmb.eval <- rev_isObj(coefficient, X, W_star, H, eta, I, logZ, Q) / n
-          smooth.pmb.result <- cbind(smooth.pmb.result,pmb.eval)
+          smooth.pmb.result[,j] <- pmb.eval
         }
         pmb.v <- try(cov(t(smooth.pmb.result), use = "complete.obs"), silent = T)
         pmb.a <- Amat(coefficient, X, W, H, I, logZ, Q) / n
