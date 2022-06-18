@@ -21,6 +21,7 @@ qris.nonsmooth <- function(info) {
     W.reg <- c(I * W, 1, 1)
     Li.fit <- rq.wfit(X.reg, Y.reg, weights = W.reg)
     coefficient <- as.vector(Li.fit$coefficients)
+    uTime <- sort(unique(data$Z))
     if (all(Li.fit$coefficients <= 10)){
       if (ne <= 1) {
         se <- rep(NA, nc)
@@ -31,14 +32,13 @@ qris.nonsmooth <- function(info) {
         fmb.result <- matrix(NA, nc, ne)
         for (j in 1:ne){
           ## generating perturbation variable
-          eta <- rexp(n, 1)
-          if (all(data[, 4] == rep(1, n))){
+          eta <- rexp(n)
+          if (all(data$delta == 1)) {
             W_star <- rep(1, n)
           } else {
-            Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-            ghatstart0 <- 1
-            if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0)) - 1]
-            W_star <- data[,4] / Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
+            survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
+            ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
+            W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
             W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
           }
           rev_pseudo1 <- -colSums(X * W_star * eta)
@@ -77,6 +77,7 @@ qris.iter <- function(info) {
     iter_beta_result[1,] <- old_beta <- new_beta <- betastart
     iter_SE_result[1,] <- sqrt(diag(new_sigma))
     iter_norm_result <- rep(NA, control$maxiter)
+    uTime <- sort(unique(data$Z))
     if (se == "fmb") {
       for (k in 1:control$maxiter){
         old_beta <- new_beta
@@ -95,14 +96,13 @@ qris.iter <- function(info) {
           result.fmb <- matrix(NA, nc, ne)
           for (j in 1:ne){
             ## generating perturbation variable
-            eta <- rexp(n, 1)
-            if (all(data[, 4] == rep(1, n))){
+            eta <- rexp(n)
+            if (all(data$delta == 1)) {
               W_star <- rep(1, n)
             } else {
-              Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-              ghatstart0 <- 1
-              if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-              W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
+              survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
+              ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
+              W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
               W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
             fmb.fit <- nleqslv(old_beta, function(b)
@@ -152,14 +152,13 @@ qris.iter <- function(info) {
           result.pmb <- matrix(NA, nc, ne)
           for (j in 1:ne){
             ## generating perturbation variable
-            eta <- rexp(n, 1)
-            if (all(data[, 4] == rep(1, n))){
+            eta <- rexp(n)
+            if (all(data$delta == 1)) {
               W_star <- rep(1, n)
             } else {
-              Gest <- ghat(data[, 1], 1 - data[, 4], eta)
-              ghatstart0 <- 1
-              if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-              W_star <- data[,4] / Gest$survp[findInterval(data[,1], Gest$deathtime)] * ghatstart0
+              survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
+              ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
+              W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
               W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
             result.pmb[,j] <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n           
@@ -197,6 +196,7 @@ qris.iter <- function(info) {
 
 qris.smooth <- function(info) {
   out <- with(info, {
+    uTime <- sort(unique(data$Z))
     smooth.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
     if (smooth.fit$termcd == 1 | smooth.fit$termcd == 2) {
       coefficient <- smooth.fit$x
@@ -210,15 +210,13 @@ qris.smooth <- function(info) {
         smooth.fmb.result <- matrix(NA, nc, ne)
         for (j in 1:ne){
           ## generating perturbation variable
-          eta <- rexp(n,1)
-          if (all(data[, 4] == rep(1, n))){
+          eta <- rexp(n)
+          if (all(data$delta == 1)) {
             W_star <- rep(1, n)
           } else {
-            Gest <- ghat(data[,1],1-data[,4],eta)
-            ghatstart0 <- 1
-            if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-            W_star <- data[,4] /
-              Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
+            survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
+            ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
+            W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
             W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
           }
           fmb.fit <- nleqslv(coefficient, function(b) rev_isObj(b, X, W_star, H, eta, I, logZ, Q))
@@ -240,14 +238,12 @@ qris.smooth <- function(info) {
         for (j in 1:ne){
           ## generating perturbation variable
           eta <- rexp(n)
-          if (all(data[, 4] == rep(1, n))){
+          if (all(data$delta == 1)) {
             W_star <- rep(1, n)
           } else {
-            Gest <- ghat(data[,1],1 - data[,4], eta)
-            ghatstart0 <- 1
-            if (t0 > Gest$deathtime[1]) ghatstart0 <- Gest$survp[min(which(Gest$deathtime>t0))-1]
-            W_star <- data[,4] /
-              Gest$survp[findInterval(data[,1] , Gest$deathtime)] * ghatstart0
+            survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
+            ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
+            W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
             W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
           }
           ## smooth.pmb.result[,j] <- rev_isObj(coefficient, X, W_star, H, eta, I, logZ, Q) / n
