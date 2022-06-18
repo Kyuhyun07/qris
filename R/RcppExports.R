@@ -12,6 +12,11 @@ ghatC <- function(Time, censor, wgt) {
 }
 
 #' @noRd
+isObjE <- function(b, X, H, I, logT, D, t0, Q, B) {
+    .Call('_qris_isObjE', PACKAGE = 'qris', b, X, H, I, logT, D, t0, Q, B)
+}
+
+#' @noRd
 isObj <- function(b, X, W, H, I, logT, Q) {
     .Call('_qris_isObj', PACKAGE = 'qris', b, X, W, H, I, logT, Q)
 }

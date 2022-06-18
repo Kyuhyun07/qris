@@ -39,6 +39,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// isObjE
+arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H, arma::vec I, arma::vec logT, arma::vec D, double t0, double Q, int B);
+RcppExport SEXP _qris_isObjE(SEXP bSEXP, SEXP XSEXP, SEXP HSEXP, SEXP ISEXP, SEXP logTSEXP, SEXP DSEXP, SEXP t0SEXP, SEXP QSEXP, SEXP BSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type H(HSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type I(ISEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type logT(logTSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type D(DSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< int >::type B(BSEXP);
+    rcpp_result_gen = Rcpp::wrap(isObjE(b, X, H, I, logT, D, t0, Q, B));
+    return rcpp_result_gen;
+END_RCPP
+}
 // isObj
 arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec I, arma::vec logT, double Q);
 RcppExport SEXP _qris_isObj(SEXP bSEXP, SEXP XSEXP, SEXP WSEXP, SEXP HSEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {

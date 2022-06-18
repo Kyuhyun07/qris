@@ -5,7 +5,7 @@ using namespace arma;
 // [[Rcpp::plugins(cpp11)]]
 
 //' @noRd
-// [[Rcpp::export(rng = FALSE)]]
+// [[Rcpp::export]]
 arma::vec ghatC(arma::vec Time, arma::vec censor, arma::vec wgt) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
@@ -17,4 +17,42 @@ arma::vec ghatC(arma::vec Time, arma::vec censor, arma::vec wgt) {
     r.elem(regspace<uvec>(0, i)) += sum(wgt.elem(ind1));
   }
   return(cumprod(1 - d / r));
+}
+
+//' @noRd
+//  [[Rcpp::export]]
+arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
+                 arma::vec I, arma::vec logT, arma::vec D,
+                 double t0, double Q, int B) {
+  int p = b.n_elem;
+  int n = logT.n_elem;
+  arma::vec T = exp(logT); 
+  arma::vec uniqT = arma::sort(arma::unique(T));
+  arma::mat out(p, B, arma::fill::zeros); 
+  for (int i = 0; i < B; i++) {
+    arma::vec eta(n, arma::fill::randu);
+    eta = -log(eta);
+    arma::vec W(n, arma::fill::ones);
+    if (any(D > 0)) {
+      arma::vec survp = ghatC(T, 1 - D, eta);
+      double ghatstart0 = 1;
+      if (t0 > min(uniqT)) ghatstart0 = survp(index_max(uniqT > t0) - 1);
+      if (uniqT.n_elem == n) {
+	W = D / survp;
+      } else {
+	arma::vec survpi(n, arma::fill::ones);
+	for (int j = 0; j < n; j++)
+	  survpi[j] = survp(index_max(uniqT > T[j]) - 1);
+	W = D / survpi;
+      }
+    }
+    W = W * ghatstart0;
+    W.replace(datum::inf, datum::nan);
+    W.replace(datum::nan, max(W));
+    arma::mat m1 = X;
+    m1.each_col() %= I % eta;  
+    arma::mat m2 = normcdf((X * b - logT) / sqrt(sum(X % (X * H), 1))) % W - Q;
+    out.col(i) = m1.t() * m2;
+  }
+  return out / n;
 }
