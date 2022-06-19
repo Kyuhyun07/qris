@@ -29,6 +29,7 @@ arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
   arma::vec T = exp(logT); 
   arma::vec uniqT = arma::sort(arma::unique(T));
   arma::mat out(p, B, arma::fill::zeros); 
+  arma::mat m2 = normcdf((X * b - logT) / sqrt(sum(X % (X * H), 1)));
   for (int i = 0; i < B; i++) {
     arma::vec eta(n, arma::fill::randu);
     eta = -log(eta);
@@ -38,16 +39,17 @@ arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
       double ghatstart0 = 1;
       if (t0 > min(uniqT)) ghatstart0 = survp(index_max(uniqT > t0) - 1);
       arma::vec survpi(n, arma::fill::ones);
-      for (int j = 0; j < n; j++)
-	survpi[j] = survp(index_min(uniqT < T[j]) - 1);
+      for (int j = 0; j < n; j++) {
+	// survpi[j] = survp(find(uniqT == T[j], 1, "first")).eval()(0);
+	survpi[j] = survp(find(uniqT == T[j])).eval()(0);
+      }
       W = D / survpi * ghatstart0;
-    }     
+    } 
     W.replace(datum::inf, datum::nan);
     W.replace(datum::nan, max(W));
     arma::mat m1 = X;
     m1.each_col() %= I % eta;  
-    arma::mat m2 = normcdf((X * b - logT) / sqrt(sum(X % (X * H), 1))) % W - Q;
-    out.col(i) = m1.t() * m2;
+    out.col(i) = m1.t() * (m2 % W - Q);
   }
   return out / n;
 }

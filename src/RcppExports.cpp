@@ -32,6 +32,7 @@ arma::vec ghatC(arma::vec Time, arma::vec censor, arma::vec wgt);
 RcppExport SEXP _qris_ghatC(SEXP TimeSEXP, SEXP censorSEXP, SEXP wgtSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type Time(TimeSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type censor(censorSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type wgt(wgtSEXP);
@@ -75,18 +76,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // isObjL
-Rcpp::List isObjL(arma::vec b, arma::mat X, arma::vec W, arma::mat H, arma::vec I, arma::vec logT, double Q);
-RcppExport SEXP _qris_isObjL(SEXP bSEXP, SEXP XSEXP, SEXP WSEXP, SEXP HSEXP, SEXP ISEXP, SEXP logTSEXP, SEXP QSEXP) {
+arma::mat isObjL(arma::vec b, arma::mat X, arma::mat H, arma::vec logT);
+RcppExport SEXP _qris_isObjL(SEXP bSEXP, SEXP XSEXP, SEXP HSEXP, SEXP logTSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< arma::vec >::type b(bSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type W(WSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type H(HSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type I(ISEXP);
     Rcpp::traits::input_parameter< arma::vec >::type logT(logTSEXP);
-    Rcpp::traits::input_parameter< double >::type Q(QSEXP);
-    rcpp_result_gen = Rcpp::wrap(isObjL(b, X, W, H, I, logT, Q));
+    rcpp_result_gen = Rcpp::wrap(isObjL(b, X, H, logT));
     return rcpp_result_gen;
 END_RCPP
 }

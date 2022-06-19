@@ -233,21 +233,21 @@ qris.smooth <- function(info) {
         }
       } else if (se == "pmb") {
         ## Partial Multiplier Bootstrap
-        smooth.pmb.result <- isObjE(coefficient, X, H, I, logZ, data$delta, t0, Q, ne)
-        ## smooth.pmb.result <- matrix(NA, nc, ne)        
-        ## eList <- isObjL(smooth.fit$x, X, W, H, I, logZ, Q)
-        ## for (j in 1:ne){
-        ##   eta <- rexp(n)
-        ##   if (all(data$delta == 1)) {
-        ##     W_star <- rep(1, n)
-        ##   } else {
-        ##     survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
-        ##     ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
-        ##     W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
-        ##     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
-        ##   }
-        ##   smooth.pmb.result[,j] <- with(eList, t(m1 * eta) %*% (m2 * W_star - Q)) / n
-        ## }       
+        ## smooth.pmb.result <- isObjE(coefficient, X, H, I, logZ, data$delta, t0, Q, ne)
+        smooth.pmb.result <- matrix(NA, nc, ne)        
+        m2 <- isObjL(smooth.fit$x, X, H, logZ)
+        for (j in 1:ne){
+          eta <- rexp(n)
+          if (all(data$delta == 1)) {
+            W_star <- rep(1, n)
+          } else {
+            survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
+            ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
+            W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
+            W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
+          }
+          smooth.pmb.result[,j] <- t(X * I * eta) %*% (m2 * W_star - Q) / n
+        } 
         pmb.v <- try(cov(t(smooth.pmb.result), use = "complete.obs"), silent = T)
         pmb.a <- Amat(coefficient, X, W, H, I, logZ, Q) / n
         ## Singular matrix 'a' error message and break
