@@ -37,15 +37,11 @@ arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
       arma::vec survp = ghatC(T, 1 - D, eta);
       double ghatstart0 = 1;
       if (t0 > min(uniqT)) ghatstart0 = survp(index_max(uniqT > t0) - 1);
-      if (uniqT.n_elem == n) {
-	W = D / survp * ghatstart0;
-      } else {
-	arma::vec survpi(n, arma::fill::ones);
-	for (int j = 0; j < n; j++)
-	  survpi[j] = survp(index_max(uniqT > T[j]) - 1);
-	W = D / survpi * ghatstart0;
-      }
-    }
+      arma::vec survpi(n, arma::fill::ones);
+      for (int j = 0; j < n; j++)
+	survpi[j] = survp(index_min(uniqT < T[j]) - 1);
+      W = D / survpi * ghatstart0;
+    }     
     W.replace(datum::inf, datum::nan);
     W.replace(datum::nan, max(W));
     arma::mat m1 = X;
