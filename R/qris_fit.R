@@ -83,10 +83,10 @@ qris.iter <- function(info) {
         old_beta <- new_beta
         old_sigma <- new_sigma
         old_h <- new_h
-        slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
+        slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q) / n
         ## Step 1 : Update beta()
         ## Singular matrix 'a' error message and break
-        if (class(try(qr.solve(slope_a),silent=TRUE))[1]=="try-error") {
+        if (class(try(qr.solve(slope_a), silent=TRUE))[1]=="try-error") {
           warning("'A' matrix is singular during iteration. Please try the non-iterative method.")
           break
         } else {
