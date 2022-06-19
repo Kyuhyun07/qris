@@ -150,6 +150,7 @@ qris.iter <- function(info) {
           iter_beta_result[k,] <- t(new_beta)
           ## Step 2 : Update Sigma()
           result.pmb <- matrix(NA, nc, ne)
+          m2 <- isObjL(old_beta, X, H, logZ)
           for (j in 1:ne){
             ## generating perturbation variable
             eta <- rexp(n)
@@ -161,7 +162,8 @@ qris.iter <- function(info) {
               W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
               W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
             }
-            result.pmb[,j] <- rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n           
+            result.pmb[,j] <- t(X * I * eta) %*% (m2 * W_star - Q) / n
+            ## rev_isObj(old_beta, X, W_star, old_h, eta, I, logZ, Q)/n           
           }
           new_V <- cov(t(result.pmb), use = "complete.obs")
           new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
