@@ -7,6 +7,11 @@ Amat <- function(b, X, W_star, H, I, logT, Q) {
 }
 
 #' @noRd
+ghat <- function(Time, censor, wgt) {
+    .Call('_qris_ghat', PACKAGE = 'qris', Time, censor, wgt)
+}
+
+#' @noRd
 isObj <- function(b, X, W, H, I, logT, Q) {
     .Call('_qris_isObj', PACKAGE = 'qris', b, X, W, H, I, logT, Q)
 }

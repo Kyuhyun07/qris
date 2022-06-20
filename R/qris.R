@@ -129,28 +129,28 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
   return(out)
 }
 
-#' Calculate the weighted Kaplan-Meier estimate
-#'
-#' @param Time is a vector of observed time, which is minimum of failure time and censored time
-#' @param censor is a vector of censoring indicator (not censored = 1, censored = 0)
-#' @param wgt is a vector of weight
-#'
-#' @return
-#' A data frame containing the following components:
-#' \describe{
-#'   \item{deathtime}{the observed time}
-#'   \item{ndeath}{a vector of number of subject who experienced event at deathtime}
-#'   \item{nrisk}{a vector of number of subject who are possible to experience event at deathtime}
-#'   \item{survp}{a vector of survival probability at deathtime}
-#'   }
-#' @export
-ghat <- function(Time, censor, wgt = 1) {
-  deathtime <- c(0, sort(unique(Time[censor > 0])))
-  ndeath <- colSums(outer(Time, deathtime, "==") * censor * wgt)
-  nrisk <- colSums(outer(Time, deathtime, ">=") * wgt)
-  survp <- cumprod(1 - ndeath / nrisk)
-  data.frame(deathtime, ndeath, nrisk, survp)
-}
+# #' Calculate the weighted Kaplan-Meier estimate
+# #'
+# #' @param Time is a vector of observed time, which is minimum of failure time and censored time
+# #' @param censor is a vector of censoring indicator (not censored = 1, censored = 0)
+# #' @param wgt is a vector of weight
+# #'
+# #' @return
+# #' A data frame containing the following components:
+# #' \describe{
+# #'   \item{deathtime}{the observed time}
+# #'   \item{ndeath}{a vector of number of subject who experienced event at deathtime}
+# #'   \item{nrisk}{a vector of number of subject who are possible to experience event at deathtime}
+# #'   \item{survp}{a vector of survival probability at deathtime}
+# #'   }
+# #' @export
+# ghat <- function(Time, censor, wgt = 1) {
+#   deathtime <- c(0, sort(unique(Time[censor > 0])))
+#   ndeath <- colSums(outer(Time, deathtime, "==") * censor * wgt)
+#   nrisk <- colSums(outer(Time, deathtime, ">=") * wgt)
+#   survp <- cumprod(1 - ndeath / nrisk)
+#   data.frame(deathtime, ndeath, nrisk, survp)
+# }
 
 #' Auxiliary for Controlling qris
 #'
