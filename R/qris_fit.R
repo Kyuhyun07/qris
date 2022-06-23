@@ -232,8 +232,6 @@ qris.smooth <- function(info) {
           out <- list(coefficient = coefficient, stderr = fmb.se, vcov = fmb.sigma)
         }
       } else if (se == "pmb") {
-        ## Partial Multiplier Bootstrap
-        ## smooth.pmb.result <- isObjE(coefficient, X, H, I, logZ, data$delta, t0, Q, ne)
         smooth.pmb.result <- matrix(NA, nc, ne)        
         m2 <- isObjL(smooth.fit$x, X, H, logZ)
         for (j in 1:ne){
