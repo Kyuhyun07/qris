@@ -7,7 +7,7 @@ using namespace arma;
 //' @noRd
 // [[Rcpp::export(rng = FALSE)]]
 arma::mat isObj(arma::vec b, arma::mat X, arma::vec W, arma::mat H,
-		arma::vec I, arma::vec logT, double Q) {
+                arma::vec I, arma::vec logT, double Q) {
   arma::mat m1 = X;
   m1.each_col() %= I;
   arma::mat m2 = normcdf((X * b - logT) / sqrt(sum(X % (X * H), 1))) % W - Q;

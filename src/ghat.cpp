@@ -39,9 +39,12 @@ arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
       double ghatstart0 = 1;
       if (t0 > min(uniqT)) ghatstart0 = survp(index_max(uniqT > t0) - 1);
       arma::vec survpi(n, arma::fill::ones);
-      for (int j = 0; j < n; j++) {
-	// survpi[j] = survp(find(uniqT == T[j], 1, "first")).eval()(0);
-	survpi[j] = survp(find(uniqT == T[j])).eval()(0);
+      if (uniqT.n_elem == n) {
+	survpi(sort_index(T)) = survp;
+      } else {
+        for (int j = 0; j < n; j++) {
+  	  survpi[j] = survp(find(uniqT == T[j])).eval()(0);
+        }
       }
       W = D / survpi * ghatstart0;
     } 
