@@ -234,7 +234,6 @@ qris.smooth <- function(info) {
           out <- list(coefficient = coefficient, stderr = fmb.se, vcov = fmb.sigma)
         }
       } else if (se == "pmb") {
-<<<<<<< HEAD
         ## Partial Multiplier Bootstrap
         smooth.pmb.result <- isObjE(coefficient, X, H, I, logZ, data$delta, t0, Q, ne)
         # smooth.pmb.result <- matrix(NA, nc, ne)        
@@ -251,22 +250,6 @@ qris.smooth <- function(info) {
         #   }
         #   smooth.pmb.result[,j] <- t(X * I * eta) %*% (m2 * W_star - Q) / n
         # } 
-=======
-        smooth.pmb.result <- matrix(NA, nc, ne)        
-        m2 <- isObjL(smooth.fit$x, X, H, logZ)
-        for (j in 1:ne){
-          eta <- rexp(n)
-          if (all(data$delta == 1)) {
-            W_star <- rep(1, n)
-          } else {
-            survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
-            ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
-            W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
-            W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
-          }
-          smooth.pmb.result[,j] <- t(X * I * eta) %*% (m2 * W_star - Q) / n
-        } 
->>>>>>> f2914eb437b21fe445df3114762c8972ef8e3f8c
         pmb.v <- try(cov(t(smooth.pmb.result), use = "complete.obs"), silent = T)
         pmb.a <- Amat(coefficient, X, W, H, I, logZ, Q) / n
         ## Singular matrix 'a' error message and break
