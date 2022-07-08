@@ -65,13 +65,15 @@ plot.qris <- function(x, t0s = NULL, Qs = NULL, ne = NULL, vari = NULL,
   if (length(unique(d$t0s)) == 1) byQs <- TRUE
   if (byQs) ## Q on x-axis
     p <- ggplot(d, aes(x = Qs, y = Est, col = variable)) + geom_line() +
-      facet_wrap(~ factor(t0s, labels = paste0("Basetime is ", unique(t0s)))) + 
+      facet_wrap(~ factor(t0s, labels = paste0("Basetime is ", unique(t0s)))) +
       xlab("Quantiles")
+      # xlab("Quantiles") + theme(legend.position = "none")  
   else   
     ## t0s on x-axis
     p <- ggplot(d, aes(x = t0s, y = Est, col = variable)) + geom_line() +
       facet_wrap(~ factor(Qs, labels = paste0("Quantile is ", unique(Qs)))) + 
-      xlab("Basetimes")
+      xlab("Basetimes") + theme(legend.position = "none")
+      # xlab("Basetimes") + theme(legend.position = "none")
   if (ne > 0)   
     p <- p + geom_ribbon(aes(ymax = Est + 1.96 * SE, ymin = Est - 1.96 * SE, fill = variable),
                          linetype = 2, alpha = .2, show.legend = FALSE)
