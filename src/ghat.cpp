@@ -18,9 +18,6 @@ arma::vec ghatC(arma::vec Time, arma::vec censor, arma::vec wgt) {
   }
   return(cumprod(1 - d / r));
 }
-<<<<<<< HEAD
-  
-=======
 
 //' @noRd
 //  [[Rcpp::export]]
@@ -59,4 +56,3 @@ arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
   }
   return out / n;
 }
->>>>>>> improveC

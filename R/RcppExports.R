@@ -7,12 +7,6 @@ Amat <- function(b, X, W_star, H, I, logT, Q) {
 }
 
 #' @noRd
-NULL
-
-ghat <- function(Time, censor, wgt) {
-    .Call('_qris_ghat', PACKAGE = 'qris', Time, censor, wgt)
-}
-
 ghatC <- function(Time, censor, wgt) {
     .Call('_qris_ghatC', PACKAGE = 'qris', Time, censor, wgt)
 }

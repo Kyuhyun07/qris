@@ -27,18 +27,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// ghat
-arma::vec ghat(arma::vec Time, arma::vec censor, arma::vec wgt);
-RcppExport SEXP _qris_ghat(SEXP TimeSEXP, SEXP censorSEXP, SEXP wgtSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type Time(TimeSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type censor(censorSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type wgt(wgtSEXP);
-    rcpp_result_gen = Rcpp::wrap(ghat(Time, censor, wgt));
-    return rcpp_result_gen;
-END_RCPP
-}
 // ghatC
 arma::vec ghatC(arma::vec Time, arma::vec censor, arma::vec wgt);
 RcppExport SEXP _qris_ghatC(SEXP TimeSEXP, SEXP censorSEXP, SEXP wgtSEXP) {
