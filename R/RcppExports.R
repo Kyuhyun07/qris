@@ -7,8 +7,19 @@ Amat <- function(b, X, W_star, H, I, logT, Q) {
 }
 
 #' @noRd
+NULL
+
 ghat <- function(Time, censor, wgt) {
     .Call('_qris_ghat', PACKAGE = 'qris', Time, censor, wgt)
+}
+
+ghatC <- function(Time, censor, wgt) {
+    .Call('_qris_ghatC', PACKAGE = 'qris', Time, censor, wgt)
+}
+
+#' @noRd
+isObjE <- function(b, X, H, I, logT, D, t0, Q, B) {
+    .Call('_qris_isObjE', PACKAGE = 'qris', b, X, H, I, logT, D, t0, Q, B)
 }
 
 #' @noRd
@@ -17,8 +28,8 @@ isObj <- function(b, X, W, H, I, logT, Q) {
 }
 
 #' @noRd
-isObjL <- function(b, X, W, H, I, logT, Q) {
-    .Call('_qris_isObjL', PACKAGE = 'qris', b, X, W, H, I, logT, Q)
+isObjL <- function(b, X, H, logT) {
+    .Call('_qris_isObjL', PACKAGE = 'qris', b, X, H, logT)
 }
 
 #' @noRd
