@@ -9,7 +9,7 @@ qris(
   data,
   t0 = 0,
   Q = 0.5,
-  ne = 100,
+  nB = 100,
   method = c("smooth", "iterative", "nonsmooth"),
   se = c("fmb", "pmb"),
   init = c("rq", "noeffect"),
@@ -26,7 +26,7 @@ The \code{response} is a \code{Surv} object with right censoring.}
 
 \item{Q}{is the quantile. The default quantile is set to 0.5.}
 
-\item{ne}{is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.}
+\item{nB}{is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.}
 
 \item{method}{is an option for specifying the methods of parameters estimation.
 ("smooth" is default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations.
@@ -80,9 +80,9 @@ data.gen <- function(n) {
 set.seed(1)
 dat <- data.gen(200)
 fm <- Surv(Time, status) ~ X
-fit1 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 100, "smooth", "pmb", c(1,1))
-fit2 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 100, "nonsmooth", "fmb", "rq")
-fit3 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 100, "iterative", "fmb", "rq",
+fit1 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 100, "smooth", "pmb", c(1,1))
+fit2 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 100, "nonsmooth", "fmb", "rq")
+fit3 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 100, "iterative", "fmb", "rq",
              control = qris.control(maxit = 20, tol = 1e-3, trace = TRUE))
 
 summary(fit1)
@@ -99,9 +99,9 @@ lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
-fit1 <- qris(fm, data = lung2, t0 = 0, Q = 0.5, ne = 100, "iterative", "pmb", "rq")
-fit2 <- qris(fm, data = lung2, t0 = 30, Q = 0.5, ne = 100, "nonsmooth", "fmb", c(1, 0, 1))
-fit3 <- qris(fm, data = lung2, t0 = 100, Q = 0.5, ne = 100,"smooth", "pmb", "rq")
+fit1 <- qris(fm, data = lung2, t0 = 0, Q = 0.5, nB = 100, "iterative", "pmb", "rq")
+fit2 <- qris(fm, data = lung2, t0 = 30, Q = 0.5, nB = 100, "nonsmooth", "fmb", c(1, 0, 1))
+fit3 <- qris(fm, data = lung2, t0 = 100, Q = 0.5, nB = 100,"smooth", "pmb", "rq")
 
 summary(fit1)
 summary(fit2)

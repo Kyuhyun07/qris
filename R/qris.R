@@ -10,7 +10,7 @@
 #' @param data an optional data.frame in which to interpret the variables occurring in the \code{formula}.
 #' @param t0 is the followup time (or basetime of analysis). The default followup time is set to 0.
 #' @param Q is the quantile. The default quantile is set to 0.5.
-#' @param ne is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.
+#' @param nB is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.
 #' @param method is an option for specifying the methods of parameters estimation.
 #'("smooth" is default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations.
 #' "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation.
@@ -40,7 +40,7 @@
 #' @importFrom stringr str_replace
 #' @import Rcpp
 #' @example inst/examples/ex_qris.R
-qris <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
+qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
                  method = c("smooth", "iterative", "nonsmooth"),
                  se = c("fmb","pmb"),
                  init = c("rq", "noeffect"),
@@ -113,13 +113,13 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, ne = 100,
     betastart <- as.vector(init)
   }
   ## collect all useful information
-  info <- list(X = X, I = I, W = W, Q = Q, ne = ne, nc = nc, n = n, H = H, t0 = t0,
+  info <- list(X = X, I = I, W = W, Q = Q, nB = nB, nc = nc, n = n, H = H, t0 = t0,
                logZ = logZ, data = data, betastart = betastart, se = se, control = control)
   ## pass to fit
   out <- qris.fit(info, method)
   out$call <- scall
   out$varNames <- colnames(covariate)
-  out$para <- list(method = method, Q = Q, t0 = t0, ne = ne)
+  out$para <- list(method = method, Q = Q, t0 = t0, nB = nB)
   if (info$control$trace) {
     rownames(out$trace.coefficient) <- rownames(out$trace.stderr) <- NULL
     colnames(out$trace.coefficient) <- colnames(out$trace.stderr) <- out$varNames

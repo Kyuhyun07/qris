@@ -4,7 +4,7 @@
 \alias{plot.qris}
 \title{Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data}
 \usage{
-\method{plot}{qris}(x, t0s = NULL, Qs = NULL, ne = NULL, vari = NULL, byQs = FALSE, ...)
+\method{plot}{qris}(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL, byQs = FALSE, ...)
 }
 \arguments{
 \item{x}{is an qris object or a data.frame returned by plot.qris}
@@ -13,7 +13,7 @@
 
 \item{Qs}{is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}}
 
-\item{ne}{is the number of multiplier bootstrapping for standard error estimation.}
+\item{nB}{is the number of multiplier bootstrapping for standard error estimation.}
 
 \item{vari}{is a character string to choose variables to draw the regression coefficient.}
 
@@ -32,13 +32,13 @@ lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
 fm <- Surv(time, status) ~ age + sex
-fit <- qris(fm, data = lung2, t0 = 30, Q = 0.5, ne = 50, "nonsmooth", "fmb")
+fit <- qris(fm, data = lung2, t0 = 30, Q = 0.5, nB = 50, "nonsmooth", "fmb")
 
 ## Plot with default values; Qs <- 1:9 / 10 and t0s = fit2$para$t0 (in this case 30)
 plot(fit)
 
 ## Plot with without 95\% CI is much faster
-plot(fit, ne = 0)
+plot(fit, nB = 0)
 
 ## Plot feature can update qris calls 
 fit <- plot(fit, Qs = 3:6 / 10, t0s = 1:6 * 10, exportDat = TRUE)

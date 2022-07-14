@@ -23,14 +23,14 @@ qris.nonsmooth <- function(info) {
     coefficient <- as.vector(Li.fit$coefficients)
     uTime <- sort(unique(data$Z))
     if (all(Li.fit$coefficients <= 10)){
-      if (ne <= 1) {
+      if (nB <= 1) {
         se <- rep(NA, nc)
         vcov <- matrix(NA, nc, nc)
         return(list(coefficient = coefficient, stderr = se, vcov = vcov))
       }
       if (se == "fmb"){
-        fmb.result <- matrix(NA, nc, ne)
-        for (j in 1:ne){
+        fmb.result <- matrix(NA, nc, nB)
+        for (j in 1:nB){
           ## generating perturbation variable
           eta <- rexp(n)
           if (all(data$delta == 1)) {
@@ -93,8 +93,8 @@ qris.iter <- function(info) {
           new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
           iter_beta_result[k,] <- t(new_beta)
           ## Step 2 : Update Sigma()
-          result.fmb <- matrix(NA, nc, ne)
-          for (j in 1:ne){
+          result.fmb <- matrix(NA, nc, nB)
+          for (j in 1:nB){
             ## generating perturbation variable
             eta <- rexp(n)
             if (all(data$delta == 1)) {
@@ -149,9 +149,9 @@ qris.iter <- function(info) {
           new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
           iter_beta_result[k,] <- t(new_beta)
           ## Step 2 : Update Sigma()
-          result.pmb <- matrix(NA, nc, ne)
+          result.pmb <- matrix(NA, nc, nB)
           m2 <- isObjL(old_beta, X, H, logZ)
-          for (j in 1:ne){
+          for (j in 1:nB){
             ## generating perturbation variable
             eta <- rexp(n)
             if (all(data$delta == 1)) {
@@ -202,15 +202,15 @@ qris.smooth <- function(info) {
     smooth.fit <- nleqslv(betastart, function(b) isObj(b, X, W, H, I, logZ, Q))
     if (smooth.fit$termcd == 1 | smooth.fit$termcd == 2) {
       coefficient <- smooth.fit$x
-      if (ne <= 1) {
+      if (nB <= 1) {
         se <- rep(NA, nc)
         vcov <- matrix(NA, nc, nc)
         return(list(coefficient = coefficient, stderr = se, vcov = vcov))
       }
       if (se == "fmb"){
         ## Full multiplier bootstrap
-        smooth.fmb.result <- matrix(NA, nc, ne)
-        for (j in 1:ne){
+        smooth.fmb.result <- matrix(NA, nc, nB)
+        for (j in 1:nB){
           ## generating perturbation variable
           eta <- rexp(n)
           if (all(data$delta == 1)) {
@@ -235,10 +235,10 @@ qris.smooth <- function(info) {
         }
       } else if (se == "pmb") {
         ## Partial Multiplier Bootstrap
-        smooth.pmb.result <- isObjE(coefficient, X, H, I, logZ, data$delta, t0, Q, ne)
-        # smooth.pmb.result <- matrix(NA, nc, ne)        
+        smooth.pmb.result <- isObjE(coefficient, X, H, I, logZ, data$delta, t0, Q, nB)
+        # smooth.pmb.result <- matrix(NA, nc, nB)        
         # m2 <- isObjL(smooth.fit$x, X, H, logZ)
-        # for (j in 1:ne){
+        # for (j in 1:nB){
         #   eta <- rexp(n)
         #   if (all(data$delta == 1)) {
         #     W_star <- rep(1, n)

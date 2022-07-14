@@ -52,3 +52,20 @@ print.summary.qris <- function(x, ...){
   cat("\n")
   printCoefmat(as.matrix(x$coefficients), P.values = TRUE, has.Pvalue = TRUE)
 }
+
+#' @exportS3Method confint qris
+#' @importFrom stats qnorm
+confint.qris <- function(object, level = 0.95, ...) {
+  cf <- coef(object)
+  pnames <- names(cf)
+  p <- (1 - level)/2
+  p <- c(p, 1 - p)
+  prange <- qnorm(p)
+  pct <- paste(format(100 * p, trim = TRUE, scientific = FALSE, digits = 3),"%")
+  ci <- array(NA, dim = c(length(pnames), 2L),
+              dimnames = list(pnames, pct))
+  ses <- object$stderr
+  ci[] <- cf + ses %o% prange
+  ci
+}
+
