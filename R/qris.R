@@ -33,7 +33,7 @@
 #'   }
 #'
 #' @export
-#' @importFrom survival Surv survfit
+#' @importFrom survival Surv survfit is.Surv
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
 #' @importFrom stats pnorm rnorm complete.cases
@@ -56,7 +56,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   obj <- unclass(m[,1])
   method <- match.arg(method)
   se <- match.arg(se)
-  if (class(m[[1]]) != "Surv" || ncol(obj) > 2)
+  if (!is.Surv(m[[1]]) || ncol(obj) > 2)
     stop("qris only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
   ## Create data; the first 2 columns are from Surv(), e.g., time, status, x1, x2, ...

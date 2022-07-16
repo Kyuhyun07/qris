@@ -1,3 +1,5 @@
+is.qris <- function(x) inherits(x, "qris")
+
 #' @exportS3Method coef qris
 #' @importFrom stats model.matrix na.omit printCoefmat
 coef.qris <- function(object, ...) {
@@ -24,9 +26,8 @@ print.qris <- function(x, ...) {
 
 #' @exportS3Method summary qris
 summary.qris <- function(object, ...) {
-  if (class(object) != "qris"){
+  if (!is.qris(object))
     stop("Must be qris class")
-  }
   ans <- object["call"]
   est.qris <- object$coefficient
   if (is.null(object$stderr)) se.qris <- rep(NaN, length(est.qris))
@@ -55,17 +56,20 @@ print.summary.qris <- function(x, ...){
 
 #' @exportS3Method confint qris
 #' @importFrom stats qnorm
-confint.qris <- function(object, level = 0.95, ...) {
+confint.qris <- function(object, parm, level = 0.95, ...) {
   cf <- coef(object)
   pnames <- names(cf)
-  p <- (1 - level)/2
+  if (missing(parm)) 
+    parm <- pnames
+  else if (is.numeric(parm)) 
+    parm <- pnames[parm]
+  p <- (1 - level) / 2
   p <- c(p, 1 - p)
   prange <- qnorm(p)
   pct <- paste(format(100 * p, trim = TRUE, scientific = FALSE, digits = 3),"%")
-  ci <- array(NA, dim = c(length(pnames), 2L),
-              dimnames = list(pnames, pct))
+  ci <- array(NA_real_, dim = c(length(parm), 2L), dimnames = list(parm, pct))
   ses <- object$stderr
-  ci[] <- cf + ses %o% prange
+  ci[] <- cf[parm] + ses[parm] %o% prange
   ci
 }
 

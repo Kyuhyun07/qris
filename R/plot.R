@@ -12,7 +12,7 @@ globalVariables("variable")
 #' @param ... for future extension
 #'
 #' @importFrom stats vcov coef update complete.cases
-#' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_ribbon labs xlab ylab
+#' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_ribbon labs xlab ylab theme
 #' @export
 #' @method plot qris
 #'

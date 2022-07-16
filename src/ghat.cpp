@@ -28,6 +28,7 @@ arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
   int n = logT.n_elem;
   arma::vec T = exp(logT); 
   arma::vec uniqT = arma::sort(arma::unique(T));
+  int m = uniqT.n_elem;
   arma::mat out(p, B, arma::fill::zeros); 
   arma::mat m2 = normcdf((X * b - logT) / sqrt(sum(X % (X * H), 1)));
   for (int i = 0; i < B; i++) {
@@ -39,7 +40,7 @@ arma::mat isObjE(arma::vec b, arma::mat X, arma::mat H,
       double ghatstart0 = 1;
       if (t0 > min(uniqT)) ghatstart0 = survp(index_max(uniqT > t0) - 1);
       arma::vec survpi(n, arma::fill::ones);
-      if (uniqT.n_elem == n) {
+      if (m == n) {
 	survpi(sort_index(T)) = survp;
       } else {
         for (int j = 0; j < n; j++) {
