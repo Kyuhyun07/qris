@@ -69,6 +69,7 @@ confint.qris <- function(object, parm, level = 0.95, ...) {
   pct <- paste(format(100 * p, trim = TRUE, scientific = FALSE, digits = 3),"%")
   ci <- array(NA_real_, dim = c(length(parm), 2L), dimnames = list(parm, pct))
   ses <- object$stderr
+  parm <- match(parm, pnames)
   ci[] <- cf[parm] + ses[parm] %o% prange
   ci
 }
