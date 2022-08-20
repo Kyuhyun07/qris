@@ -34,8 +34,8 @@ library(qris)
 
 ## Example
 
-There are two examples
-
+There are two examples to get started. 
+Here is a simulated data. 
 ```{r example}
 data.gen <- function(n) {
     r0 <- .2 * sqrt(log(2))
@@ -48,7 +48,6 @@ data.gen <- function(n) {
     dat$status <- 1 * (dat$Time0 < dat$censoring)
     subset(dat, select = c(Time, status, X))
 }
-
 library(survival)
 set.seed(1)
 dat <- data.gen(200)
@@ -57,20 +56,17 @@ fit1 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 200, "smooth", "pmb", c(1,1))
 fit2 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 200, "nonsmooth", "fmb", "rq")
 fit3 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 200, "iterative", "fmb", "rq",
                control = qris.control(maxit = 20, tol = 1e-3, trace = TRUE))
-
 summary(fit1)
 summary(fit2)
 summary(fit3)
-
 coef(fit1)
 summary(fit2)
 vcov(fit3)
-
 plot(fit1, Qs = 4:6 / 10)
 ```
 
+Here is a real data application.
 ```{r example2}
-## 2. real data example
 ## Load "retinopathy" data from R survival package
 library(survival)
 ## Real data application
@@ -79,16 +75,13 @@ lung2 <- subset(lung, select = c(time, status, age, sex))
 ## tidy up the data
 lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
-
 fm <- Surv(time, status) ~ age + sex
 fit1 <- qris(fm, data = lung2, t0 = 0, Q = 0.5, nB = 200, "iterative", "pmb", "rq")
 fit2 <- qris(fm, data = lung2, t0 = 30, Q = 0.5, nB = 200, "nonsmooth", "fmb", c(1, 0, 1))
 fit3 <- qris(fm, data = lung2, t0 = 100, Q = 0.5, nB = 200,"smooth", "pmb", "rq")
-
 summary(fit1)
 summary(fit2)
 summary(fit3)
-
 plot(fit2, Qs = 4:6 / 10)
 ```
 

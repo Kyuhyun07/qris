@@ -38,7 +38,7 @@ You can install the released version of qris from
 
 ## Example
 
-There are two examples
+There are two examples to get started. Here is a simulated data.
 
 ``` r
 > data.gen <- function(n) {
@@ -52,85 +52,82 @@ There are two examples
 +     dat$status <- 1 * (dat$Time0 < dat$censoring)
 +     subset(dat, select = c(Time, status, X))
 + }
-> 
 > library(survival)
 > set.seed(1)
 > dat <- data.gen(200)
 > fm <- Surv(Time, status) ~ X
-> fit1 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "smooth", "pmb", c(1,1))
-> fit2 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "nonsmooth", "fmb", "rq")
-> fit3 <- qris(fm, data = dat, t0 = 1, Q = 0.5, ne = 200, "iterative", "fmb", "rq",
+> fit1 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 200, "smooth", "pmb", c(1,1))
+> fit2 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 200, "nonsmooth", "fmb", "rq")
+> fit3 <- qris(fm, data = dat, t0 = 1, Q = 0.5, nB = 200, "iterative", "fmb", "rq",
 +                control = qris.control(maxit = 20, tol = 1e-3, trace = TRUE))
 
  Step: 1
  beta: 1.239291 0.8531057
- se: 0.09210374 0.1227197 
+ se: 0.08670517 0.1267661 
 
  Step: 2
- beta: 1.239863 0.8527304
- se: 0.07852733 0.1262729 
-> 
+ beta: 1.239761 0.8534891
+ se: 0.0890501 0.1356901 
 > summary(fit1)
 Call:
-qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "smooth", 
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, nB = 200, method = "smooth", 
     se = "pmb", init = c(1, 1))
 
 qris Estimator
             estimate std.Error z.value   p.value    
-(Intercept)   1.2395    0.0779  15.922 < 2.2e-16 ***
-X             0.8525    0.1220   6.990 < 2.2e-16 ***
+(Intercept)   1.2395    0.0889  13.942 < 2.2e-16 ***
+X             0.8525    0.1281   6.653 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit2)
 Call:
-qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, nB = 200, method = "nonsmooth", 
     se = "fmb", init = "rq")
 
 qris Estimator
             estimate std.Error z.value   p.value    
-(Intercept)   1.2528    0.0992  12.626 < 2.2e-16 ***
-X             0.8100    0.1302   6.221 < 2.2e-16 ***
+(Intercept)   1.2528    0.0927  13.521 < 2.2e-16 ***
+X             0.8100    0.1377   5.883 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit3)
 Call:
-qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "iterative", 
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, nB = 200, method = "iterative", 
     se = "fmb", init = "rq", control = qris.control(maxit = 20, 
         tol = 0.001, trace = TRUE))
 
 qris Estimator
             estimate std.Error z.value   p.value    
-(Intercept)   1.2399    0.0785  15.789 < 2.2e-16 ***
-X             0.8527    0.1263   6.753 < 2.2e-16 ***
+(Intercept)   1.2398    0.0891  13.922 < 2.2e-16 ***
+X             0.8535    0.1357   6.290 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-> 
 > coef(fit1)
 (Intercept)           X 
   1.2395248   0.8525343 
 > summary(fit2)
 Call:
-qris(formula = fm, data = dat, t0 = 1, Q = 0.5, ne = 200, method = "nonsmooth", 
+qris(formula = fm, data = dat, t0 = 1, Q = 0.5, nB = 200, method = "nonsmooth", 
     se = "fmb", init = "rq")
 
 qris Estimator
             estimate std.Error z.value   p.value    
-(Intercept)   1.2528    0.0992  12.626 < 2.2e-16 ***
-X             0.8100    0.1302   6.221 < 2.2e-16 ***
+(Intercept)   1.2528    0.0927  13.521 < 2.2e-16 ***
+X             0.8100    0.1377   5.883 < 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > vcov(fit3)
              (Intercept)            X
-(Intercept)  0.006166542 -0.006948767
-X           -0.006948767  0.015944839
-> 
+(Intercept)  0.007929919 -0.008634304
+X           -0.008634304  0.018411815
 > plot(fit1, Qs = 4:6 / 10)
 ```
 
 ![](README_files/figure-gfm/example-1.png)<!-- -->
 
+Here is a real data application.
+
 ``` r
-> ## 2. real data example
 > ## Load "retinopathy" data from R survival package
 > library(survival)
 > ## Real data application
@@ -139,49 +136,46 @@ X           -0.006948767  0.015944839
 > ## tidy up the data
 > lung2$status <- lung2$status - 1
 > lung2$sex <- lung2$sex - 1
-> 
 > fm <- Surv(time, status) ~ age + sex
-> fit1 <- qris(fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, "iterative", "pmb", "rq")
-> fit2 <- qris(fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, "nonsmooth", "fmb", c(1, 0, 1))
-> fit3 <- qris(fm, data = lung2, t0 = 100, Q = 0.5, ne = 200,"smooth", "pmb", "rq")
-> 
+> fit1 <- qris(fm, data = lung2, t0 = 0, Q = 0.5, nB = 200, "iterative", "pmb", "rq")
+> fit2 <- qris(fm, data = lung2, t0 = 30, Q = 0.5, nB = 200, "nonsmooth", "fmb", c(1, 0, 1))
+> fit3 <- qris(fm, data = lung2, t0 = 100, Q = 0.5, nB = 200,"smooth", "pmb", "rq")
 > summary(fit1)
 Call:
-qris(formula = fm, data = lung2, t0 = 0, Q = 0.5, ne = 200, method = "iterative", 
+qris(formula = fm, data = lung2, t0 = 0, Q = 0.5, nB = 200, method = "iterative", 
     se = "pmb", init = "rq")
 
 qris Estimator
             estimate std.Error z.value p.value    
-(Intercept)   6.1747    0.7032   8.781  <2e-16 ***
-age          -0.0095    0.0108  -0.880  0.3790    
-sex           0.4873    0.1675   2.909  0.0036 ** 
+(Intercept)   6.1622    0.4830  12.758  <2e-16 ***
+age          -0.0090    0.0076  -1.190  0.2340    
+sex           0.4680    0.1312   3.567  0.0004 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit2)
 Call:
-qris(formula = fm, data = lung2, t0 = 30, Q = 0.5, ne = 200, 
+qris(formula = fm, data = lung2, t0 = 30, Q = 0.5, nB = 200, 
     method = "nonsmooth", se = "fmb", init = c(1, 0, 1))
 
 qris Estimator
             estimate std.Error z.value p.value    
-(Intercept)   5.6362    0.8650   6.516  <2e-16 ***
-age          -0.0015    0.0132  -0.110  0.9122    
-sex           0.4489    0.2175   2.064  0.0390 *  
+(Intercept)   5.6362    0.9355   6.025  <2e-16 ***
+age          -0.0015    0.0142  -0.103  0.9182    
+sex           0.4489    0.1979   2.268  0.0233 *  
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 > summary(fit3)
 Call:
-qris(formula = fm, data = lung2, t0 = 100, Q = 0.5, ne = 200, 
+qris(formula = fm, data = lung2, t0 = 100, Q = 0.5, nB = 200, 
     method = "smooth", se = "pmb", init = "rq")
 
 qris Estimator
             estimate std.Error z.value p.value    
-(Intercept)   8.6285    2.6138   3.301  0.0010 ***
-age          -0.0601    0.0416  -1.446  0.1481    
-sex           1.8121    0.6657   2.722  0.0065 ** 
+(Intercept)   8.6285    2.5117   3.435  0.0006 ***
+age          -0.0601    0.0395  -1.522  0.1279    
+sex           1.8121    0.6331   2.862  0.0042 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-> 
 > plot(fit2, Qs = 4:6 / 10)
 ```
 
