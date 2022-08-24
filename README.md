@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# qris
+# The qris package
 
 <!-- badges: start -->
 
@@ -183,17 +183,17 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ## Reference
 
-Kim, K., and Kang, S., (2022). Smoothed quantile regression for censored
-residual life.
+Kim, K., and Kang, S., (2022). “Smoothed quantile regression for
+censored residual life”. *Upcoming*
 
-Chiou, S., Kang, S., and Yan, J. (2014). Fitting accelerated failure
-time model in routine survival analysis with R package aftgee. *Journal
+Chiou, S., Kang, S., and Yan, J. (2014). “Fitting accelerated failure
+time model in routine survival analysis with R package aftgee”. *Journal
 of Statistical Software*, **61**(11): 1–23.
 
-Li, R., Huang, X., & Cortes, J. (2016). Quantile residual life
+Li, R., Huang, X., & Cortes, J. (2016). “Quantile residual life
 regression with longitudinal biomarker measurements for dynamic
-prediction. *Journal of the Royal Statistical Society*. **Series C**
+prediction”. *Journal of the Royal Statistical Society*. **Series C**
 (Applied Statistics), 755-773.
 
-Jung, S. H., Jeong, J. H., & Bandos, H. (2009). Regression on quantile
-residual life. *Biometrics*, **65**(4), 1203-1212.
+Jung, S. H., Jeong, J. H., & Bandos, H. (2009). “Regression on quantile
+residual life”. *Biometrics*, **65**(4), 1203-1212.

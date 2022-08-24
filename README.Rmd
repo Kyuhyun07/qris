@@ -7,7 +7,7 @@ output: github_document
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(comment = NA, prompt = TRUE, collapse = TRUE)
 ```
-# qris
+# The qris package
 
 <!-- badges: start -->
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/ibq7asah7tmym46b/branch/master?svg=true)](https://ci.appveyor.com/project/stc04003/qris-shjbv/branch/master)
@@ -86,11 +86,11 @@ plot(fit2, Qs = 4:6 / 10)
 ```
 
 ## Reference 
-Kim, K., and Kang, S., (2022). Smoothed quantile regression for censored residual life.
+Kim, K., and Kang, S., (2022). "Smoothed quantile regression for censored residual life". *Upcoming*
 
-Chiou, S., Kang, S., and Yan, J. (2014).  Fitting accelerated failure time model in routine survival analysis with R package aftgee. 
+Chiou, S., Kang, S., and Yan, J. (2014).  "Fitting accelerated failure time model in routine survival analysis with R package aftgee". 
 *Journal of Statistical Software*, **61**(11): 1--23. 
 
-Li, R., Huang, X., & Cortes, J. (2016). Quantile residual life regression with longitudinal biomarker measurements for dynamic prediction. *Journal of the Royal Statistical Society*. **Series C** (Applied Statistics), 755-773.
+Li, R., Huang, X., & Cortes, J. (2016). "Quantile residual life regression with longitudinal biomarker measurements for dynamic prediction". *Journal of the Royal Statistical Society*. **Series C** (Applied Statistics), 755-773.
 
-Jung, S. H., Jeong, J. H., & Bandos, H. (2009). Regression on quantile residual life. *Biometrics*, **65**(4), 1203-1212.
+Jung, S. H., Jeong, J. H., & Bandos, H. (2009). "Regression on quantile residual life". *Biometrics*, **65**(4), 1203-1212.
