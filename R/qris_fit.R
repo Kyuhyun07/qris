@@ -113,7 +113,7 @@ qris.iter <- function(info) {
           }
           new_sigma <- try(cov(t(result.fmb), use = "complete.obs"), silent = T)
           ## Trace the result
-          if (control$trace) {
+          if (verbose) {
             cat("\n Step:", k)
             cat("\n beta:", as.numeric(new_beta))
             cat("\n se:", as.numeric(sqrt(diag(new_sigma))), "\n")
@@ -169,7 +169,7 @@ qris.iter <- function(info) {
           new_sigma <- t(qr.solve(slope_a)) %*% new_V %*% qr.solve(slope_a)
           new_h <- new_sigma
           ## Trace the result
-          if (control$trace) {
+          if (verbose) {
             cat("\n beta:", as.numeric(new_beta), "\n")
             cat("\n se:", as.numeric(sqrt(diag(new_sigma))), "\n")
           }
@@ -236,20 +236,6 @@ qris.smooth <- function(info) {
       } else if (se == "pmb") {
         ## Partial Multiplier Bootstrap
         smooth.pmb.result <- isObjE(coefficient, X, H, I, logZ, data$delta, t0, Q, nB)
-        # smooth.pmb.result <- matrix(NA, nc, nB)        
-        # m2 <- isObjL(smooth.fit$x, X, H, logZ)
-        # for (j in 1:nB){
-        #   eta <- rexp(n)
-        #   if (all(data$delta == 1)) {
-        #     W_star <- rep(1, n)
-        #   } else {
-        #     survp <- drop(ghatC(data$Z, 1 - data$delta, eta))
-        #     ghatstart0 <- ifelse(t0 > 0, survp[findInterval(t0, uTime)], 1)
-        #     W_star <- data$delta / survp[findInterval(data$Z, uTime)] * ghatstart0
-        #     W_star[is.na(W_star)] <- max(W_star, na.rm = TRUE)
-        #   }
-        #   smooth.pmb.result[,j] <- t(X * I * eta) %*% (m2 * W_star - Q) / n
-        # } 
         pmb.v <- try(cov(t(smooth.pmb.result), use = "complete.obs"), silent = T)
         pmb.a <- Amat(coefficient, X, W, H, I, logZ, Q) / n
         ## Singular matrix 'a' error message and break
@@ -263,7 +249,7 @@ qris.smooth <- function(info) {
         }
         out <- list(coefficient=coefficient, stderr = pmb.se, vcov = pmb.sigma)
       } else {
-        print ("Select either 'fmb' or 'pmb'")
+        stop("Select either 'fmb' or 'pmb'")
       }
     } else {
       coefficient <- se <- rep(NA, nc)

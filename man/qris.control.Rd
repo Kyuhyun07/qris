@@ -11,7 +11,7 @@ qris.control(maxiter = 10, tol = 0.001, trace = FALSE)
 
 \item{tol}{tolerance of convergence}
 
-\item{trace}{a binary variable, determine whether to display output for each iteration.}
+\item{trace}{a binary variable, determine whether to save output for each iteration.}
 }
 \value{
 A list with the arguments as components.

@@ -22,7 +22,9 @@
 #' @param init is an option for specifying the initial values of the parameters estimates
 #' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 #' User defined vector as an initial value)
+#' @param verbose Show computation status.
 #' @param control controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when method = "iterative".
+#' 
 #' @return An object of class "\code{qris}" contains model fitting results.
 #' The \code{qris} object is a list containing at least the following components:
 #' \describe{
@@ -44,7 +46,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
                  method = c("smooth", "iterative", "nonsmooth"),
                  se = c("fmb","pmb"),
                  init = c("rq", "noeffect"),
-                 control = qris.control()) {
+                 verbose = FALSE, control = qris.control()) {
   scall <- match.call()
   mnames <- c("", "formula", "data")
   cnames <- names(scall)
@@ -103,8 +105,8 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
                      error = function(e) {
                        tmp <- conditionMessage(e)
                        tmp <- str_replace(tmp, "'arg'", "'init'")
-                       cat(tmp, "or a numerical vector \n")
-                       on.exit(options(show.error.messages = F))
+                       stop(tmp, " or a numerical vector \n")
+                       ## on.exit(options(show.error.messages = F))
                      })
     if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
   } else {
@@ -114,7 +116,8 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   }
   ## collect all useful information
   info <- list(X = X, I = I, W = W, Q = Q, nB = nB, nc = nc, n = n, H = H, t0 = t0,
-               logZ = logZ, data = data, betastart = betastart, se = se, control = control)
+               logZ = logZ, data = data, betastart = betastart, se = se,
+               verbose = verbose, control = control)
   ## pass to fit
   out <- qris.fit(info, method)
   out$call <- scall
@@ -160,7 +163,7 @@ ghat <- function(Time, censor, wgt = 1) {
 #' 
 #' @param maxiter max number of iteration.
 #' @param tol tolerance of convergence
-#' @param trace a binary variable, determine whether to display output for each iteration.
+#' @param trace a binary variable, determine whether to save output for each iteration.
 #'
 #' @export
 #' @return A list with the arguments as components.

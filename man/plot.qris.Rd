@@ -21,6 +21,9 @@
 
 \item{...}{for future extension}
 }
+\value{
+A list contains \code{ggplot} object and the information to generate it.
+}
 \description{
 Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data
 }

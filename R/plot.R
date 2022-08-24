@@ -16,6 +16,8 @@ globalVariables("variable")
 #' @export
 #' @method plot qris
 #'
+#' @return A list contains \code{ggplot} object and the information to generate it.
+#' 
 #' @example inst/examples/ex_plot.R
 plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
                   byQs = FALSE, ...) {

@@ -13,6 +13,7 @@ qris(
   method = c("smooth", "iterative", "nonsmooth"),
   se = c("fmb", "pmb"),
   init = c("rq", "noeffect"),
+  verbose = FALSE,
   control = qris.control()
 )
 }
@@ -41,6 +42,8 @@ It is only for "smooth" and "iterative" options.
 \item{init}{is an option for specifying the initial values of the parameters estimates
 ("rq" is default in which the estimates from the non-smooth counterpart is specified,
 User defined vector as an initial value)}
+
+\item{verbose}{Show computation status.}
 
 \item{control}{controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when method = "iterative".}
 }
