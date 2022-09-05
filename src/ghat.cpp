@@ -14,7 +14,7 @@ arma::vec ghatC(arma::vec Time, arma::vec censor, arma::vec wgt) {
   for (int i = 0; i < n; i++) {
     arma::uvec ind1 = find(Time == T0[i]);
     d[i] = sum(censor.elem(ind1) % wgt.elem(ind1));
-    r(span(0, i)) += ind1.n_elem;
+    r(span(0, i)) += sum(wgt.elem(ind1));
     // r.elem(regspace<uvec>(0, i)) += sum(wgt.elem(ind1));
   }
   return(cumprod(1 - d / r));
