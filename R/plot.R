@@ -29,7 +29,7 @@ plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
   } else {
     if (!is.null(Qs)) {
       Qs <- sort(Qs)
-      if (min(Qs) <= 0 | max(Qs) >= 1) stop("Qs outisde [0, 1]") 
+      if (min(Qs) <= 0 | max(Qs) >= 1) stop("Qs outside [0, 1]") 
     }
     if (!is.null(t0s)) {
       t0s <- sort(t0s)
