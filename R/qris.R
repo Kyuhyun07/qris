@@ -73,7 +73,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   n <- nrow(covariate)
   ## Checks
   if(nc < 2) stop("Use at least one covariate")
-  if(t0 < 0) stop("basetime must be 0 and positive number")
+  if(t0 < 0) stop("basetime must be 0 or positive number")
   if(length(Q) > 1) stop("Multiple taus not allowed in qris")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
   ## Suppress warning message
