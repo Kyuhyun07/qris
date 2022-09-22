@@ -24,12 +24,12 @@ qris.nonsmooth <- function(info) {
     uTime <- sort(unique(data$Z))
     if (all(Li.fit$coefficients <= 10)){
       if (nB <= 1) {
-        se <- rep(NA, nc)
-        vcov <- matrix(NA, nc, nc)
+        se <- rep(NA_real_, nc)
+        vcov <- matrix(NA_real_, nc, nc)
         return(list(coefficient = coefficient, stderr = se, vcov = vcov))
       }
       if (se == "fmb"){
-        fmb.result <- matrix(NA, nc, nB)
+        fmb.result <- matrix(NA_real_, nc, nB)
         for (j in 1:nB){
           ## generating perturbation variable
           eta <- rexp(n)
@@ -73,10 +73,10 @@ qris.iter <- function(info) {
   out <- with(info, {
     new_h <- old_h <- H
     new_sigma <- old_sigma <- H*n
-    iter_beta_result <- iter_SE_result <- matrix(NA, control$maxiter, nc)
+    iter_beta_result <- iter_SE_result <- matrix(NA_real_, control$maxiter, nc)
     iter_beta_result[1,] <- old_beta <- new_beta <- betastart
     iter_SE_result[1,] <- sqrt(diag(new_sigma))
-    iter_norm_result <- rep(NA, control$maxiter)
+    iter_norm_result <- rep(NA_real_, control$maxiter)
     uTime <- sort(unique(data$Z))
     if (se == "fmb") {
       for (k in 1:control$maxiter){
@@ -93,7 +93,7 @@ qris.iter <- function(info) {
           new_beta <- old_beta + qr.solve(slope_a) %*% (isObj(old_beta, X, W, old_h, I, logZ, Q)/n)
           iter_beta_result[k,] <- t(new_beta)
           ## Step 2 : Update Sigma()
-          result.fmb <- matrix(NA, nc, nB)
+          result.fmb <- matrix(NA_real_, nc, nB)
           for (j in 1:nB){
             ## generating perturbation variable
             eta <- rexp(n)
