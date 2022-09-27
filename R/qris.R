@@ -58,7 +58,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   obj <- unclass(m[,1])
   method <- match.arg(method)
   se <- match.arg(se)
-  if (!is.Surv(m[[1]]) || ncol(obj) > 2)
+  if (!is.Surv(m[[1]]) || attr(obj, "type") != "right")
     stop("qris only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
   ## Create data; the first 2 columns are from Surv(), e.g., time, status, x1, x2, ...
@@ -67,7 +67,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   } else {
     data <- cbind(obj, model.matrix(mterms, m))
   }
-  data <- as.data.frame(data)
+  ## data <- as.data.frame(data)
   X <- covariate <- as.matrix(data[, -(1:2), drop = FALSE])
   nc <- ncol(covariate)
   n <- nrow(covariate)
@@ -76,12 +76,9 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   if(t0 < 0) stop("basetime must be 0 or positive number")
   if(length(Q) > 1) stop("Multiple taus not allowed in qris")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
-  ## Suppress warning message
-  logZ <- suppressWarnings(log(data[,1] - t0))
+  logZ <- log(pmax(data[,1] - t0, 1e-4))
   I <- as.numeric(data[,1] >= t0)
   data <- cbind(time = data[, 1], logtime = logZ, I, data[, -1])
-  data[is.na(data[, 2]), 2] <- -10
-  data[data[,2] == -Inf, 2] <- -10
   data[n, 4] <- 1
   colnames(data)[1:4] <- c("Z", "log(Z-t0)", "I[Z>t0]","delta")
   data <- na.omit(data)
@@ -146,7 +143,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
 #'   \item{nrisk}{a vector of number of subject who are possible to experience event at deathtime}
 #'   \item{survp}{a vector of survival probability at deathtime}
 #'   }
-#' @export
+#' @noRd
 ghat <- function(Time, censor, wgt = 1) {
   deathtime <- c(0, sort(unique(Time[censor > 0])))
   ndeath <- colSums(outer(Time, deathtime, "==") * censor * wgt)

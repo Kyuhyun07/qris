@@ -16,12 +16,21 @@ vcov.qris <- function(object, ...) {
 }
 
 #' @exportS3Method print qris
-print.qris <- function(x, ...) {
-  cat("Call: \n")
-  dput(x$call)
-  mat <- rbind(x$varNames, format(x$coefficient, digits = 5))
-  prmatrix(mat, rowlab = rep("", nrow(mat)),
-           collab = rep("", ncol(mat)), quote = FALSE)
+print.qris <- function(x, digits = max(1L, getOption("digits") - 3L), ...) {
+  ## cat("Call: \n")
+  ## dput(x$call)
+  ## mat <- rbind(x$varNames, format(x$coefficient, digits = 5))
+  ## prmatrix(mat, rowlab = rep("", nrow(mat)),
+  ##          collab = rep("", ncol(mat)), quote = FALSE)
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  if (length(coef(x))) {
+    cat("Coefficients:\n")
+    print.default(format(coef(x), digits = digits), print.gap = 2L, quote = FALSE)
+  }
+  else cat("No coefficients\n")
+  cat("\n")
+  invisible(x) 
 }
 
 #' @exportS3Method summary qris

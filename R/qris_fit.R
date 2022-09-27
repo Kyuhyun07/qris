@@ -86,7 +86,7 @@ qris.iter <- function(info) {
         slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q) / n
         ## Step 1 : Update beta()
         ## Singular matrix 'a' error message and break
-        if (class(try(qr.solve(slope_a), silent=TRUE))[1]=="try-error") {
+        if (qr(slope_a)$rank < min(dim(slope_a))) {
           warning("'A' matrix is singular during iteration. Please try the non-iterative method.")
           break
         } else {
@@ -118,7 +118,7 @@ qris.iter <- function(info) {
             cat("\n beta:", as.numeric(new_beta))
             cat("\n se:", as.numeric(sqrt(diag(new_sigma))), "\n")
           }
-          if (class(try(new_sigma,silent=TRUE))[1]=="try-error") {
+          if (qr(new_sigma)$rank < min(dim(new_sigma))) {
             warning("Futher fmb method is inapplicable to this dataset. Please try other estimation methods")
             new_sigma <- old_sigma
             break
@@ -142,7 +142,7 @@ qris.iter <- function(info) {
         slope_a <- Amat(old_beta, X, W, old_h, I, logZ, Q)/n
         ## Step 1 : Update beta()
         ## Singular matrix 'a' error message and break
-        if (class(try(qr.solve(slope_a), silent=TRUE))[1]=="try-error") {
+        if (qr(slope_a)$rank < min(dim(slope_a))) {
           warning("'A' matrix is singular during iteration. Please try the non-iterative method.")
           break
         } else {
@@ -239,7 +239,7 @@ qris.smooth <- function(info) {
         pmb.v <- try(cov(t(smooth.pmb.result), use = "complete.obs"), silent = T)
         pmb.a <- Amat(coefficient, X, W, H, I, logZ, Q) / n
         ## Singular matrix 'a' error message and break
-        if (class(try(qr.solve(pmb.a),silent=TRUE))[1]=="try-error") {
+        if (qr(pmb.a)$rank < min(dim(pmb.a))) {
           pmb.se <- rep(NA,nc+1)
           stop("'A' matrix is singular during iteration. Please try the nonsmooth method.")
         } else {
