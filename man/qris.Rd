@@ -67,6 +67,7 @@ Using three estimation methods
 ## ######################################### 
 ## Simulated data
 ## #########################################
+library(qris)
 
 data.gen <- function(n) {
   r0 <- .2 * sqrt(log(2))

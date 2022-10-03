@@ -42,6 +42,7 @@
 #' @importFrom stringr str_replace
 #' @import Rcpp
 #' @example inst/examples/ex_qris.R
+#' @useDynLib qris
 qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
                  method = c("smooth", "iterative", "nonsmooth"),
                  se = c("fmb","pmb"),
@@ -65,10 +66,8 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   if (formula == ~1) {
     stop("No covariates are detected.")
   } else {
-    data <- cbind(obj, model.matrix(mterms, m))
+      X <- covariate <- model.matrix(mterms, m)
   }
-  ## data <- as.data.frame(data)
-  X <- covariate <- as.matrix(data[, -(1:2), drop = FALSE])
   nc <- ncol(covariate)
   n <- nrow(covariate)
   ## Checks
@@ -76,23 +75,23 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   if(t0 < 0) stop("basetime must be 0 or positive number")
   if(length(Q) > 1) stop("Multiple taus not allowed in qris")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
-  logZ <- log(pmax(data[,1] - t0, 1e-4))
-  I <- as.numeric(data[,1] >= t0)
-  data <- cbind(time = data[, 1], logtime = logZ, I, data[, -1])
-  data[n, 4] <- 1
-  colnames(data)[1:4] <- c("Z", "log(Z-t0)", "I[Z>t0]","delta")
+  data <- data.frame(Z = obj[,1])
+  data$"log(Z-t0)" <- log(pmax(data$Z - t0, 1e-4))
+  data$"I[Z>t0]" <- as.numeric(data$Z >= t0)
+  data$delta <- 1
   data <- na.omit(data)
   n <- nrow(data)
   ## Rcpp IPCW with jump weight
   # Use survfit
-  sv <- survfit(Surv(data[, 1], 1 - data[, 4]) ~ 1)
-  if (t0 <= sv$time[1]) {ghatt0 <- 1
-  } else {ghatt0 <- sv$surv[min(which(sv$time>t0))-1]}
-  W <- data[,4] / sv$surv[findInterval(data[,1], sv$time)] * ghatt0
+  sv <- survfit(Surv(Z, 1 - delta) ~ 1, data)
+  if (t0 <= sv$time[1]) {
+      ghatt0 <- 1
+  } else {
+      ghatt0 <- sv$surv[min(which(sv$time>t0))-1]
+  }
+  W <- data$delta / sv$surv[findInterval(data$Z, sv$time)] * ghatt0
   W[is.na(W)] <- max(W, na.rm = TRUE)
-  data[, ncol(data) + 1] <- W
-  
-  colnames(data)[ncol(data)] <- c("weight")
+  data$weight <- W
   logZ <- data[,2]
   I <- data[,3]
   H <- diag(1 / n, nc, nc)
