@@ -78,7 +78,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   data <- data.frame(Z = obj[,1])
   data$"log(Z-t0)" <- log(pmax(data$Z - t0, 1e-4))
   data$"I[Z>t0]" <- as.numeric(data$Z >= t0)
-  data$delta <- 1
+  data$delta <- c(obj[1:(n - 1),2], 1)
   data <- na.omit(data)
   n <- nrow(data)
   ## Rcpp IPCW with jump weight
