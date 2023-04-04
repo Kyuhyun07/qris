@@ -105,6 +105,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
                        ## on.exit(options(show.error.messages = F))
                      })
     if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
+    if (init == "noeffect") betastart <- rep(0, nc)
   } else {
     if (!is.numeric(init)) stop("User specified initial value must be a numerical vector")
     if (length(init) != nc) stop("User specified initial value must match the number of covariates")
