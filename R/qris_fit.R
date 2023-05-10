@@ -183,8 +183,8 @@ qris.iter <- function(info) {
         }
       } ## end for loop
     }
-    iter_beta_result <- iter_beta_result[!is.na(iter_beta_result[,1]),]
-    iter_SE_result <- iter_SE_result[!is.na(iter_SE_result[,1]),]
+    iter_beta_result <- iter_beta_result[!is.na(iter_beta_result[,1]),,drop = FALSE]
+    iter_SE_result <- iter_SE_result[!is.na(iter_SE_result[,1]),,drop = FALSE]
     iter_norm_result <- iter_norm_result[!is.na(iter_norm_result)]
     out <- list(coefficient = as.numeric(tail(iter_beta_result, n = 1)),
                 trace.coefficient = iter_beta_result,
@@ -254,7 +254,7 @@ qris.smooth <- function(info) {
     } else {
       coefficient <- se <- rep(NA, nc)
       vcov <- matrix(NA, nc, nc)
-      out <- list(coefficient=coefficient, stderr = se, vcov = vcov)
+      out <- list(coefficient = coefficient, stderr = se, vcov = vcov)
     }})
   out
 }

@@ -14,7 +14,7 @@ plot(fit)
 plot(fit, nB = 0)
 
 ## Plot feature can update qris calls 
-fit <- plot(fit, Qs = 3:6 / 10, t0s = 1:6 * 10, exportDat = TRUE)
+fit <- plot(fit, Qs = 3:6 / 10, t0s = 1:6 * 10)
 
 ## Faster after updating the qris call
 plot(fit, byQs = FALSE)
@@ -22,4 +22,3 @@ plot(fit, byQs = TRUE)
 
 plot(fit, byQs = FALSE, vari = c("sex", "age"))
 plot(fit, byQs = TRUE, vari = c("sex", "age"))
-

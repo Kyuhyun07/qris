@@ -20,7 +20,7 @@ globalVariables("variable")
 #' 
 #' @example inst/examples/ex_plot.R
 plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
-                  byQs = FALSE, ...) {
+                  byQs = FALSE, show = TRUE, ...) {
   ## Assign default values
   ## When both t0s and Qs are NULL, we plot it by Qs? which is easier or more informative?
   if (all(is.null(t0s), is.null(Qs))) {
@@ -48,7 +48,7 @@ plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
   if (is.null(x$ggdat)) {
     d <- expand.grid(Qs = Qs, t0s = t0s, KEEP.OUT.ATTRS = F)
     ddd <- apply(d, 1, function(dd) {
-      tmp <- update(x, t0 = dd['t0s'], Q = dd['Qs'], nB = nB)
+      tmp <- update(x, t0 = dd['t0s'], Q = dd['Qs'], nB = nB, data = x$data)
       c(coef(tmp), sqrt(diag(vcov(tmp))))
     })
     nc <- length(x$varNames)
@@ -80,7 +80,7 @@ plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
     p <- p + geom_ribbon(aes(ymax = Est + 1.96 * SE, ymin = Est - 1.96 * SE, fill = variable),
                          linetype = 2, alpha = .2, show.legend = FALSE)
   p <- p + labs(color = "Covariates") + ylab("Regression coefficients")
-  print(p)
+  if (show) print(p)
   x$ggdat <- d
   x$gg <- p
   invisible(x)

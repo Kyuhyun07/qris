@@ -118,6 +118,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   ## pass to fit
   out <- qris.fit(info, method)
   out$call <- scall
+  out$data <- as.data.frame(do.call(cbind, m))
   out$varNames <- colnames(covariate)
   out$para <- list(method = method, Q = Q, t0 = t0, nB = nB)
   if (info$control$trace) {
