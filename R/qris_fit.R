@@ -186,9 +186,9 @@ qris.iter <- function(info) {
     iter_beta_result <- iter_beta_result[!is.na(iter_beta_result[,1]),]
     iter_SE_result <- iter_SE_result[!is.na(iter_SE_result[,1]),]
     iter_norm_result <- iter_norm_result[!is.na(iter_norm_result)]
-    out <- list(coefficient = tail(iter_beta_result, n = 1),
+    out <- list(coefficient = as.numeric(tail(iter_beta_result, n = 1)),
                 trace.coefficient = iter_beta_result,
-                stderr = tail(iter_SE_result, n = 1),
+                stderr = as.numeric(tail(iter_SE_result, n = 1)),
                 trace.stderr = iter_SE_result,
                 vcov = new_sigma, iterno = k,
                 norm = iter_norm_result)   
