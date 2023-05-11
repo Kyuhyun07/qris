@@ -56,6 +56,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   mcall[[1]] <- as.name("model.frame")
   m <- eval(mcall, parent.frame())
   mterms <- attr(m, "terms")
+  allnames <- all.vars(formula)
   obj <- unclass(m[,1])
   method <- match.arg(method)
   se <- match.arg(se)
@@ -119,6 +120,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   out <- qris.fit(info, method)
   out$call <- scall
   out$data <- as.data.frame(do.call(cbind, m))
+  names(out$data) <- allnames
   out$varNames <- colnames(covariate)
   out$para <- list(method = method, Q = Q, t0 = t0, nB = nB)
   if (info$control$trace) {

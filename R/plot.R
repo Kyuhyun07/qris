@@ -9,6 +9,8 @@ globalVariables("variable")
 #' @param vari is a character string to choose variables to draw the regression coefficient.
 #' @param byQs put Qs on x-axis; only used when both t0s and Qs are specified.
 ## #' @param exportData is a logical variable to specify whether to return the data.frame used to construct ggplot
+#' @param show is a logical value to indicate whether to display the plot
+#' @param ggextra is a list that contains additional componenets to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature. 
 #' @param ... for future extension
 #'
 #' @importFrom stats vcov coef update complete.cases
@@ -20,7 +22,7 @@ globalVariables("variable")
 #' 
 #' @example inst/examples/ex_plot.R
 plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
-                  byQs = FALSE, show = TRUE, ...) {
+                      byQs = FALSE, show = TRUE, ggextra = NULL, ...) {
   ## Assign default values
   ## When both t0s and Qs are NULL, we plot it by Qs? which is easier or more informative?
   if (all(is.null(t0s), is.null(Qs))) {
@@ -79,7 +81,7 @@ plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
   if (nB > 0)   
     p <- p + geom_ribbon(aes(ymax = Est + 1.96 * SE, ymin = Est - 1.96 * SE, fill = variable),
                          linetype = 2, alpha = .2, show.legend = FALSE)
-  p <- p + labs(color = "Covariates") + ylab("Regression coefficients")
+  p <- p + labs(color = "Covariates") + ylab("Regression coefficients") + ggextra
   if (show) print(p)
   x$ggdat <- d
   x$gg <- p

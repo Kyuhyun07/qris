@@ -22,3 +22,7 @@ plot(fit, byQs = TRUE)
 
 plot(fit, byQs = FALSE, vari = c("sex", "age"))
 plot(fit, byQs = TRUE, vari = c("sex", "age"))
+
+## Extra ggplot components
+library(ggplot2)
+plot(fit, byQs = FALSE, vari = c("sex", "age"), ggextra = theme(legend.position = "none"))
