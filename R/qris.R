@@ -60,6 +60,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   obj <- unclass(m[,1])
   method <- match.arg(method)
   se <- match.arg(se)
+  formula0 <- formula
   if (!is.Surv(m[[1]]) || attr(obj, "type") != "right")
     stop("qris only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
@@ -119,6 +120,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   ## pass to fit
   out <- qris.fit(info, method)
   out$call <- scall
+  out$formula <- formula0
   out$data <- as.data.frame(do.call(cbind, m))
   names(out$data) <- allnames
   out$varNames <- colnames(covariate)
