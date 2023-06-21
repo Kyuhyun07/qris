@@ -4,7 +4,17 @@
 \alias{plot.qris}
 \title{Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data}
 \usage{
-\method{plot}{qris}(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL, byQs = FALSE, ...)
+\method{plot}{qris}(
+  x,
+  t0s = NULL,
+  Qs = NULL,
+  nB = NULL,
+  vari = NULL,
+  byQs = FALSE,
+  show = TRUE,
+  ggextra = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{is an qris object or a data.frame returned by plot.qris}
@@ -18,6 +28,10 @@
 \item{vari}{is a character string to choose variables to draw the regression coefficient.}
 
 \item{byQs}{put Qs on x-axis; only used when both t0s and Qs are specified.}
+
+\item{show}{is a logical value to indicate whether to display the plot}
+
+\item{ggextra}{is a list that contains additional componenets to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature.}
 
 \item{...}{for future extension}
 }
@@ -44,7 +58,7 @@ plot(fit)
 plot(fit, nB = 0)
 
 ## Plot feature can update qris calls 
-fit <- plot(fit, Qs = 3:6 / 10, t0s = 1:6 * 10, exportDat = TRUE)
+fit <- plot(fit, Qs = 3:6 / 10, t0s = 1:6 * 10)
 
 ## Faster after updating the qris call
 plot(fit, byQs = FALSE)
@@ -53,4 +67,7 @@ plot(fit, byQs = TRUE)
 plot(fit, byQs = FALSE, vari = c("sex", "age"))
 plot(fit, byQs = TRUE, vari = c("sex", "age"))
 
+## Extra ggplot components
+library(ggplot2)
+plot(fit, byQs = FALSE, vari = c("sex", "age"), ggextra = theme(legend.position = "none"))
 }

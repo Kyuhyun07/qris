@@ -67,8 +67,6 @@ Using three estimation methods
 ## ######################################### 
 ## Simulated data
 ## #########################################
-library(qris)
-
 data.gen <- function(n) {
   r0 <- .2 * sqrt(log(2))
   r1 <- .1 * sqrt(log(2))
@@ -112,6 +110,5 @@ summary(fit2)
 summary(fit3)
 
 plot(fit2, Qs = 4:6 / 10)
-
 
 }

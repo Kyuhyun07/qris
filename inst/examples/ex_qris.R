@@ -45,4 +45,3 @@ summary(fit3)
 
 plot(fit2, Qs = 4:6 / 10)
 
-
