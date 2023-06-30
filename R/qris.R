@@ -137,7 +137,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
 #' Calculate the weighted Kaplan-Meier estimate
 #'
 #' @param Time is a vector of observed time, which is minimum of failure time and censored time
-#' @param censor is a vector of censoring indicator (not censored = 1, censored = 0)
+#' @param event is a vector of event indicator (not censored = 1, censored = 0)
 #' @param wgt is a vector of weight
 #'
 #' @return
@@ -149,9 +149,9 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
 #'   \item{survp}{a vector of survival probability at deathtime}
 #'   }
 #' @noRd
-ghat <- function(Time, censor, wgt = 1) {
-  deathtime <- c(0, sort(unique(Time[censor > 0])))
-  ndeath <- colSums(outer(Time, deathtime, "==") * censor * wgt)
+ghat <- function(Time, event, wgt = 1) {
+  deathtime <- c(0, sort(unique(Time[event > 0])))
+  ndeath <- colSums(outer(Time, deathtime, "==") * event * wgt)
   nrisk <- colSums(outer(Time, deathtime, ">=") * wgt)
   survp <- cumprod(1 - ndeath / nrisk)
   data.frame(deathtime, ndeath, nrisk, survp)
