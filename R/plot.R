@@ -10,7 +10,7 @@ globalVariables("variable")
 #' @param byQs put Qs on x-axis; only used when both t0s and Qs are specified.
 ## #' @param exportData is a logical variable to specify whether to return the data.frame used to construct ggplot
 #' @param show is a logical value to indicate whether to display the plot
-#' @param ggextra is a list that contains additional componenets to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature. 
+#' @param ggextra is a list that contains additional components to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature. 
 #' @param ... for future extension
 #'
 #' @importFrom stats vcov coef update complete.cases

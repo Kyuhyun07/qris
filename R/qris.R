@@ -19,9 +19,8 @@
 #'("pmb" is default in which parameters estimates' standard errors are obtained via partial multiplier bootstrapping. 
 #' It is only for "smooth" and "iterative" options.
 #' "fmb" uses a full multiplier bootstrapping in standard errors estimation. In "nonsmooth" method, "pmb" option is not available.
-#' @param init is an option for specifying the initial values of the parameters estimates
-#' ("rq" is default in which the estimates from the non-smooth counterpart is specified,
-#' User defined vector as an initial value)
+#' @param init is an option for specifying the initial values of the parameters estimates.
+#' Available options are "rq" and "noeffect", which correspond to the estimates from the \code{quantreg::rq()} and a zero vector, respectively. Alternatively, user defined numerical vector is also allowed.
 #' @param verbose Show computation status.
 #' @param control controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when method = "iterative".
 #' 
@@ -29,9 +28,9 @@
 #' The \code{qris} object is a list containing at least the following components:
 #' \describe{
 #'   \item{coefficient}{a vector of point estimates}
-#'   \item{stderr}{a vector of standard error of point estiamtes}
+#'   \item{stderr}{a vector of standard error of point estimates}
 #'   \item{vcov}{a matrix of the estimated variance-covariance matrix}
-#'   \item{maxiter}{a number of itertation until convergence (only for iterative procedure)}
+#'   \item{maxiter}{a number of iteration until convergence (only for iterative procedure)}
 #'   }
 #'
 #' @export
