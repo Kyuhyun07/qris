@@ -12,9 +12,3 @@ test_that("Test additional data from plot", {
   expect_equal(unique(fit$ggdat$Qs), 3:6 / 10)
   expect_equal(unique(fit$ggdat$t0s), 1:6 * 10)
 })
-
-
-library(testthat)
-library(qris)
-
-debug(qris:::plot.qris)
