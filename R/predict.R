@@ -26,6 +26,11 @@ predict.qris <- function(object, newdata, ...) {
 #'
 #' Residual based on fitted quantile regression model
 #' 
+#' @param object is a qris object
+#' @param newdata is a data frame for an optional new data to do predictions.
+#' If omitted, the fitted values based on the original data and fit will be returned.
+#' @param ... for future extension
+#'
 #' @method residuals qris
 #'
 #' @export

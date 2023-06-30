@@ -6,6 +6,14 @@
 \usage{
 \method{residuals}{qris}(object, newdata, ...)
 }
+\arguments{
+\item{object}{is a qris object}
+
+\item{newdata}{is a data frame for an optional new data to do predictions.
+If omitted, the fitted values based on the original data and fit will be returned.}
+
+\item{...}{for future extension}
+}
 \value{
 A vector of residual
 }

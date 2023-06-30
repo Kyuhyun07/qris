@@ -11,7 +11,6 @@
   nB = NULL,
   vari = NULL,
   byQs = FALSE,
-  show = TRUE,
   ggextra = NULL,
   ...
 )
@@ -29,9 +28,7 @@
 
 \item{byQs}{put Qs on x-axis; only used when both t0s and Qs are specified.}
 
-\item{show}{is a logical value to indicate whether to display the plot}
-
-\item{ggextra}{is a list that contains additional componenets to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature.}
+\item{ggextra}{is a list that contains additional components to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature.}
 
 \item{...}{for future extension}
 }

@@ -1,30 +1,17 @@
 globalVariables("variable")
 
-#' Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data
+#' Extend a \code{qris} to a specified range of $\tau$ or $t_0$ values.
 #'
 #' @param x is an qris object or a data.frame returned by plot.qris
 #' @param t0s is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}
 #' @param Qs  is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}
 #' @param nB is the number of multiplier bootstrapping for standard error estimation.
 #' @param vari is a character string to choose variables to draw the regression coefficient.
-#' @param byQs put Qs on x-axis; only used when both t0s and Qs are specified.
-## #' @param exportData is a logical variable to specify whether to return the data.frame used to construct ggplot
-#' @param show is a logical value to indicate whether to display the plot
-#' @param ggextra is a list that contains additional components to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature. 
-#' @param ... for future extension
-#'
-#' @importFrom stats vcov coef update complete.cases
-#' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_ribbon labs xlab ylab theme
-#' @export
-#' @method plot qris
-#'
-#' @return A list contains \code{ggplot} object and the information to generate it.
 #' 
-#' @example inst/examples/ex_plot.R
-plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
-                      byQs = FALSE, show = TRUE, ggextra = NULL, ...) {
-  ## Assign default values
-  ## When both t0s and Qs are NULL, we plot it by Qs? which is easier or more informative?
+#' @export
+extand <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL) {
+  if (!is.qris(x))
+    stop("Must be qris class")
   if (all(is.null(t0s), is.null(Qs))) {
     Qs <- 1:9 / 10
     t0s <- x$para$t0
@@ -66,24 +53,49 @@ plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
     rownames(d) <- NULL
   } else d <- x$ggdat
   d <- subset(d, variable %in% vari)
+  x$ggdat <- d
+  invisible(x)
+}
+
+
+#' Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data
+#'
+#' @param x is an qris object or a data.frame returned by plot.qris
+#' @param t0s is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}
+#' @param Qs  is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}
+#' @param nB is the number of multiplier bootstrapping for standard error estimation.
+#' @param vari is a character string to choose variables to draw the regression coefficient.
+#' @param byQs put Qs on x-axis; only used when both t0s and Qs are specified.
+## #' @param exportData is a logical variable to specify whether to return the data.frame used to construct ggplot
+#' @param ggextra is a list that contains additional components to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature. 
+#' @param ... for future extension
+#'
+#' @importFrom stats vcov coef update complete.cases
+#' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_ribbon labs xlab ylab theme
+#' @export
+#'
+#' @method plot qris
+#' @return A list contains \code{ggplot} object and the information to generate it.
+#' 
+#' @example inst/examples/ex_plot.R
+plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
+                      byQs = FALSE, ggextra = NULL, ...) {
+  if (is.null(nB)) nB <- 0
+  if (is.null(x$ggdat)) x <- extand(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL)
+  d <- x$ggdat
   if (length(unique(d$t0s)) == 1) byQs <- TRUE
   if (byQs) ## Q on x-axis
     p <- ggplot(d, aes(x = Qs, y = Est, col = variable)) + geom_line() +
       facet_wrap(~ factor(t0s, labels = paste0("Basetime is ", unique(t0s)))) +
       xlab("Quantiles")
-      # xlab("Quantiles") + theme(legend.position = "none")  
   else   
     ## t0s on x-axis
     p <- ggplot(d, aes(x = t0s, y = Est, col = variable)) + geom_line() +
       facet_wrap(~ factor(Qs, labels = paste0("Quantile is ", unique(Qs)))) + 
       xlab("Basetimes") + theme(legend.position = "none")
-      # xlab("Basetimes") + theme(legend.position = "none")
-  if (nB > 0)   
+  if (nB > 0) 
     p <- p + geom_ribbon(aes(ymax = Est + 1.96 * SE, ymin = Est - 1.96 * SE, fill = variable),
                          linetype = 2, alpha = .2, show.legend = FALSE)
-  p <- p + labs(color = "Covariates") + ylab("Regression coefficients") + ggextra
-  if (show) print(p)
-  x$ggdat <- d
-  x$gg <- p
-  invisible(x)
+  p + labs(color = "Covariates") + ylab("Regression coefficients") + ggextra
 }
+
