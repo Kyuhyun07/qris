@@ -9,7 +9,7 @@ globalVariables("variable")
 #' @param vari is a character string to choose variables to draw the regression coefficient.
 #' 
 #' @export
-extend <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL) {
+qris.extend <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL) {
   if (!is.qris(x))
     stop("Must be qris class")
   if (all(is.null(t0s), is.null(Qs))) {
@@ -81,7 +81,7 @@ extend <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL) {
 plot.qris <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL,
                       byQs = FALSE, ggextra = NULL, ...) {
   if (is.null(nB)) nB <- 0
-  if (is.null(x$ggdat)) x <- extand(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL)
+  if (is.null(x$ggdat)) x <- qris.extend(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL)
   d <- x$ggdat
   if (length(unique(d$t0s)) == 1) byQs <- TRUE
   if (byQs) ## Q on x-axis
