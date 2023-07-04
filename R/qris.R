@@ -64,15 +64,21 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
     stop("qris only supports Surv object with right censoring.", call. = FALSE)
   formula[[2]] <- NULL
   ## Create data; the first 2 columns are from Surv(), e.g., time, status, x1, x2, ...
+  intModel <- FALSE
+  n <- nrow(obj)
   if (formula == ~1) {
-    stop("No covariates are detected.")
+      intModel <- TRUE
+      X <- covariate <- matrix(1, n, 1)
   } else {
       X <- covariate <- model.matrix(mterms, m)
   }
   nc <- ncol(covariate)
-  n <- nrow(covariate)
   ## Checks
-  if(nc < 2) stop("Use at least one covariate")
+  if(nc < 2 | intModel) {
+      s <- survfit(Surv(time, status) ~ 1, data = as.data.frame(obj), subset = time > t0)
+      q <- as.numeric(quantile(s, .5)$quantile)
+      stop(paste0("Intercept-only model detected; the ", round(100 * Q, 2), "-th quantile residual time is ", round(q, 2)))
+  }
   if(t0 < 0) stop("basetime must be 0 or positive number")
   if(length(Q) > 1) stop("Multiple taus not allowed in qris")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
