@@ -1,31 +1,36 @@
 #' Estimate a quantile regression estimator of residual lifetime from survival data
 #'
 #' Using three estimation methods
-#' (1) L1-minimization(non-smooth estimating equation)
-#' (2) Induced smoothing approach (smooth estimating equation)
-#' (3) Iterative procedure with induced smoothing approach (smooth estimating equation)
+#' (1) L1-minimization(non-smooth estimating equation
+#' (2) Induced smoothing approach (smooth estimating equation
+#' (3) Iterative procedure with induced smoothing approach (smooth estimating equation
 #'
-#' @param formula  a formula expression, of the form \code{response ~ predictors}.
+#' @param formula is a formula expression, of the form \code{response ~ predictors}.
 #'     The \code{response} is a \code{Surv} object with right censoring.
-#' @param data an optional data.frame in which to interpret the variables occurring in the \code{formula}.
-#' @param t0 is the followup time (or basetime of analysis). The default followup time is set to 0.
+#' @param data is an optional \code{data.frame} in which to interpret the variables occurring in the \code{formula}.
+#' @param t0 is the follow-up time (or basetime of analysis). The default followup time is set to 0.
 #' @param Q is the quantile. The default quantile is set to 0.5.
 #' @param nB is number of multiplier bootstrapping for V matrix estimation. The default number of bootstrapping is set to 100.
-#' @param method is an option for specifying the methods of parameters estimation.
-#'("smooth" is default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations.
-#' "nonsmooth" uses a L1-minimization method for non-smooth object functions in coefficient estimation.
-#' "iterative" simultaneously estimates parameters and their standard errors based the iterative updates for parameter estimates.)
-#' @param se is an option for specifying the methods of standard errors estimation
-#'("pmb" is default in which parameters estimates' standard errors are obtained via partial multiplier bootstrapping. 
-#' It is only for "smooth" and "iterative" options.
-#' "fmb" uses a full multiplier bootstrapping in standard errors estimation. In "nonsmooth" method, "pmb" option is not available.
+#' @param method is an option for specifying the methods of parameters estimation;
+#' \code{smooth} is the default in which parameters estimates and their standard errors are obtained via induced smoothed estimating equations.
+#' \code{nonsmooth} uses a L1-minimization method for non-smooth object functions in coefficient estimation.
+#' \code{iterative} simultaneously estimates parameters and their standard errors based on the iterative updates for the parameter estimates.
+#' @param se is an option for specifying the methods of standard errors estimation;
+#' The available options are \code{pmb} and \code{fmb}.
+#' The \code{pmb} is the default option.
+#' It estimates the standard errors via partial multiplier bootstrapping and is only available
+#' when \code{method = "smooth"} or \code{method = "iterative"}.
+#' The \code{fmb} uses a full multiplier bootstrapping in standard errors estimation. 
 #' @param init is an option for specifying the initial values of the parameters estimates.
-#' Available options are "rq" and "noeffect", which correspond to the estimates from the \code{quantreg::rq()} and a zero vector, respectively. Alternatively, user defined numerical vector is also allowed.
-#' @param verbose Show computation status.
-#' @param control controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when method = "iterative".
+#' Available options are \code{rq} and \code{noeffect}.
+#' These options correspond to the estimates from the \code{quantreg::rq()} and a zero vector, respectively.
+#' Alternatively, user defined numerical vector is also allowed.
+#' @param verbose Shows computation status.
+#' @param control controls maximum number of iteration, tolerance of convergence and whether to display output for each iteration when
+#' \code{method = "iterative"}.
 #' 
 #' @return An object of class "\code{qris}" contains model fitting results.
-#' The \code{qris} object is a list containing at least the following components:
+#' The "\code{qris}" object is a list containing at least the following components:
 #' \describe{
 #'   \item{coefficient}{a vector of point estimates}
 #'   \item{stderr}{a vector of standard error of point estimates}
@@ -40,6 +45,7 @@
 #' @importFrom stats pnorm rnorm complete.cases
 #' @importFrom stringr str_replace
 #' @import Rcpp
+#' 
 #' @example inst/examples/ex_qris.R
 #' @useDynLib qris
 qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,

@@ -1,6 +1,6 @@
 globalVariables("variable")
 
-#' Extend a \code{qris} to a specified range of \eqn{tau} or \eqn{t_0} values.
+#' Extend a "\code{qris}" object to a specified range of \eqn{tau} or \eqn{t_0} values.
 #'
 #' @param x is an qris object or a data.frame returned by plot.qris
 #' @param t0s is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}
@@ -60,14 +60,17 @@ qris.extend <- function(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL) {
 
 #' Draw 95\% confidence interval by a quantile regression estimator of residual lifetime from survival data
 #'
-#' @param x is an qris object or a data.frame returned by plot.qris
-#' @param t0s is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}
-#' @param Qs  is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}
+#' @param x is an "\code{qris}" object or a data.frame returned by \code{plot.qris}.
+#' @param t0s is a vector of range of \code{t0} to plot;
+#' when not specified, the default value is from 0 to presently defined \eqn{t_0}
+#' @param Qs  is a vector of range of \code{Q} to plot;
+#' when not specified, the default value is from 5\% to presently defined \eqn{Q}
 #' @param nB is the number of multiplier bootstrapping for standard error estimation.
 #' @param vari is a character string to choose variables to draw the regression coefficient.
-#' @param byQs put Qs on x-axis; only used when both t0s and Qs are specified.
-## #' @param exportData is a logical variable to specify whether to return the data.frame used to construct ggplot
-#' @param ggextra is a list that contains additional components to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature. 
+#' @param byQs put \code{Q}'s on x-axis; only used when both \code{t0}'s and \code{Q}'s are specified.
+## #' @param exportData is a logical variable to specify whether to return the data.frame used to construct \code{ggplot}
+#' @param ggextra is a list that contains additional components to apply to the \code{ggplot} output.
+#' The \code{ggplot2} library must be loaded in order to utilize this feature. 
 #' @param ... for future extension
 #'
 #' @importFrom stats vcov coef update complete.cases

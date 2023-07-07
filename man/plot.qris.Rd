@@ -16,19 +16,22 @@
 )
 }
 \arguments{
-\item{x}{is an qris object or a data.frame returned by plot.qris}
+\item{x}{is an "\code{qris}" object or a data.frame returned by \code{plot.qris}.}
 
-\item{t0s}{is a vector of range of t0 to plot; when not specified, the default value is from 0 to presently defined \eqn{t_0}}
+\item{t0s}{is a vector of range of \code{t0} to plot;
+when not specified, the default value is from 0 to presently defined \eqn{t_0}}
 
-\item{Qs}{is a vector of range of Q to plot; when not specified, the default value is from 5\% to presently defined \eqn{Q}}
+\item{Qs}{is a vector of range of \code{Q} to plot;
+when not specified, the default value is from 5\% to presently defined \eqn{Q}}
 
 \item{nB}{is the number of multiplier bootstrapping for standard error estimation.}
 
 \item{vari}{is a character string to choose variables to draw the regression coefficient.}
 
-\item{byQs}{put Qs on x-axis; only used when both t0s and Qs are specified.}
+\item{byQs}{put \code{Q}'s on x-axis; only used when both \code{t0}'s and \code{Q}'s are specified.}
 
-\item{ggextra}{is a list that contains additional components to apply to the ggplot. The ggplot2 library must be loaded in order to utilize this feature.}
+\item{ggextra}{is a list that contains additional components to apply to the \code{ggplot} output.
+The \code{ggplot2} library must be loaded in order to utilize this feature.}
 
 \item{...}{for future extension}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{qris.extend}
 \alias{qris.extend}
-\title{Extend a \code{qris} to a specified range of \eqn{tau} or \eqn{t_0} values.}
+\title{Extend a "\code{qris}" object to a specified range of \eqn{tau} or \eqn{t_0} values.}
 \usage{
 qris.extend(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL)
 }
@@ -18,5 +18,5 @@ qris.extend(x, t0s = NULL, Qs = NULL, nB = NULL, vari = NULL)
 \item{vari}{is a character string to choose variables to draw the regression coefficient.}
 }
 \description{
-Extend a \code{qris} to a specified range of \eqn{tau} or \eqn{t_0} values.
+Extend a "\code{qris}" object to a specified range of \eqn{tau} or \eqn{t_0} values.
 }
