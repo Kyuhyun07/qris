@@ -58,9 +58,9 @@ The \code{qris} object is a list containing at least the following components:
 }
 \description{
 Using three estimation methods
-1. L1-minimization(non-smooth estimating equation)
-2. Induced smoothing approach (smooth estimating equation)
-3. Iterative procedure with induced smoothing approach (smooth estimating equation)
+(1) L1-minimization(non-smooth estimating equation)
+(2) Induced smoothing approach (smooth estimating equation)
+(3) Iterative procedure with induced smoothing approach (smooth estimating equation)
 }
 \examples{
 ## ######################################### 

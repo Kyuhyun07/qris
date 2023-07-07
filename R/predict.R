@@ -12,13 +12,13 @@
 #' @export
 #' @return A vector of prediction
 predict.qris <- function(object, newdata, ...) {
-    if (missing(newdata))
+    object$formula[[2]] <- NULL
+    if (missing(newdata)) {
         X <- model.matrix(object$formula, dat = object$data)
-    else {
-        object$formula[[2]] <- NULL
-        X <- model.matrix(object$formula, dat = newdata)
+        return(exp(drop(X %*% object$coef)) + object$para$t0)
     }
-    exp(drop(X %*% object$coef)) + object$para$t0
+    newX <- model.matrix(object$formula, dat = newdata)
+    exp(drop(newX %*% object$coef)) + object$para$t0
 }
 
 
@@ -43,5 +43,5 @@ residuals.qris <- function(object, newdata, ...) {
     newY <- drop(newdata[all.vars(object$formula[[2]])[1]])
     object$formula[[2]] <- NULL
     newX <- model.matrix(object$formula, dat = newdata)
-    exp(drop(newX %*% object$coef)) + object$para$t0 - newY        
+    exp(drop(newX %*% object$coef)) + object$para$t0 - newY
 }

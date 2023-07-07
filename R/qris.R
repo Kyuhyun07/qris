@@ -1,9 +1,9 @@
 #' Estimate a quantile regression estimator of residual lifetime from survival data
 #'
 #' Using three estimation methods
-#' 1. L1-minimization(non-smooth estimating equation)
-#' 2. Induced smoothing approach (smooth estimating equation)
-#' 3. Iterative procedure with induced smoothing approach (smooth estimating equation)
+#' (1) L1-minimization(non-smooth estimating equation)
+#' (2) Induced smoothing approach (smooth estimating equation)
+#' (3) Iterative procedure with induced smoothing approach (smooth estimating equation)
 #'
 #' @param formula  a formula expression, of the form \code{response ~ predictors}.
 #'     The \code{response} is a \code{Surv} object with right censoring.
