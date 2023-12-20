@@ -1,8 +1,8 @@
 Package: qris
 Type: Package
 Title: Quantile Regression Model for Residual Lifetime Using an Induced Smoothing Approach
-Version: 1.1.0
-Date: 2023-05-24
+Version: 1.1.1
+Date: 2023-12-14
 Authors@R: c(person("Kyu Hyun", "Kim", email = "kyuhyunkim07@yonsei.ac.kr", role = c("aut", "cre")), 
 	   person("Sangwook", "Kang", role = "aut"),
 	   person("Sy Han", "Chiou", role = "aut"))
