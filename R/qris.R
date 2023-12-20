@@ -72,19 +72,10 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   ## Create data; the first 2 columns are from Surv(), e.g., time, status, x1, x2, ...
   intModel <- FALSE
   n <- nrow(obj)
-  if (formula == ~1) {
-      intModel <- TRUE
-      X <- covariate <- matrix(1, n, 1)
-  } else {
-      X <- covariate <- model.matrix(mterms, m)
-  }
+  X <- covariate <- model.matrix(mterms, m)
   nc <- ncol(covariate)
-  ## Checks
-  if(nc < 2 | intModel) {
-      s <- survfit(Surv(time, status) ~ 1, data = as.data.frame(obj), subset = time > t0)
-      q <- as.numeric(quantile(s, .5)$quantile)
-      stop(paste0("Intercept-only model detected; the ", round(100 * Q, 2), "-th quantile residual time is ", round(q, 2)))
-  }
+  if (nc == 1) intModel <- TRUE
+  ## Some checks
   if(t0 < 0) stop("basetime must be 0 or positive number")
   if(length(Q) > 1) stop("Multiple taus not allowed in qris")
   if(Q <= 0 | Q >= 1) stop("Tau must be scalar number between 0 and 1")
@@ -108,6 +99,23 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
   logZ <- data[,2]
   I <- data[,3]
   H <- diag(1 / n, nc, nc)
+  ## Intercept model print message and output a qris object
+  if(nc < 2 | intModel) {
+    out <- NULL
+    s <- survfit(Surv(time, status) ~ 1, data = as.data.frame(obj), subset = time > t0)
+    tmp <- quantile(s, .5)
+    out$coefficient <- as.numeric(tmp$quantile)
+    cat(paste0("Intercept-only model detected; the ", round(Q, 2),
+               " quantile residual time is ", round(out$coefficient, 2), "\n"))
+    out$varNames <- colnames(covariate)
+    out$ci <- c(tmp$lower, tmp$upper)
+    out$call <- scall
+    out$formula <- formula0
+    out$data <- as.data.frame(do.call(cbind, m))
+    out$para <- list(method = method, Q = Q, t0 = t0, nB = nB)
+    class(out) <- "qris"
+    return(out)
+  }  
   ## Define initial value
   if (is.character(init)) {
     init <- tryCatch(match.arg(init),
@@ -117,7 +125,7 @@ qris <- function(formula, data, t0 = 0, Q = 0.5, nB = 100,
                        stop(tmp, " or a numerical vector \n")
                        ## on.exit(options(show.error.messages = F))
                      })
-    if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = W)$coef)
+    if (init == "rq") betastart <- as.vector(rq.wfit(X, data[,2], tau = Q, weights = I * W)$coef)
     if (init == "noeffect") betastart <- rep(0, nc)
   } else {
     if (!is.numeric(init)) stop("User specified initial value must be a numerical vector")

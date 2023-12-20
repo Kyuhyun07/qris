@@ -22,13 +22,9 @@ print.qris <- function(x, digits = max(1L, getOption("digits") - 3L), ...) {
   ## mat <- rbind(x$varNames, format(x$coefficient, digits = 5))
   ## prmatrix(mat, rowlab = rep("", nrow(mat)),
   ##          collab = rep("", ncol(mat)), quote = FALSE)
-  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
-      "\n\n", sep = "")
-  if (length(coef(x))) {
-    cat("Coefficients:\n")
-    print.default(format(coef(x), digits = digits), print.gap = 2L, quote = FALSE)
-  }
-  else cat("No coefficients\n")
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+  cat("Coefficients:\n")
+  print.default(format(coef(x), digits = digits), print.gap = 2L, quote = FALSE)
   cat("\n")
   invisible(x) 
 }
@@ -77,6 +73,11 @@ confint.qris <- function(object, parm, level = 0.95, ...) {
   prange <- qnorm(p)
   pct <- paste(format(100 * p, trim = TRUE, scientific = FALSE, digits = 3),"%")
   ci <- array(NA_real_, dim = c(length(parm), 2L), dimnames = list(parm, pct))
+  if (!is.null(object$ci)) { ## intercept model
+    cat("Confidence Interval for the ", round(object$para$Q, 2), " quantile residual time:\n")
+    ci[1,] <- object$ci
+    return(ci)
+  } ## else
   ses <- object$stderr
   parm <- match(parm, pnames)
   ci[] <- cf[parm] + ses[parm] %o% prange
