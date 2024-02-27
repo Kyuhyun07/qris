@@ -42,7 +42,7 @@
 #' @importFrom survival Surv survfit is.Surv
 #' @importFrom quantreg rq.wfit
 #' @importFrom nleqslv nleqslv
-#' @importFrom stats pnorm rnorm complete.cases
+#' @importFrom stats pnorm rnorm complete.cases quantile
 #' @importFrom stringr str_replace
 #' @import Rcpp
 #' 

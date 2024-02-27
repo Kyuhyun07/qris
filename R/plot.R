@@ -1,4 +1,4 @@
-globalVariables("variable")
+globalVariables(c("variable", "SE", "Est", "time"))
 
 #' Extend a "\code{qris}" object to a specified range of \eqn{tau} or \eqn{t_0} values.
 #'

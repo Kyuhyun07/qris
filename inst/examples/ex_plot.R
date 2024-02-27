@@ -4,6 +4,7 @@ lung2 <- subset(lung, select = c(time, status, age, sex))
 lung2$status <- lung2$status - 1
 lung2$sex <- lung2$sex - 1
 
+library(qris)
 fm <- Surv(time, status) ~ age + sex
 fit <- qris(fm, data = lung2, t0 = 30, Q = 0.5, nB = 50, "nonsmooth", "fmb")
 
