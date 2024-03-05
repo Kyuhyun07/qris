@@ -3,7 +3,6 @@
 \docType{package}
 \name{qris-package}
 \alias{qris-package}
-\alias{_PACKAGE}
 \alias{qris-packages}
 \title{qris: Quantile Regression Model for Residual Lifetime Using an Induced Smoothing Approach}
 \description{
